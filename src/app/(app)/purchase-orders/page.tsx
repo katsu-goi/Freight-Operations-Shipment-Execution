@@ -16,7 +16,7 @@ function fulfillment(items: PurchaseOrderWithItems["items"]) {
 }
 
 export default async function PurchaseOrdersPage() {
-  await requireRole(["Admin", "Dispatcher", "Client"]);
+  await requireRole(["Admin", "Dispatcher", "Planner", "Client"]);
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -24,7 +24,7 @@ export default async function PurchaseOrdersPage() {
     .select("*, items:purchase_order_items(*), shipment:shipments(reference, status)")
     .order("created_at", { ascending: false });
 
-  const orders = (data ?? []) as (PurchaseOrderWithItems & {
+  const orders = (data ?? []) as unknown as (PurchaseOrderWithItems & {
     shipment: { reference: string; status: string } | null;
   })[];
 

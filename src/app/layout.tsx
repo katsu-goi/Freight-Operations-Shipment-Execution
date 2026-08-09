@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "FreightOS — Operations & Shipment Execution",
+  title: "Airship Express — Operations & Shipment Execution",
   description:
     "Multimodal freight operations subsystem: booking, consolidation, Bills of Lading, live tracking, and PO integration.",
 };

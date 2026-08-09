@@ -93,7 +93,7 @@ export default function ConsolidationBoard({
               </div>
               <div>
                 <label className={label}>Vessel</label>
-                <input className={field} value={form.vessel} onChange={(e) => setForm({ ...form, vessel: e.target.value })} placeholder="MAERSK MC-KINNEY MOLLER" />
+                <input className={field} value={form.vessel} onChange={(e) => setForm({ ...form, vessel: e.target.value })} placeholder="MV SuperCat / Truck Fleet-PH" />
               </div>
               <div>
                 <label className={label}>Max volume (CBM)</label>
@@ -105,11 +105,11 @@ export default function ConsolidationBoard({
               </div>
               <div>
                 <label className={label}>Origin</label>
-                <input className={field} value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} placeholder="Shanghai Port (CNSHA)" />
+                <input className={field} value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} placeholder="Manila Port (PHMNL)" />
               </div>
               <div>
                 <label className={label}>Destination</label>
-                <input className={field} value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} placeholder="Rotterdam Port (NLRTM)" />
+                <input className={field} value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} placeholder="Cebu Port (PHCEB)" />
               </div>
               <div className="md:col-span-2 flex items-center gap-3">
                 <button onClick={submit} disabled={saving || !form.reference} className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">

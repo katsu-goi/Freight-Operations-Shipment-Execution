@@ -1,13 +1,19 @@
 import type { ShipmentStatus, TransportMode } from "@/types";
+import { DEFAULT_CURRENCY } from "@/lib/locale";
 
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export function formatCurrency(amount: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+/** Format money; defaults to Philippine pesos (₱). Treats legacy USD as PHP. */
+export function formatCurrency(
+  amount: number,
+  currency: string = DEFAULT_CURRENCY,
+): string {
+  const code = !currency || currency.toUpperCase() === "USD" ? DEFAULT_CURRENCY : currency;
+  return new Intl.NumberFormat("en-PH", {
     style: "currency",
-    currency,
+    currency: code,
     maximumFractionDigits: 0,
   }).format(amount);
 }
@@ -30,10 +36,13 @@ export function statusBadgeClass(status: ShipmentStatus | string): string {
     case "In Transit":
       return "bg-blue-100 text-blue-700";
     case "Customs Hold":
+    case "Draft":
       return "bg-amber-100 text-amber-800";
     case "Delivered":
+    case "Approved":
       return "bg-emerald-100 text-emerald-700";
     case "Delayed":
+    case "Rejected":
       return "bg-rose-100 text-rose-700";
     case "Cancelled":
       return "bg-slate-200 text-slate-500";

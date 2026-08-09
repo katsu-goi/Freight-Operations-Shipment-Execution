@@ -244,10 +244,10 @@ function LocationUpdateForm({ shipmentId }: { shipmentId: string }) {
         <Navigation className="w-4 h-4 text-pink-600" /> Post Location Update
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <input className={`${field} col-span-2 md:col-span-3`} placeholder="Message (e.g. Cleared customs at ORD)" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <input className={field} placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} />
-        <input className={field} placeholder="Latitude" value={lat} onChange={(e) => setLat(e.target.value)} />
-        <input className={field} placeholder="Longitude" value={lng} onChange={(e) => setLng(e.target.value)} />
+        <input className={`${field} col-span-2 md:col-span-3`} placeholder="Message (e.g. Cleared BOC at Manila)" value={message} onChange={(e) => setMessage(e.target.value)} />
+        <input className={field} placeholder="Location (e.g. NLEX Exit 15)" value={location} onChange={(e) => setLocation(e.target.value)} />
+        <input className={field} placeholder="Lat (e.g. 14.5995)" value={lat} onChange={(e) => setLat(e.target.value)} />
+        <input className={field} placeholder="Lng (e.g. 120.9842)" value={lng} onChange={(e) => setLng(e.target.value)} />
         <input className={field} placeholder="Progress %" value={progress} onChange={(e) => setProgress(e.target.value)} />
         <select className={field} value={status} onChange={(e) => setStatus(e.target.value as ShipmentStatus)}>
           <option value="">Keep status</option>

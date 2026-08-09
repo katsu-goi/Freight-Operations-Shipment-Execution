@@ -7,6 +7,7 @@ import {
   Navigation,
   Layers,
   Database,
+  Cpu,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,21 +32,28 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/booking",
     label: "Booking & AI Routing",
     icon: Plus,
-    roles: ["Admin", "Dispatcher"],
+    roles: ["Admin", "Dispatcher", "Planner"],
     badge: { text: "AI", kind: "ai" },
   },
   {
     href: "/consolidation",
     label: "LCL / FCL Consolidation",
     icon: Boxes,
-    roles: ["Admin", "Dispatcher"],
+    roles: ["Admin", "Dispatcher", "Planner"],
     badge: { text: "count", kind: "count" },
+  },
+  {
+    href: "/load-allocation",
+    label: "ML Load Allocation",
+    icon: Cpu,
+    roles: ["Admin", "Dispatcher", "Planner"],
+    badge: { text: "AI", kind: "ai" },
   },
   {
     href: "/bol",
     label: "House & Master BoL",
     icon: FileText,
-    roles: ["Admin", "Dispatcher"],
+    roles: ["Admin", "Dispatcher", "Planner"],
   },
   {
     href: "/tracking",
@@ -58,7 +66,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/purchase-orders",
     label: "PO Integration & SLA",
     icon: Layers,
-    roles: ["Admin", "Dispatcher", "Client"],
+    roles: ["Admin", "Dispatcher", "Planner", "Client"],
   },
   {
     href: "/schema",

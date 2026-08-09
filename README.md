@@ -1,4 +1,4 @@
-# FreightOS — Freight Operations & Shipment Execution Subsystem
+# Airship Express — Freight Operations & Shipment Execution Subsystem
 
 A production-oriented logistics platform for booking, consolidating, documenting, and
 tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
@@ -59,7 +59,8 @@ tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
 6. **PO Integration & SLA** — link purchase orders to shipments and track line-item
    fulfillment progress.
 
-An **Admin-only Schema** page renders the live `supabase/schema.sql` for reference.
+An **Admin-only Schema** page renders the live
+`supabase/migrations/0001_initial_schema.sql` for reference.
 
 ---
 
@@ -95,8 +96,9 @@ cp .env.local.example .env.local
 #   then fill in the values (see below)
 
 # 3. Apply the database schema
-#   Open the Supabase Dashboard -> SQL Editor -> paste the contents of
-#   supabase/schema.sql -> Run.
+#   Local: supabase start && supabase db reset  (applies migrations + seed)
+#   Hosted: open the Supabase Dashboard -> SQL Editor -> paste the contents of
+#   supabase/migrations/0001_initial_schema.sql -> Run.
 #   (Optional) run supabase/seed.sql afterwards for sample data.
 
 # 4. Start the dev server
@@ -104,7 +106,9 @@ npm run dev
 ```
 
 Then open <http://localhost:3000> and register your first user from the **Register**
-tab. Pick a role (e.g. **Dispatcher** or **Admin**) to unlock staff modules.
+tab. Self-registration is limited to the **Client** and **Carrier** roles; privileged
+roles (**Admin / Dispatcher / Planner**) must be provisioned by an administrator
+(see `ALLOW_QUICK_LOGIN` for enabling the one-click demo accounts in production).
 
 ---
 
@@ -117,6 +121,7 @@ Copy `.env.local.example` to `.env.local` and set:
 | `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Supabase project URL                               |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon/publishable key (safe for the browser) |
 | `SUPABASE_SERVICE_ROLE_KEY`     | ⚙️       | Server-only key for trusted admin/seed operations  |
+| `ALLOW_QUICK_LOGIN`             | ⭘        | Enable one-click demo accounts in production       |
 | `GROQ_API_KEY`                  | ⭘        | Enables AI routing & BoL parsing (preferred)       |
 | `GEMINI_API_KEY`                | ⭘        | Fallback AI provider if Groq is not set            |
 | `GROQ_MODEL`                    | ⭘        | Override (default `llama-3.3-70b-versatile`)        |
@@ -130,7 +135,9 @@ Copy `.env.local.example` to `.env.local` and set:
 
 ## Database schema & RBAC
 
-The full DDL lives in [`supabase/schema.sql`](supabase/schema.sql) and includes:
+The full DDL lives in
+[`supabase/migrations/0001_initial_schema.sql`](supabase/migrations/0001_initial_schema.sql)
+and includes:
 
 - **Enums** — `app_role`, `transport_mode`, `shipment_status`, `container_status`,
   `bol_type`, `po_status`, `load_type`.
@@ -221,8 +228,11 @@ src/
 └── middleware.ts              # Session refresh + auth redirects
 
 supabase/
-├── schema.sql                 # Full DDL: enums, tables, RLS, realtime, triggers
-└── seed.sql                   # Optional demo data (not loaded by the app)
+├── config.toml               # Local dev config (ports, auth, seed)
+├── migrations/
+│   ├── 0001_initial_schema.sql   # Full DDL: enums, tables, RLS, realtime, triggers
+│   └── 20260806_planner_rbac.sql # Incremental Planner/load-plan RBAC (idempotent)
+└── seed.sql                   # Optional demo data (applied on `supabase db reset`)
 ```
 
 ---

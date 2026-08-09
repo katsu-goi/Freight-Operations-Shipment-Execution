@@ -82,13 +82,14 @@ export async function recommendRoutes(
   req: RoutingRequest,
 ): Promise<RouteRecommendation[]> {
   const system =
-    "You are an expert freight-forwarding logistics routing engine. " +
-    "Return ONLY JSON of the shape " +
-    '{"routes":[{routeName,carrierName,transitTimeDays,estimatedCostUSD,co2ReductionPercent,riskScore,keyAdvantage}]}. ' +
+    "You are an expert Philippine domestic freight-forwarding routing engine. " +
+    "Plan ONLY local corridors inside the Philippines (Metro Manila, Luzon, Visayas, Mindanao, major ports like Manila, Batangas, Cebu, Davao, Subic). " +
+    "Costs must be in Philippine pesos (₱). Return ONLY JSON of the shape " +
+    '{"routes":[{routeName,carrierName,transitTimeDays,estimatedCostPHP,co2ReductionPercent,riskScore,keyAdvantage}]}. ' +
     "riskScore is one of Low, Medium, High. Provide exactly 3 diverse routes " +
-    "(fastest, most economical, greenest).";
+    "(fastest, most economical, greenest). Do not suggest international routes.";
 
-  const user = `Plan freight routing for:
+  const user = `Plan domestic Philippine freight routing for:
 - Origin: ${req.origin}
 - Destination: ${req.destination}
 - Mode: ${req.mode}
@@ -97,10 +98,18 @@ export async function recommendRoutes(
 - Incoterms: ${req.incoterms}`;
 
   const raw = await complete(system, user);
-  const parsed = extractJson<{ routes?: RouteRecommendation[] } | RouteRecommendation[]>(raw);
-  const routes = Array.isArray(parsed) ? parsed : parsed.routes ?? [];
+  const parsed = extractJson<
+    | { routes?: Array<RouteRecommendation & { estimatedCostUSD?: number }> }
+    | Array<RouteRecommendation & { estimatedCostUSD?: number }>
+  >(raw);
+  const routes = Array.isArray(parsed) ? parsed : (parsed.routes ?? []);
   if (!routes.length) throw new Error("AI returned no routes");
-  return routes;
+  return routes.map((r) => ({
+    ...r,
+    estimatedCostPHP:
+      r.estimatedCostPHP ??
+      (typeof r.estimatedCostUSD === "number" ? r.estimatedCostUSD : 0),
+  }));
 }
 
 export async function parseBillOfLading(text: string): Promise<ParsedBillOfLading> {

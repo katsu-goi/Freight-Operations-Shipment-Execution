@@ -13,6 +13,9 @@ export type PurchaseOrder =
   Database["public"]["Tables"]["purchase_orders"]["Row"];
 export type PurchaseOrderItem =
   Database["public"]["Tables"]["purchase_order_items"]["Row"];
+export type LoadPlan = Database["public"]["Tables"]["load_plans"]["Row"];
+export type LoadPlanItem =
+  Database["public"]["Tables"]["load_plan_items"]["Row"];
 
 export type {
   AppRole,
@@ -22,6 +25,7 @@ export type {
   BolType,
   PoStatus,
   LoadType,
+  LoadPlanStatus,
 } from "./database";
 
 /** Container joined with the shipments consolidated into it. */
@@ -54,7 +58,8 @@ export interface RouteRecommendation {
   routeName: string;
   carrierName: string;
   transitTimeDays: number;
-  estimatedCostUSD: number;
+  /** Cost in Philippine pesos. */
+  estimatedCostPHP: number;
   co2ReductionPercent: number;
   riskScore: "Low" | "Medium" | "High";
   keyAdvantage: string;

@@ -21,6 +21,9 @@ export default function ShipmentsTable({
 }) {
   const [mode, setMode] = useState<string>("All");
   const [q, setQ] = useState(initialQuery);
+  const [page, setPage] = useState(1);
+
+  const pageSize = 25;
 
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -34,6 +37,10 @@ export default function ShipmentsTable({
       return matchesMode && matchesTerm;
     });
   }, [shipments, mode, q]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -93,7 +100,7 @@ export default function ShipmentsTable({
                 </td>
               </tr>
             ) : (
-              rows.map((s) => (
+              pageRows.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-50/80 transition-all">
                   <td className="px-5 py-3.5">
                     <div className="font-bold text-slate-900">{s.reference}</div>
@@ -150,6 +157,38 @@ export default function ShipmentsTable({
             )}
           </tbody>
         </table>
+
+        {rows.length > pageSize && (
+          <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[11px] text-slate-500 font-mono">
+              {rows.length === 0
+                ? "0 results"
+                : `${(currentPage - 1) * pageSize + 1}–${Math.min(
+                    currentPage * pageSize,
+                    rows.length,
+                  )} of ${rows.length}`}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage(currentPage - 1)}
+                disabled={currentPage <= 1}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-slate-100 transition-all"
+              >
+                Prev
+              </button>
+              <span className="text-[11px] text-slate-500 font-mono px-2">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-slate-100 transition-all"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

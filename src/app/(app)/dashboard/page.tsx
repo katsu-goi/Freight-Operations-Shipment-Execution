@@ -25,7 +25,11 @@ export default async function DashboardPage() {
   const supabase = await createClient();
 
   const [{ data: shipments }, { data: logs }] = await Promise.all([
-    supabase.from("shipments").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("shipments")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500),
     supabase
       .from("shipment_tracking_logs")
       .select("*")
@@ -50,7 +54,7 @@ export default async function DashboardPage() {
             Shipment &amp; Logistics Operations
           </h2>
           <p className="text-slate-300 text-xs mt-1">
-            Real-time monitoring of multimodal transport, container
+            Real-time monitoring of domestic Philippine freight, container
             consolidation, and automated compliance.
           </p>
         </div>

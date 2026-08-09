@@ -35,12 +35,12 @@ export async function createBooking(
   },
   selectedRoute?: RouteRecommendation | null,
 ): Promise<BookingResult> {
-  const profile = await requireRole(["Admin", "Dispatcher"]);
+  const profile = await requireRole(["Admin", "Dispatcher", "Planner"]);
   const supabase = await createClient();
 
   const reference = newReference();
   const etd = new Date();
-  const transit = selectedRoute?.transitTimeDays ?? 14;
+  const transit = selectedRoute?.transitTimeDays ?? 3;
   const eta = new Date(Date.now() + transit * 86_400_000);
 
   const { data, error } = await supabase
@@ -66,6 +66,8 @@ export async function createBooking(
       hazard_class: form.hazardClass,
       incoterms: form.incoterms,
       current_location: `${form.origin} Freight Depot`,
+      current_lat: 14.5995,
+      current_lng: 120.9842,
       progress: 5,
       created_by: profile.id,
     })

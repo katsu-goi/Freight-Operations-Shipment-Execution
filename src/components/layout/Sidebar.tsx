@@ -28,7 +28,7 @@ export default function Sidebar({
           </div>
           <div>
             <h1 className="font-bold text-white text-base tracking-wide">
-              Freight<span className="text-pink-500 font-black ml-1">OS</span>
+              Airship<span className="text-pink-500 font-black ml-1">Express</span>
             </h1>
             <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold bg-pink-950/60 px-1.5 py-0.5 rounded border border-pink-800/50">
               Subsystem v3.1

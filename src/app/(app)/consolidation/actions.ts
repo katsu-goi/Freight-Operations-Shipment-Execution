@@ -46,6 +46,16 @@ export async function assignShipment(
   await requireRole(["Admin", "Dispatcher"]);
   const supabase = await createClient();
 
+  // A shipment may only live in one container — reject double allocation.
+  const { data: existing } = await supabase
+    .from("container_shipments")
+    .select("container_id")
+    .eq("shipment_id", shipmentId)
+    .maybeSingle();
+  if (existing) {
+    return { ok: false, error: "Shipment is already consolidated into a container" };
+  }
+
   const { data: shipment } = await supabase
     .from("shipments")
     .select("weight_kg, volume_cbm")
@@ -53,22 +63,34 @@ export async function assignShipment(
     .single();
   if (!shipment) return { ok: false, error: "Shipment not found" };
 
+  const { data: container } = await supabase
+    .from("containers")
+    .select(
+      "current_weight_kg, current_volume_cbm, max_weight_kg, max_volume_cbm",
+    )
+    .eq("id", containerId)
+    .single();
+  if (!container) return { ok: false, error: "Container not found" };
+
+  const nextWeight = Number(container.current_weight_kg) + Number(shipment.weight_kg);
+  const nextVolume = Number(container.current_volume_cbm) + Number(shipment.volume_cbm);
+  if (nextWeight > Number(container.max_weight_kg)) {
+    return { ok: false, error: "Shipment would exceed container weight capacity" };
+  }
+  if (nextVolume > Number(container.max_volume_cbm)) {
+    return { ok: false, error: "Shipment would exceed container volume capacity" };
+  }
+
   const { error: linkError } = await supabase
     .from("container_shipments")
     .insert({ container_id: containerId, shipment_id: shipmentId });
   if (linkError) return { ok: false, error: linkError.message };
 
-  const { data: container } = await supabase
-    .from("containers")
-    .select("current_weight_kg, current_volume_cbm")
-    .eq("id", containerId)
-    .single();
-
   await supabase
     .from("containers")
     .update({
-      current_weight_kg: Number(container?.current_weight_kg ?? 0) + Number(shipment.weight_kg),
-      current_volume_cbm: Number(container?.current_volume_cbm ?? 0) + Number(shipment.volume_cbm),
+      current_weight_kg: nextWeight,
+      current_volume_cbm: nextVolume,
       status: "Loading in Progress",
     })
     .eq("id", containerId);

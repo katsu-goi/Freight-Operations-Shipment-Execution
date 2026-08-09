@@ -1,4 +1,4 @@
-import { requireProfile, isStaff } from "@/lib/auth";
+import { requireRole, isStaff, OPS_ROLES } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/ui/PageHeader";
 import ConsolidationBoard from "./ConsolidationBoard";
@@ -7,7 +7,7 @@ import type { ContainerWithShipments } from "@/types";
 export const dynamic = "force-dynamic";
 
 export default async function ConsolidationPage() {
-  const profile = await requireProfile();
+  const profile = await requireRole(OPS_ROLES);
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -18,15 +18,20 @@ export default async function ConsolidationPage() {
     .order("created_at", { ascending: false });
 
   const containers: ContainerWithShipments[] = (data ?? []).map((c) => {
-    const links = (c.container_shipments ?? []) as {
-      shipments: ContainerWithShipments["shipments"][number] | null;
-    }[];
-    const { container_shipments, ...rest } = c as typeof c & {
-      container_shipments: unknown;
+    const row = c as unknown as {
+      container_shipments?: {
+        shipments: ContainerWithShipments["shipments"][number] | null;
+      }[];
+    } & Omit<ContainerWithShipments, "shipments">;
+    const links = row.container_shipments ?? [];
+    const { container_shipments: _links, ...rest } = row as typeof row & {
+      container_shipments?: unknown;
     };
     return {
       ...(rest as ContainerWithShipments),
-      shipments: links.map((l) => l.shipments).filter(Boolean) as ContainerWithShipments["shipments"],
+      shipments: links
+        .map((l) => l.shipments)
+        .filter(Boolean) as ContainerWithShipments["shipments"],
     };
   });
 

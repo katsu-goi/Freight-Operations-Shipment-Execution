@@ -2,6 +2,7 @@
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
+import { PH_MAP, isInPhilippines } from "@/lib/locale";
 import type { Shipment } from "@/types";
 
 // Fix default marker icons for bundlers (Leaflet references image assets).
@@ -16,14 +17,25 @@ const icon = L.icon({
 });
 
 export default function TrackingMap({ shipment }: { shipment: Shipment | null }) {
-  const lat = shipment?.current_lat ?? 20;
-  const lng = shipment?.current_lng ?? 0;
-  const hasPosition = shipment?.current_lat != null && shipment?.current_lng != null;
+  const rawLat = shipment?.current_lat;
+  const rawLng = shipment?.current_lng;
+  const hasPosition =
+    rawLat != null &&
+    rawLng != null &&
+    isInPhilippines(Number(rawLat), Number(rawLng));
+
+  const lat = hasPosition ? Number(rawLat) : PH_MAP.manila[0];
+  const lng = hasPosition ? Number(rawLng) : PH_MAP.manila[1];
+  const center = hasPosition ? ([lat, lng] as [number, number]) : PH_MAP.center;
 
   return (
     <MapContainer
-      center={[lat, lng]}
-      zoom={hasPosition ? 4 : 2}
+      key={shipment?.id ?? "ph-map"}
+      center={center}
+      zoom={hasPosition ? PH_MAP.detailZoom : PH_MAP.defaultZoom}
+      minZoom={PH_MAP.minZoom}
+      maxBounds={PH_MAP.maxBounds}
+      maxBoundsViscosity={1}
       scrollWheelZoom
       className="h-full w-full rounded-2xl"
     >

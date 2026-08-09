@@ -1,10 +1,15 @@
 /**
  * Generated-style Supabase schema types.
- * Mirrors supabase/schema.sql. Keep in sync when the DDL changes
- * (or regenerate with `supabase gen types typescript`).
+ * Mirrors supabase/migrations/0001_initial_schema.sql. Keep in sync when the
+ * DDL changes (or regenerate with `supabase gen types typescript`).
  */
 
-export type AppRole = "Admin" | "Dispatcher" | "Carrier" | "Client";
+export type AppRole =
+  | "Admin"
+  | "Dispatcher"
+  | "Planner"
+  | "Carrier"
+  | "Client";
 export type TransportMode = "Ocean" | "Air" | "Road" | "Rail";
 export type ShipmentStatus =
   | "Booked"
@@ -28,6 +33,7 @@ export type PoStatus =
   | "Closed"
   | "Cancelled";
 export type LoadType = "LCL" | "FCL";
+export type LoadPlanStatus = "Draft" | "Approved" | "Rejected";
 
 export interface Database {
   public: {
@@ -39,6 +45,8 @@ export interface Database {
           email: string | null;
           role: AppRole;
           org_name: string | null;
+          is_active: boolean;
+          invited_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -48,9 +56,19 @@ export interface Database {
           email?: string | null;
           role?: AppRole;
           org_name?: string | null;
+          is_active?: boolean;
+          invited_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "profiles_invited_by_fkey";
+            columns: ["invited_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       shipments: {
         Row: {
@@ -118,7 +136,29 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["shipments"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "shipments_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shipments_carrier_id_fkey";
+            columns: ["carrier_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shipments_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       shipment_tracking_logs: {
         Row: {
@@ -148,7 +188,15 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["shipment_tracking_logs"]["Insert"]
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "shipment_tracking_logs_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       containers: {
         Row: {
@@ -202,7 +250,22 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["container_shipments"]["Insert"]
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "container_shipments_container_id_fkey";
+            columns: ["container_id"];
+            isOneToOne: false;
+            referencedRelation: "containers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "container_shipments_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       bills_of_lading: {
         Row: {
@@ -258,7 +321,22 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["bills_of_lading"]["Insert"]
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "bills_of_lading_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bills_of_lading_master_bol_id_fkey";
+            columns: ["master_bol_id"];
+            isOneToOne: false;
+            referencedRelation: "bills_of_lading";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       purchase_orders: {
         Row: {
@@ -292,7 +370,22 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["purchase_orders"]["Insert"]
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchase_orders_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       purchase_order_items: {
         Row: {
@@ -318,7 +411,107 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["purchase_order_items"]["Insert"]
         >;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_po_id_fkey";
+            columns: ["po_id"];
+            isOneToOne: false;
+            referencedRelation: "purchase_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      load_plans: {
+        Row: {
+          id: string;
+          reference: string;
+          status: LoadPlanStatus;
+          vehicle_ref: string | null;
+          origin: string | null;
+          destination: string | null;
+          max_weight_kg: number;
+          max_volume_cbm: number;
+          planned_weight_kg: number;
+          planned_volume_cbm: number;
+          utilization_pct: number;
+          ml_score: number | null;
+          ml_rationale: string | null;
+          created_by: string | null;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference: string;
+          status?: LoadPlanStatus;
+          vehicle_ref?: string | null;
+          origin?: string | null;
+          destination?: string | null;
+          max_weight_kg?: number;
+          max_volume_cbm?: number;
+          planned_weight_kg?: number;
+          planned_volume_cbm?: number;
+          utilization_pct?: number;
+          ml_score?: number | null;
+          ml_rationale?: string | null;
+          created_by?: string | null;
+          approved_by?: string | null;
+          approved_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["load_plans"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "load_plans_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "load_plans_approved_by_fkey";
+            columns: ["approved_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      load_plan_items: {
+        Row: {
+          id: string;
+          plan_id: string;
+          shipment_id: string;
+          sequence_no: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          shipment_id: string;
+          sequence_no?: number;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["load_plan_items"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "load_plan_items_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "load_plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "load_plan_items_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {
@@ -327,6 +520,23 @@ export interface Database {
     Functions: {
       current_role: { Args: Record<string, never>; Returns: AppRole };
       is_staff: { Args: Record<string, never>; Returns: boolean };
+      is_ops: { Args: Record<string, never>; Returns: boolean };
+      can_approve_load_plans: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      post_tracking_update: {
+        Args: {
+          p_shipment_id: string;
+          p_message: string;
+          p_location: string;
+          p_lat?: number | null;
+          p_lng?: number | null;
+          p_progress?: number | null;
+          p_status?: ShipmentStatus | null;
+        };
+        Returns: { ok: boolean; error?: string | null };
+      };
     };
     Enums: {
       app_role: AppRole;
@@ -336,6 +546,7 @@ export interface Database {
       bol_type: BolType;
       po_status: PoStatus;
       load_type: LoadType;
+      load_plan_status: LoadPlanStatus;
     };
     CompositeTypes: {
       [_ in never]: never;

@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/auth";
+import { requireRole, isStaff, OPS_ROLES } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { aiEnabled } from "@/lib/ai";
 import PageHeader from "@/components/ui/PageHeader";
@@ -12,7 +12,7 @@ import type { BillOfLading, Shipment } from "@/types";
 export const dynamic = "force-dynamic";
 
 export default async function BolPage() {
-  await requireRole(["Admin", "Dispatcher"]);
+  const profile = await requireRole(OPS_ROLES);
   const supabase = await createClient();
 
   const [{ data: shipments }, { data: bols }] = await Promise.all([
@@ -36,10 +36,16 @@ export default async function BolPage() {
         description="Generate, parse, and print HBL / MBL documents linked to shipment files."
       />
 
-      <BolGenerator
-        shipments={(shipments ?? []) as Shipment[]}
-        aiEnabled={aiEnabled()}
-      />
+      {isStaff(profile.role) ? (
+        <BolGenerator
+          shipments={(shipments ?? []) as Shipment[]}
+          aiEnabled={aiEnabled()}
+        />
+      ) : (
+        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          Planner access is read-only here. Ask Admin/Dispatcher to issue Bills of Lading.
+        </p>
+      )}
 
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100">

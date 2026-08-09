@@ -7,7 +7,7 @@ import BookingForm from "./BookingForm";
 export const dynamic = "force-dynamic";
 
 export default async function BookingPage() {
-  await requireRole(["Admin", "Dispatcher"]);
+  await requireRole(["Admin", "Dispatcher", "Planner"]);
 
   return (
     <div className="max-w-5xl mx-auto">

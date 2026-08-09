@@ -8,13 +8,12 @@ import {
   Loader2,
   Leaf,
   Clock,
-  DollarSign,
+  PhilippinePeso,
   ShieldAlert,
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-import { TRANSPORT_MODES } from "@/lib/utils";
-import { formatCurrency } from "@/lib/utils";
+import { TRANSPORT_MODES, formatCurrency } from "@/lib/utils";
 import { createBooking } from "./actions";
 import type { RouteRecommendation, TransportMode } from "@/types";
 
@@ -24,9 +23,9 @@ const INITIAL = {
   consignee: "",
   origin: "",
   destination: "",
-  mode: "Ocean" as TransportMode,
-  cargoType: "FCL 40HQ",
-  incoterms: "FOB",
+  mode: "Road" as TransportMode,
+  cargoType: "LCL Truckload",
+  incoterms: "DAP",
   weightKg: 0,
   volumeCbm: 0,
   hazardClass: "None",
@@ -106,27 +105,27 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={label}>Client name</label>
-            <input className={field} value={form.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="Apex Electronics Corp" />
+            <input className={field} value={form.clientName} onChange={(e) => set("clientName", e.target.value)} placeholder="Jollibee Foods Logistics" />
           </div>
           <div>
             <label className={label}>PO number</label>
-            <input className={field} value={form.poNumber} onChange={(e) => set("poNumber", e.target.value)} placeholder="PO-99420" />
+            <input className={field} value={form.poNumber} onChange={(e) => set("poNumber", e.target.value)} placeholder="PO-MNL-99420" />
           </div>
           <div>
             <label className={label}>Shipper</label>
-            <input className={field} value={form.shipper} onChange={(e) => set("shipper", e.target.value)} placeholder="Shenzhen Tech Exports Ltd" />
+            <input className={field} value={form.shipper} onChange={(e) => set("shipper", e.target.value)} placeholder="Davao Agri Exports Co." />
           </div>
           <div>
             <label className={label}>Consignee</label>
-            <input className={field} value={form.consignee} onChange={(e) => set("consignee", e.target.value)} placeholder="Apex Logistics Whse (LA)" />
+            <input className={field} value={form.consignee} onChange={(e) => set("consignee", e.target.value)} placeholder="Manila North Harbor Whse" />
           </div>
           <div>
             <label className={label}>Origin</label>
-            <input className={field} value={form.origin} onChange={(e) => set("origin", e.target.value)} placeholder="Shenzhen (CNSZX)" />
+            <input className={field} value={form.origin} onChange={(e) => set("origin", e.target.value)} placeholder="Davao Port (PHDVO)" />
           </div>
           <div>
             <label className={label}>Destination</label>
-            <input className={field} value={form.destination} onChange={(e) => set("destination", e.target.value)} placeholder="Los Angeles (USLAX)" />
+            <input className={field} value={form.destination} onChange={(e) => set("destination", e.target.value)} placeholder="Manila Port (PHMNL)" />
           </div>
           <div>
             <label className={label}>Transport mode</label>
@@ -138,7 +137,7 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
           </div>
           <div>
             <label className={label}>Cargo type</label>
-            <input className={field} value={form.cargoType} onChange={(e) => set("cargoType", e.target.value)} placeholder="FCL 40HQ / LCL / Air Express" />
+            <input className={field} value={form.cargoType} onChange={(e) => set("cargoType", e.target.value)} placeholder="FCL 40HQ / LCL / Domestic Truck" />
           </div>
           <div>
             <label className={label}>Weight (kg)</label>
@@ -216,7 +215,7 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
                   <Clock className="w-3.5 h-3.5 text-slate-400" /> {r.transitTimeDays}d transit
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
-                  <DollarSign className="w-3.5 h-3.5 text-slate-400" /> {formatCurrency(r.estimatedCostUSD)}
+                  <PhilippinePeso className="w-3.5 h-3.5 text-slate-400" /> {formatCurrency(r.estimatedCostPHP)}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-600">
                   <Leaf className="w-3.5 h-3.5 text-emerald-500" /> {r.co2ReductionPercent}% CO₂
