@@ -23,9 +23,12 @@ export default async function SchemaPage() {
 
   let sql = "";
   try {
-    sql = await readFile(path.join(process.cwd(), "supabase", "schema.sql"), "utf8");
+    sql = await readFile(
+      path.join(process.cwd(), "supabase", "migrations", "0001_initial_schema.sql"),
+      "utf8",
+    );
   } catch {
-    sql = "-- supabase/schema.sql not found in deployment bundle.";
+    sql = "-- supabase/migrations/0001_initial_schema.sql not found in deployment bundle.";
   }
 
   return (
@@ -51,7 +54,7 @@ export default async function SchemaPage() {
 
       <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden">
         <div className="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
-          <span className="text-xs font-mono text-slate-400">supabase/schema.sql</span>
+          <span className="text-xs font-mono text-slate-400">migrations/0001_initial_schema.sql</span>
           <CopyButton text={sql} />
         </div>
         <pre className="p-4 text-[11px] leading-relaxed text-slate-300 overflow-x-auto scroll-thin max-h-[70vh] font-mono">

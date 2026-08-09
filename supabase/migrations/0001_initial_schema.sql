@@ -15,7 +15,7 @@ create extension if not exists "pgcrypto";
 -- ---------------------------------------------------------------------------
 -- Enumerated types
 -- ---------------------------------------------------------------------------
-create type app_role       as enum ('Admin', 'Dispatcher', 'Carrier', 'Client');
+create type app_role       as enum ('Admin', 'Dispatcher', 'Planner', 'Carrier', 'Client');
 create type transport_mode as enum ('Ocean', 'Air', 'Road', 'Rail');
 create type shipment_status as enum (
   'Booked', 'In Transit', 'Customs Hold', 'Delivered', 'Cancelled', 'Delayed'
@@ -36,6 +36,8 @@ create table public.profiles (
   email       text,
   role        app_role not null default 'Client',
   org_name    text,
+  is_active   boolean not null default true,
+  invited_by  uuid references public.profiles (id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -132,6 +134,14 @@ create table public.container_shipments (
   primary key (container_id, shipment_id)
 );
 
+-- Utilization can never exceed a container's capacity.
+alter table public.containers
+  add constraint containers_within_capacity
+  check (
+    current_weight_kg between 0 and max_weight_kg
+    and current_volume_cbm between 0 and max_volume_cbm
+  );
+
 -- =============================================================================
 -- BILLS OF LADING  (House / Master)
 -- =============================================================================
@@ -172,7 +182,7 @@ create table public.purchase_orders (
   po_number    text unique not null,
   client_name  text not null,
   vendor       text,
-  currency     text not null default 'USD',
+  currency     text not null default 'PHP',
   total_amount numeric(14,2) not null default 0,
   status       po_status not null default 'Open',
   shipment_id  uuid references public.shipments (id) on delete set null,
@@ -195,6 +205,45 @@ create table public.purchase_order_items (
 
 create index po_items_po_idx on public.purchase_order_items (po_id);
 create index po_shipment_idx on public.purchase_orders (shipment_id);
+
+-- =============================================================================
+-- ML LOAD PLANS (maker–checker)
+-- =============================================================================
+create type load_plan_status as enum ('Draft', 'Approved', 'Rejected');
+
+create table public.load_plans (
+  id                 uuid primary key default gen_random_uuid(),
+  reference          text not null unique,
+  status             load_plan_status not null default 'Draft',
+  vehicle_ref        text,
+  origin             text,
+  destination        text,
+  max_weight_kg      numeric(12,2) not null default 20000,
+  max_volume_cbm     numeric(12,3) not null default 60,
+  planned_weight_kg  numeric(12,2) not null default 0,
+  planned_volume_cbm numeric(12,3) not null default 0,
+  utilization_pct    numeric(5,2) not null default 0
+                       check (utilization_pct >= 0 and utilization_pct <= 100),
+  ml_score           numeric(5,2),
+  ml_rationale       text,
+  created_by         uuid references public.profiles (id) on delete set null,
+  approved_by        uuid references public.profiles (id) on delete set null,
+  approved_at        timestamptz,
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now()
+);
+
+create table public.load_plan_items (
+  id          uuid primary key default gen_random_uuid(),
+  plan_id     uuid not null references public.load_plans (id) on delete cascade,
+  shipment_id uuid not null references public.shipments (id) on delete cascade,
+  sequence_no int not null default 1,
+  created_at  timestamptz not null default now(),
+  unique (plan_id, shipment_id)
+);
+
+create index load_plans_status_idx on public.load_plans (status);
+create index load_plan_items_plan_idx on public.load_plan_items (plan_id);
 
 -- =============================================================================
 -- RBAC HELPER FUNCTIONS
@@ -220,6 +269,97 @@ as $$
   select coalesce(public.current_role() in ('Admin', 'Dispatcher'), false);
 $$;
 
+create or replace function public.is_ops()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    public.current_role() in ('Admin', 'Dispatcher', 'Planner'),
+    false
+  );
+$$;
+
+create or replace function public.can_approve_load_plans()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.is_staff();
+$$;
+
+-- =============================================================================
+-- ATOMIC TRACKING UPDATE
+-- Inserts the tracking log and updates the shipment position/status in a single
+-- database call. Centralizes authorization (staff, or the assigned carrier)
+-- and the Philippine-bounds guard so they cannot be bypassed by an RLS misconfig.
+-- =============================================================================
+create or replace function public.post_tracking_update(
+  p_shipment_id uuid,
+  p_message text,
+  p_location text,
+  p_lat double precision default null,
+  p_lng double precision default null,
+  p_progress int default null,
+  p_status shipment_status default null
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role  public.app_role;
+  v_ship  public.shipments%rowtype;
+  v_level text;
+begin
+  select role into v_role
+    from public.profiles
+    where id = auth.uid();
+
+  select * into v_ship
+    from public.shipments
+    where id = p_shipment_id;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'Shipment not found');
+  end if;
+
+  -- Authorization: staff, or the carrier assigned to this shipment only.
+  if v_role is null or (
+    v_role not in ('Admin', 'Dispatcher')
+    and not (v_role = 'Carrier' and v_ship.carrier_id = auth.uid())
+  ) then
+    return jsonb_build_object('ok', false, 'error', 'Your role cannot post tracking updates');
+  end if;
+
+  -- Protective bounds: domestic Philippine tracking only.
+  if p_lat is not null and p_lng is not null
+     and (p_lat < 4.2 or p_lat > 21.5 or p_lng < 116.0 or p_lng > 127.0) then
+    return jsonb_build_object('ok', false, 'error', 'Coordinates must be inside the Philippines');
+  end if;
+
+  v_level := case when p_status = 'Customs Hold'::shipment_status then 'warning' else 'info' end;
+
+  insert into public.shipment_tracking_logs
+    (shipment_id, event_type, level, message, location, lat, lng, created_by)
+  values
+    (p_shipment_id, 'gps', v_level, p_message, p_location, p_lat, p_lng, auth.uid());
+
+  update public.shipments
+     set current_location = coalesce(p_location, current_location),
+         current_lat      = coalesce(p_lat, current_lat),
+         current_lng      = coalesce(p_lng, current_lng),
+         progress         = coalesce(p_progress, progress),
+         status           = coalesce(p_status, status)
+   where id = p_shipment_id;
+
+  return jsonb_build_object('ok', true);
+end;
+$$;
+
 -- =============================================================================
 -- ROW LEVEL SECURITY
 -- =============================================================================
@@ -231,16 +371,21 @@ alter table public.container_shipments   enable row level security;
 alter table public.bills_of_lading       enable row level security;
 alter table public.purchase_orders       enable row level security;
 alter table public.purchase_order_items  enable row level security;
+alter table public.load_plans            enable row level security;
+alter table public.load_plan_items       enable row level security;
 
 -- ---- profiles ----
-create policy "profiles: read own or staff reads all"
+create policy "profiles: read own or ops reads all"
   on public.profiles for select
-  using (id = auth.uid() or public.is_staff());
+  using (id = auth.uid() or public.is_ops());
 
 create policy "profiles: update own"
   on public.profiles for update
   using (id = auth.uid())
-  with check (id = auth.uid());
+  with check (
+    id = auth.uid()
+    and role = (select p.role from public.profiles p where p.id = auth.uid())
+  );
 
 create policy "profiles: admin manages all"
   on public.profiles for all
@@ -248,19 +393,18 @@ create policy "profiles: admin manages all"
   with check (public.current_role() = 'Admin');
 
 -- ---- shipments ----
--- Staff (Admin/Dispatcher) see everything. Carriers see their assigned loads.
--- Clients see only their own shipments.
+-- Ops (Admin/Dispatcher/Planner) see everything. Carriers/Clients scoped.
 create policy "shipments: scoped read"
   on public.shipments for select
   using (
-    public.is_staff()
+    public.is_ops()
     or carrier_id = auth.uid()
     or client_id = auth.uid()
   );
 
-create policy "shipments: staff write"
+create policy "shipments: ops write"
   on public.shipments for insert
-  with check (public.is_staff());
+  with check (public.is_ops());
 
 create policy "shipments: staff or carrier update"
   on public.shipments for update
@@ -278,7 +422,7 @@ create policy "tracking: read if shipment visible"
     exists (
       select 1 from public.shipments s
       where s.id = shipment_id
-        and (public.is_staff() or s.carrier_id = auth.uid() or s.client_id = auth.uid())
+        and (public.is_ops() or s.carrier_id = auth.uid() or s.client_id = auth.uid())
     )
   );
 
@@ -309,10 +453,10 @@ create policy "container_shipments: staff manage"
   with check (public.is_staff());
 
 -- ---- bills of lading ----
-create policy "bol: read if shipment visible or staff"
+create policy "bol: read if shipment visible or ops"
   on public.bills_of_lading for select
   using (
-    public.is_staff()
+    public.is_ops()
     or exists (
       select 1 from public.shipments s
       where s.id = shipment_id
@@ -328,7 +472,7 @@ create policy "bol: staff manage"
 -- ---- purchase orders ----
 create policy "po: scoped read"
   on public.purchase_orders for select
-  using (public.is_staff() or client_id = auth.uid());
+  using (public.is_ops() or client_id = auth.uid());
 
 create policy "po: staff manage"
   on public.purchase_orders for all
@@ -340,7 +484,7 @@ create policy "po_items: read if po visible"
   using (
     exists (
       select 1 from public.purchase_orders p
-      where p.id = po_id and (public.is_staff() or p.client_id = auth.uid())
+      where p.id = po_id and (public.is_ops() or p.client_id = auth.uid())
     )
   );
 
@@ -348,6 +492,44 @@ create policy "po_items: staff manage"
   on public.purchase_order_items for all
   using (public.is_staff())
   with check (public.is_staff());
+
+-- ---- load plans (maker–checker) ----
+create policy "load_plans: ops read"
+  on public.load_plans for select
+  using (public.is_ops());
+
+create policy "load_plans: ops insert draft"
+  on public.load_plans for insert
+  with check (public.is_ops() and status = 'Draft');
+
+create policy "load_plans: staff or draft owner update"
+  on public.load_plans for update
+  using (public.is_staff() or (public.is_ops() and status = 'Draft'))
+  with check (public.is_staff() or (public.is_ops() and status = 'Draft'));
+
+create policy "load_plans: staff or draft delete"
+  on public.load_plans for delete
+  using (
+    public.is_staff()
+    or (public.is_ops() and status = 'Draft' and created_by = auth.uid())
+  );
+
+create policy "load_plan_items: ops manage"
+  on public.load_plan_items for all
+  using (
+    public.is_staff()
+    or exists (
+      select 1 from public.load_plans lp
+      where lp.id = plan_id and public.is_ops() and lp.status = 'Draft'
+    )
+  )
+  with check (
+    public.is_staff()
+    or exists (
+      select 1 from public.load_plans lp
+      where lp.id = plan_id and public.is_ops() and lp.status = 'Draft'
+    )
+  );
 
 -- =============================================================================
 -- REALTIME — publish the tables the UI subscribes to
@@ -373,6 +555,7 @@ create trigger trg_containers_touch  before update on public.containers       fo
 create trigger trg_bol_touch         before update on public.bills_of_lading  for each row execute function public.touch_updated_at();
 create trigger trg_po_touch          before update on public.purchase_orders  for each row execute function public.touch_updated_at();
 create trigger trg_profiles_touch    before update on public.profiles         for each row execute function public.touch_updated_at();
+create trigger trg_load_plans_touch  before update on public.load_plans       for each row execute function public.touch_updated_at();
 
 -- Auto-create a profile row when a new auth user signs up.
 create or replace function public.handle_new_user()
@@ -381,13 +564,24 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  requested text := coalesce(new.raw_user_meta_data ->> 'role', 'Client');
+  resolved public.app_role;
 begin
+  -- Self-service signup may only claim untrusted roles. Staff roles
+  -- (Admin/Dispatcher/Planner) are provisioned by an administrator only;
+  -- any other requested role demotes to Client.
+  resolved := case requested
+    when 'Carrier' then 'Carrier'::public.app_role
+    else 'Client'::public.app_role
+  end;
+
   insert into public.profiles (id, email, full_name, role)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', new.email),
-    coalesce((new.raw_user_meta_data ->> 'role')::app_role, 'Client')
+    resolved
   )
   on conflict (id) do nothing;
   return new;
@@ -398,3 +592,21 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- =============================================================================
+-- PRIVILEGES — mirror hosted Supabase defaults so PostgREST can serve the
+-- tables/functions through the REST + Realtime endpoints. Row-level security
+-- (RLS policies above) still governs which rows/functions each role may use.
+-- =============================================================================
+grant usage on schema public to anon, authenticated, service_role;
+
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant execute on all functions in schema public to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
