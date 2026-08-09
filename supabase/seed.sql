@@ -13,10 +13,11 @@ declare
   v_ship     uuid;
   v_cont     uuid;
   v_po       uuid;
-  v_pass     text := crypt('DemoPass!123', gen_salt('bf'));
+  v_pass     text := crypt('demo123456', gen_salt('bf'));
 begin
-  -- ---- demo users (idempotent: skip if already registered) ----
-  if not exists (select 1 from auth.users where email = 'admin@demo.local') then
+  -- ---- demo users (idempotent: skip if already registered). Emails and names
+  --      match the one-click Quick Login accounts on the sign-in page. ----
+  if not exists (select 1 from auth.users where email = 'admin@freightos.demo') then
     insert into auth.users
       (instance_id, id, aud, role, email, encrypted_password,
        email_confirmed_at, confirmation_token, recovery_token,
@@ -24,13 +25,13 @@ begin
        created_at, updated_at)
     values
       ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
-       'admin@demo.local', v_pass, now(), '', '', '', '',
+       'admin@freightos.demo', v_pass, now(), '', '', '', '',
        '{"provider":"email","providers":["email"]}',
-       '{"role":"Admin","full_name":"Demo Admin"}',
+       '{"role":"Admin","full_name":"Sol, Emmanuel M."}',
        now(), now());
   end if;
 
-  if not exists (select 1 from auth.users where email = 'carrier@demo.local') then
+  if not exists (select 1 from auth.users where email = 'dispatcher@freightos.demo') then
     insert into auth.users
       (instance_id, id, aud, role, email, encrypted_password,
        email_confirmed_at, confirmation_token, recovery_token,
@@ -38,13 +39,13 @@ begin
        created_at, updated_at)
     values
       ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
-       'carrier@demo.local', v_pass, now(), '', '', '', '',
+       'dispatcher@freightos.demo', v_pass, now(), '', '', '', '',
        '{"provider":"email","providers":["email"]}',
-       '{"role":"Carrier","full_name":"Demo Carrier"}',
+       '{"role":"Dispatcher","full_name":"Munoz, Arnold M."}',
        now(), now());
   end if;
 
-  if not exists (select 1 from auth.users where email = 'client@demo.local') then
+  if not exists (select 1 from auth.users where email = 'planner@freightos.demo') then
     insert into auth.users
       (instance_id, id, aud, role, email, encrypted_password,
        email_confirmed_at, confirmation_token, recovery_token,
@@ -52,28 +53,66 @@ begin
        created_at, updated_at)
     values
       ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
-       'client@demo.local', v_pass, now(), '', '', '', '',
+       'planner@freightos.demo', v_pass, now(), '', '', '', '',
        '{"provider":"email","providers":["email"]}',
-       '{"role":"Client","full_name":"Demo Client"}',
+       '{"role":"Planner","full_name":"Pace, Emmanuel Jason D."}',
+       now(), now());
+  end if;
+
+  if not exists (select 1 from auth.users where email = 'carrier@freightos.demo') then
+    insert into auth.users
+      (instance_id, id, aud, role, email, encrypted_password,
+       email_confirmed_at, confirmation_token, recovery_token,
+       email_change_token_new, email_change, raw_app_meta_data, raw_user_meta_data,
+       created_at, updated_at)
+    values
+      ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+       'carrier@freightos.demo', v_pass, now(), '', '', '', '',
+       '{"provider":"email","providers":["email"]}',
+       '{"role":"Carrier","full_name":"Sogale, Christian Jericho C."}',
+       now(), now());
+  end if;
+
+  if not exists (select 1 from auth.users where email = 'client@freightos.demo') then
+    insert into auth.users
+      (instance_id, id, aud, role, email, encrypted_password,
+       email_confirmed_at, confirmation_token, recovery_token,
+       email_change_token_new, email_change, raw_app_meta_data, raw_user_meta_data,
+       created_at, updated_at)
+    values
+      ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+       'client@freightos.demo', v_pass, now(), '', '', '', '',
+       '{"provider":"email","providers":["email"]}',
+       '{"role":"Client","full_name":"Amora, Daniella Sophia P."}',
        now(), now());
   end if;
 
   -- ---- provision profiles (trigger demotes sign-up roles, so staff demos
   --      are elevated explicitly here for development/demo purposes) ----
-  select id into v_admin from auth.users where email = 'admin@demo.local';
+  select id into v_admin from auth.users where email = 'admin@freightos.demo';
   insert into public.profiles (id, full_name, email, role, org_name)
-  values (v_admin, 'Demo Admin', 'admin@demo.local', 'Admin', 'Airship Express Ops')
-  on conflict (id) do update set role = 'Admin';
+  values (v_admin, 'Sol, Emmanuel M.', 'admin@freightos.demo', 'Admin', 'Airship Express Ops')
+  on conflict (id) do update set role = 'Admin', full_name = 'Sol, Emmanuel M.';
 
-  select id into v_carrier from auth.users where email = 'carrier@demo.local';
+  select id into v_carrier from auth.users where email = 'carrier@freightos.demo';
   insert into public.profiles (id, full_name, email, role, org_name)
-  values (v_carrier, 'Demo Carrier', 'carrier@demo.local', 'Carrier', 'Demo Trucking Co.')
-  on conflict (id) do update set role = 'Carrier';
+  values (v_carrier, 'Sogale, Christian Jericho C.', 'carrier@freightos.demo', 'Carrier', 'Demo Trucking Co.')
+  on conflict (id) do update set role = 'Carrier', full_name = 'Sogale, Christian Jericho C.';
 
-  select id into v_client from auth.users where email = 'client@demo.local';
+  select id into v_client from auth.users where email = 'client@freightos.demo';
   insert into public.profiles (id, full_name, email, role, org_name)
-  values (v_client, 'Demo Client', 'client@demo.local', 'Client', 'Jollibee Foods Logistics')
-  on conflict (id) do update set role = 'Client';
+  values (v_client, 'Amora, Daniella Sophia P.', 'client@freightos.demo', 'Client', 'Jollibee Foods Logistics')
+  on conflict (id) do update set role = 'Client', full_name = 'Amora, Daniella Sophia P.';
+
+  insert into public.profiles (id, full_name, email, role, org_name)
+  select id, 'Munoz, Arnold M.', 'dispatcher@freightos.demo', 'Dispatcher', 'Airship Express Ops'
+    from auth.users where email = 'dispatcher@freightos.demo'
+  on conflict (id) do update set role = 'Dispatcher', full_name = 'Munoz, Arnold M.';
+
+  insert into public.profiles (id, full_name, email, role, org_name)
+  select id, 'Pace, Emmanuel Jason D.', 'planner@freightos.demo', 'Planner', 'Airship Express Ops'
+    from auth.users where email = 'planner@freightos.demo'
+  on conflict (id) do update set role = 'Planner', full_name = 'Pace, Emmanuel Jason D.';
 
   -- ---- sample data (skip when already loaded) ----
   if exists (select 1 from public.shipments) then
@@ -117,5 +156,5 @@ begin
     (v_po, 'BEV-CRT24', 'Beverage crates (24-pack)', 5000, 5000, 180.00),
     (v_po, 'DRY-SKU12', 'Dry goods tote bins', 2000, 1200, 95.00);
 
-  raise notice 'Demo seed complete: admin@/carrier@/client@demo.local, password DemoPass!123';
+  raise notice 'Demo seed complete: {admin,dispatcher,planner,carrier,client}@freightos.demo, shared password demo123456';
 end $$;

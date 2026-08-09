@@ -27,11 +27,11 @@ const DEMO_USERS: Record<
   AppRole,
   { email: string; fullName: string }
 > = {
-  Admin: { email: "admin@freightos.demo", fullName: "Ava Admin" },
-  Dispatcher: { email: "dispatcher@freightos.demo", fullName: "Dexter Dispatch" },
-  Planner: { email: "planner@freightos.demo", fullName: "Parker Planner" },
-  Carrier: { email: "carrier@freightos.demo", fullName: "Cole Carrier" },
-  Client: { email: "client@freightos.demo", fullName: "Clara Client" },
+  Admin: { email: "admin@freightos.demo", fullName: "Sol, Emmanuel M." },
+  Dispatcher: { email: "dispatcher@freightos.demo", fullName: "Munoz, Arnold M." },
+  Planner: { email: "planner@freightos.demo", fullName: "Pace, Emmanuel Jason D." },
+  Carrier: { email: "carrier@freightos.demo", fullName: "Sogale, Christian Jericho C." },
+  Client: { email: "client@freightos.demo", fullName: "Amora, Daniella Sophia P." },
 };
 
 export async function signIn(
