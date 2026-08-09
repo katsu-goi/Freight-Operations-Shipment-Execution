@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useTransition, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import {
   Ship,
   Loader2,
@@ -11,17 +11,20 @@ import {
   Radar,
   Truck,
   Building2,
+  Boxes,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 import { signIn, signUp, quickLogin, type AuthState } from "./actions";
 import type { AppRole } from "@/types";
 
-const ROLES: AppRole[] = ["Admin", "Dispatcher", "Carrier", "Client"];
+/** Roles available for self-registration. Staff roles are admin-provisioned. */
+const ROLES: AppRole[] = ["Client", "Carrier"];
 
 const QUICK_ROLES: { role: AppRole; icon: LucideIcon; hint: string }[] = [
   { role: "Admin", icon: ShieldCheck, hint: "Full access" },
   { role: "Dispatcher", icon: Radar, hint: "Operations" },
+  { role: "Planner", icon: Boxes, hint: "ML load drafts" },
   { role: "Carrier", icon: Truck, hint: "Assigned loads" },
   { role: "Client", icon: Building2, hint: "Own shipments" },
 ];
@@ -49,7 +52,7 @@ function SubmitButton({ mode }: { mode: "signin" | "signup" }) {
 export default function LoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const action = mode === "signin" ? signIn : signUp;
-  const [state, formAction] = useFormState<AuthState, FormData>(action, {});
+  const [state, formAction] = useActionState<AuthState, FormData>(action, {});
 
   const [isPending, startTransition] = useTransition();
   const [quickRole, setQuickRole] = useState<AppRole | null>(null);
@@ -76,7 +79,7 @@ export default function LoginForm() {
         </div>
         <div>
           <h1 className="font-black text-white text-2xl tracking-tight">
-            Freight<span className="text-pink-500">OS</span>
+            Airship<span className="text-pink-500">Express</span>
           </h1>
           <p className="text-xs text-slate-400 uppercase tracking-widest">
             Shipment Execution Subsystem
