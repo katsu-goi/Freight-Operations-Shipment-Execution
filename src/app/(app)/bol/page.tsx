@@ -42,14 +42,14 @@ export default async function BolPage() {
           aiEnabled={aiEnabled()}
         />
       ) : (
-        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+        <p className="text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">
           Planner access is read-only here. Ask Admin/Dispatcher to issue Bills of Lading.
         </p>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100">
-          <h3 className="font-bold text-slate-900 text-sm">Issued Bills of Lading</h3>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Issued Bills of Lading</h3>
         </div>
         {bolList.length === 0 ? (
           <EmptyState
@@ -59,8 +59,8 @@ export default async function BolPage() {
           />
         ) : (
           <div className="overflow-x-auto scroll-thin">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
+            <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
                 <tr>
                   <th className="px-5 py-3">BoL No.</th>
                   <th className="px-5 py-3">Type</th>
@@ -70,10 +70,10 @@ export default async function BolPage() {
                   <th className="px-5 py-3">Issued</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                 {bolList.map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-50/80">
-                    <td className="px-5 py-3.5 font-bold text-slate-900">{b.bol_number}</td>
+                  <tr key={b.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60">
+                    <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-slate-100">{b.bol_number}</td>
                     <td className="px-5 py-3.5"><StatusBadge status={b.bol_type} /></td>
                     <td className="px-5 py-3.5">{b.shipper_name ?? "—"} → {b.consignee_name ?? "—"}</td>
                     <td className="px-5 py-3.5">{b.vessel_name ?? "—"}</td>

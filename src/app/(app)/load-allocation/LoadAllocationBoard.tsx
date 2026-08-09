@@ -56,25 +56,25 @@ export default function LoadAllocationBoard({
           )}
           Generate ML draft
         </button>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
           Planner drafts · Admin/Dispatcher approve (maker–checker)
         </p>
       </div>
 
       {error && (
-        <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+        <p className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
       {message && (
-        <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+        <p className="text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 rounded-lg px-3 py-2">
           {message}
         </p>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <table className="w-full text-left text-xs text-slate-600">
-          <thead className="bg-slate-50 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
             <tr>
               <th className="px-5 py-3">Reference</th>
               <th className="px-5 py-3">Corridor</th>
@@ -83,18 +83,18 @@ export default function LoadAllocationBoard({
               <th className="px-5 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {plans.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-slate-400">
+                <td colSpan={5} className="px-5 py-8 text-center text-slate-400 dark:text-slate-500">
                   No load plans yet. Generate a draft from Booked shipments.
                 </td>
               </tr>
             ) : (
               plans.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/80 align-top">
+                <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 align-top">
                   <td className="px-5 py-3">
-                    <div className="font-bold text-slate-900 font-mono">{p.reference}</div>
+                    <div className="font-bold text-slate-900 dark:text-slate-100 font-mono">{p.reference}</div>
                     <div className="text-[10px] text-slate-400 mt-0.5 max-w-xs">
                       {p.ml_rationale ?? "—"}
                     </div>
@@ -120,7 +120,7 @@ export default function LoadAllocationBoard({
                           type="button"
                           disabled={pending}
                           onClick={() => decide(p.id, "Approved")}
-                          className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline disabled:opacity-40"
+                          className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold hover:underline disabled:opacity-40"
                         >
                           <Check className="w-3.5 h-3.5" /> Approve
                         </button>
@@ -128,13 +128,13 @@ export default function LoadAllocationBoard({
                           type="button"
                           disabled={pending}
                           onClick={() => decide(p.id, "Rejected")}
-                          className="inline-flex items-center gap-1 text-rose-600 font-bold hover:underline disabled:opacity-40"
+                          className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold hover:underline disabled:opacity-40"
                         >
                           <X className="w-3.5 h-3.5" /> Reject
                         </button>
                       </div>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400 dark:text-slate-500">—</span>
                     )}
                   </td>
                 </tr>

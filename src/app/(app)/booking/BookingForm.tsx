@@ -33,9 +33,9 @@ const INITIAL = {
 };
 
 function riskTone(risk: string) {
-  if (risk === "Low") return "bg-emerald-100 text-emerald-700";
-  if (risk === "Medium") return "bg-amber-100 text-amber-700";
-  return "bg-rose-100 text-rose-700";
+  if (risk === "Low") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300";
+  if (risk === "Medium") return "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300";
+  return "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300";
 }
 
 export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
@@ -95,13 +95,13 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
   const canBook = form.clientName.trim() && form.origin.trim() && form.destination.trim();
 
   const field =
-    "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
-  const label = "block text-xs font-semibold text-slate-600 mb-1";
+    "w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
+  const label = "block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1";
 
   return (
     <div className="space-y-6">
       {/* Booking form */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={label}>Client name</label>
@@ -161,7 +161,7 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-slate-100">
+        <div className="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={runAiRouting}
             disabled={!canRoute}
@@ -179,19 +179,19 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
             Book without route
           </button>
           {!aiEnabled && (
-            <span className="text-[11px] text-amber-600">
+            <span className="text-[11px] text-amber-600 dark:text-amber-400">
               AI provider not configured — set GROQ_API_KEY or GEMINI_API_KEY.
             </span>
           )}
           {submitError && (
-            <span className="text-[11px] text-rose-600">{submitError}</span>
+            <span className="text-[11px] text-rose-600 dark:text-rose-400">{submitError}</span>
           )}
         </div>
       </div>
 
       {/* AI results */}
       {routingError && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl px-4 py-3">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs rounded-xl px-4 py-3">
           {routingError}
         </div>
       )}
@@ -199,11 +199,11 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
       {routes && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {routes.map((r, i) => (
-            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
+            <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">{r.routeName}</h4>
-                  <p className="text-xs text-slate-500">{r.carrierName}</p>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{r.routeName}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{r.carrierName}</p>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${riskTone(r.riskScore)}`}>
                   {r.riskScore} risk
@@ -211,21 +211,21 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
               </div>
 
               <div className="grid grid-cols-2 gap-2 my-4 text-xs">
-                <div className="flex items-center gap-1.5 text-slate-600">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                   <Clock className="w-3.5 h-3.5 text-slate-400" /> {r.transitTimeDays}d transit
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-600">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                   <PhilippinePeso className="w-3.5 h-3.5 text-slate-400" /> {formatCurrency(r.estimatedCostPHP)}
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-600">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                   <Leaf className="w-3.5 h-3.5 text-emerald-500" /> {r.co2ReductionPercent}% CO₂
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-600">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                   <ShieldAlert className="w-3.5 h-3.5 text-slate-400" /> {r.riskScore}
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-500 leading-snug flex-1">{r.keyAdvantage}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug flex-1">{r.keyAdvantage}</p>
 
               <button
                 onClick={() => submit(r)}

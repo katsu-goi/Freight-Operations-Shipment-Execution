@@ -37,7 +37,7 @@ export default async function PurchaseOrdersPage() {
       />
 
       {orders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
           <EmptyState
             icon={Layers}
             title="No purchase orders"
@@ -49,21 +49,21 @@ export default async function PurchaseOrdersPage() {
           {orders.map((po) => {
             const f = fulfillment(po.items);
             return (
-              <div key={po.id} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div key={po.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-900 text-sm">{po.po_number}</h3>
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{po.po_number}</h3>
                       <StatusBadge status={po.status} />
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       {po.client_name} · Vendor: {po.vendor ?? "—"}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Value</div>
-                      <div className="font-bold text-slate-900 text-sm">{formatCurrency(Number(po.total_amount), po.currency)}</div>
+                      <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{formatCurrency(Number(po.total_amount), po.currency)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">Linked shipment</div>
@@ -78,19 +78,19 @@ export default async function PurchaseOrdersPage() {
                   </div>
                 </div>
 
-                <div className="px-5 py-3 bg-slate-50 border-b border-slate-100">
-                  <div className="flex justify-between text-[11px] font-medium text-slate-500 mb-1">
+                <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                     <span>Line-item fulfillment</span>
                     <span className="font-mono">{f.shipped} / {f.ordered} units · {f.pct}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                  <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-pink-600 to-rose-500" style={{ width: `${f.pct}%` }} />
                   </div>
                 </div>
 
                 <div className="overflow-x-auto scroll-thin">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="bg-white text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                    <thead className="bg-white dark:bg-slate-900 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="px-5 py-2.5">SKU</th>
                         <th className="px-5 py-2.5">Item</th>
@@ -100,11 +100,11 @@ export default async function PurchaseOrdersPage() {
                         <th className="px-5 py-2.5 text-right">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                       {po.items.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-5 py-6 text-center text-slate-400">
-                            <Package className="w-6 h-6 mx-auto mb-1 text-slate-300" />
+                          <td colSpan={6} className="px-5 py-6 text-center text-slate-400 dark:text-slate-500">
+                            <Package className="w-6 h-6 mx-auto mb-1 text-slate-300 dark:text-slate-600" />
                             No line items on this PO.
                           </td>
                         </tr>
@@ -113,13 +113,13 @@ export default async function PurchaseOrdersPage() {
                           const complete = Number(item.qty_shipped) >= Number(item.qty_ordered);
                           return (
                             <tr key={item.id}>
-                              <td className="px-5 py-2.5 font-mono text-slate-800">{item.sku}</td>
+                              <td className="px-5 py-2.5 font-mono text-slate-800 dark:text-slate-200">{item.sku}</td>
                               <td className="px-5 py-2.5">{item.name}</td>
                               <td className="px-5 py-2.5 text-right font-mono">{Number(item.qty_ordered).toLocaleString()}</td>
                               <td className="px-5 py-2.5 text-right font-mono">{Number(item.qty_shipped).toLocaleString()}</td>
                               <td className="px-5 py-2.5 text-right font-mono">{formatCurrency(Number(item.unit_price), po.currency)}</td>
                               <td className="px-5 py-2.5 text-right">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${complete ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${complete ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"}`}>
                                   {complete ? "Fulfilled" : "Partial"}
                                 </span>
                               </td>

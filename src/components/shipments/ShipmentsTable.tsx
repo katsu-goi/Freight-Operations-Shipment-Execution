@@ -43,11 +43,11 @@ export default function ShipmentsTable({
   const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="font-bold text-slate-900 text-sm">Shipment Files</h3>
-          <p className="text-slate-500 text-xs">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Shipment Files</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-xs">
             {rows.length} of {shipments.length} shown
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function ShipmentsTable({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Filter…"
-            className="border border-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
           {showModeFilter &&
             ["All", ...TRANSPORT_MODES].map((m) => (
@@ -65,8 +65,8 @@ export default function ShipmentsTable({
                 onClick={() => setMode(m)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                   mode === m
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-slate-900 dark:bg-pink-600 text-white"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                 }`}
               >
                 {m}
@@ -76,8 +76,8 @@ export default function ShipmentsTable({
       </div>
 
       <div className="overflow-x-auto scroll-thin">
-        <table className="w-full text-left text-xs text-slate-600">
-          <thead className="bg-slate-50 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100">
+        <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
             <tr>
               <th className="px-5 py-3">Shipment / Track</th>
               <th className="px-5 py-3">Client & PO</th>
@@ -88,7 +88,7 @@ export default function ShipmentsTable({
               <th className="px-5 py-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-medium">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-10">
@@ -101,30 +101,30 @@ export default function ShipmentsTable({
               </tr>
             ) : (
               pageRows.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/80 transition-all">
+                <tr key={s.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-all">
                   <td className="px-5 py-3.5">
-                    <div className="font-bold text-slate-900">{s.reference}</div>
+                    <div className="font-bold text-slate-900 dark:text-slate-100">{s.reference}</div>
                     <div className="text-[10px] text-slate-400 font-mono">
                       {s.tracking_number ?? "—"}
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="font-semibold text-slate-800">
+                    <div className="font-semibold text-slate-800 dark:text-slate-200">
                       {s.client_name}
                     </div>
                     {s.po_number && (
-                      <span className="text-[10px] text-pink-600 font-mono bg-pink-50 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-pink-600 dark:text-pink-400 font-mono bg-pink-50 dark:bg-pink-950/40 px-1.5 py-0.5 rounded">
                         {s.po_number}
                       </span>
                     )}
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {s.origin}
                       </span>
                       <ArrowRight className="w-3 h-3 text-slate-400" />
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {s.destination}
                       </span>
                     </div>
@@ -132,7 +132,7 @@ export default function ShipmentsTable({
                   <td className="px-5 py-3.5">
                     <div className="flex items-center space-x-1.5">
                       <ModeIcon mode={s.mode} />
-                      <span className="font-bold text-slate-800">{s.mode}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{s.mode}</span>
                     </div>
                     <div className="text-[10px] text-slate-400">
                       {s.vessel ?? "Unassigned"}
@@ -141,13 +141,13 @@ export default function ShipmentsTable({
                   <td className="px-5 py-3.5">
                     <StatusBadge status={s.status} />
                   </td>
-                  <td className="px-5 py-3.5 font-mono text-slate-700">
+                  <td className="px-5 py-3.5 font-mono text-slate-700 dark:text-slate-300">
                     {formatDate(s.eta)}
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <Link
                       href={`/tracking?shipment=${s.id}`}
-                      className="text-xs font-bold text-pink-600 hover:text-pink-700 hover:underline inline-flex items-center"
+                      className="text-xs font-bold text-pink-600 dark:text-pink-400 hover:text-pink-700 hover:underline inline-flex items-center"
                     >
                       Live Track <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                     </Link>
@@ -159,8 +159,8 @@ export default function ShipmentsTable({
         </table>
 
         {rows.length > pageSize && (
-          <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-[11px] text-slate-500 font-mono">
+          <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
               {rows.length === 0
                 ? "0 results"
                 : `${(currentPage - 1) * pageSize + 1}–${Math.min(
@@ -172,17 +172,17 @@ export default function ShipmentsTable({
               <button
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage <= 1}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-slate-100 transition-all"
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-100 dark:disabled:hover:bg-slate-800 transition-all"
               >
                 Prev
               </button>
-              <span className="text-[11px] text-slate-500 font-mono px-2">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono px-2">
                 {currentPage} / {totalPages}
               </span>
               <button
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-slate-100 transition-all"
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-100 dark:disabled:hover:bg-slate-800 transition-all"
               >
                 Next
               </button>

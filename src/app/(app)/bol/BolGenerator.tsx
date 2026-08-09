@@ -140,19 +140,19 @@ export default function BolGenerator({
     w.print();
   }
 
-  const field = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
-  const label = "block text-xs font-semibold text-slate-600 mb-1";
+  const field = "w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
+  const label = "block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: form + AI parse */}
       <div className="space-y-6">
         {/* AI parse box */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-          <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-2">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-pink-600" /> AI Document Parsing
           </h3>
-          <p className="text-xs text-slate-500 mb-3">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
             Paste unstructured shipping advice / BoL text — the AI extracts the fields.
           </p>
           <textarea
@@ -171,13 +171,13 @@ export default function BolGenerator({
               {parsing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Parse with AI
             </button>
-            {!aiEnabled && <span className="text-[11px] text-amber-600">AI provider not configured.</span>}
-            {parseError && <span className="text-[11px] text-rose-600">{parseError}</span>}
+            {!aiEnabled && <span className="text-[11px] text-amber-600 dark:text-amber-400">AI provider not configured.</span>}
+            {parseError && <span className="text-[11px] text-rose-600 dark:text-rose-400">{parseError}</span>}
           </div>
         </div>
 
         {/* BoL fields */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={label}>BoL type</label>
@@ -234,15 +234,15 @@ export default function BolGenerator({
             <button onClick={printBol} disabled={!form.bolNumber} className="bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2">
               <Printer className="w-4 h-4" /> Print / PDF
             </button>
-            {saveError && <span className="text-[11px] text-rose-600">{saveError}</span>}
+            {saveError && <span className="text-[11px] text-rose-600 dark:text-rose-400">{saveError}</span>}
           </div>
         </div>
       </div>
 
       {/* Right: printable preview */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
             <FileText className="w-4 h-4 text-pink-600" /> Document Preview
           </h3>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-white">

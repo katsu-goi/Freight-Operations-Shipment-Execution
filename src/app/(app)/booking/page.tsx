@@ -16,7 +16,7 @@ export default async function BookingPage() {
         title="Multimodal Shipment Booking Engine"
         description="Configure freight details and generate AI-optimized carrier routes."
         actions={
-          <span className="bg-pink-50 text-pink-600 text-xs font-bold px-3 py-1.5 rounded-full border border-pink-200 flex items-center gap-1.5">
+          <span className="bg-pink-50 dark:bg-pink-950/40 text-pink-600 dark:text-pink-400 text-xs font-bold px-3 py-1.5 rounded-full border border-pink-200 dark:border-pink-900 flex items-center gap-1.5">
             <Plus className="w-3.5 h-3.5" /> New Booking
           </span>
         }

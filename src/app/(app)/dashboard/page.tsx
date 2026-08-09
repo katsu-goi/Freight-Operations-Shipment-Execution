@@ -112,19 +112,19 @@ export default async function DashboardPage() {
 
       {/* Charts + feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
                 Monthly Multimodal Volume
               </h3>
-              <p className="text-slate-500 text-xs">
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
                 Ocean vs Air vs Road vs Rail distribution
               </p>
             </div>
-            <div className="flex items-center space-x-2 text-[11px] font-medium text-slate-500">
+            <div className="flex items-center space-x-2 text-[11px] font-medium text-slate-500 dark:text-slate-400">
               <span className="flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-900 inline-block mr-1" />
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-slate-200 inline-block mr-1" />
                 Ocean
               </span>
               <span className="flex items-center">

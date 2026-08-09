@@ -45,19 +45,19 @@ export default function ActivityFeed({ initial }: { initial: TrackingLog[] }) {
   }, []);
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col">
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
           <Radio className="w-4 h-4 text-pink-500 animate-pulse" />
           Live Operations Feed
         </h3>
-        <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">
+        <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-mono">
           Realtime Sync
         </span>
       </div>
 
       {logs.length === 0 ? (
-        <p className="text-xs text-slate-400 py-10 text-center">
+        <p className="text-xs text-slate-400 dark:text-slate-500 py-10 text-center">
           No activity yet. Location updates and status changes will stream in
           here.
         </p>
@@ -66,7 +66,7 @@ export default function ActivityFeed({ initial }: { initial: TrackingLog[] }) {
           {logs.map((log) => (
             <div
               key={log.id}
-              className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-2.5 animate-fade-in"
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-start space-x-2.5 animate-fade-in"
             >
               <div
                 className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${levelDot(
@@ -74,7 +74,7 @@ export default function ActivityFeed({ initial }: { initial: TrackingLog[] }) {
                 )}`}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-800 leading-snug">
+                <p className="text-xs text-slate-800 dark:text-slate-200 leading-snug">
                   {log.message}
                 </p>
                 <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">

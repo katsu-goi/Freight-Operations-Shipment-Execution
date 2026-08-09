@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -13,7 +14,22 @@ import { BarChart3 } from "lucide-react";
 
 type Row = { month: string; Ocean: number; Air: number; Road: number; Rail: number };
 
+function useDark() {
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const el = document.documentElement;
+    const update = () => setDark(el.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  return dark;
+}
+
 export default function VolumeChart({ data }: { data: Row[] }) {
+  const dark = useDark();
+
   if (!data.length) {
     return (
       <EmptyState
@@ -32,14 +48,14 @@ export default function VolumeChart({ data }: { data: Row[] }) {
           <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} allowDecimals={false} />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#0f172a",
+              backgroundColor: dark ? "#1e293b" : "#0f172a",
               borderRadius: "8px",
               color: "#fff",
               border: "none",
               fontSize: "12px",
             }}
           />
-          <Bar dataKey="Ocean" fill="#0f172a" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="Ocean" fill={dark ? "#e2e8f0" : "#0f172a"} radius={[4, 4, 0, 0]} />
           <Bar dataKey="Air" fill="#ec4899" radius={[4, 4, 0, 0]} />
           <Bar dataKey="Road" fill="#3b82f6" radius={[4, 4, 0, 0]} />
           <Bar dataKey="Rail" fill="#f59e0b" radius={[4, 4, 0, 0]} />

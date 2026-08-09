@@ -15,7 +15,22 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="font-sans text-slate-800">{children}</body>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+  try {
+    var t = localStorage.getItem("theme");
+    var dark = t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (dark) document.documentElement.classList.add("dark");
+  } catch (e) {}
+})();`,
+          }}
+        />
+      </head>
+      <body className="font-sans text-slate-800 dark:text-slate-200 dark:bg-slate-950">
+        {children}
+      </body>
     </html>
   );
 }

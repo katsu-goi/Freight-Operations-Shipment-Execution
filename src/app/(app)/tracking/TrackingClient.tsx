@@ -91,7 +91,7 @@ export default function TrackingClient({
 
   if (shipments.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
         <EmptyState
           icon={Navigation}
           title="No shipments to track"
@@ -104,25 +104,25 @@ export default function TrackingClient({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Selector list */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col max-h-[80vh]">
-        <div className="p-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-900 text-sm">Shipment Files</h3>
-          <p className="text-xs text-slate-500">{rows.length} tracked</p>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Shipment Files</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{rows.length} tracked</p>
         </div>
-        <div className="overflow-y-auto scroll-thin divide-y divide-slate-100">
+        <div className="overflow-y-auto scroll-thin divide-y divide-slate-100 dark:divide-slate-800">
           {rows.map((s) => (
             <button
               key={s.id}
               onClick={() => setSelectedId(s.id)}
               className={`w-full text-left px-4 py-3 transition-all ${
-                s.id === selectedId ? "bg-pink-50 border-l-2 border-pink-500" : "hover:bg-slate-50"
+                s.id === selectedId ? "bg-pink-50 dark:bg-pink-950/30 border-l-2 border-pink-500" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-slate-900">{s.reference}</span>
+                <span className="font-bold text-xs text-slate-900 dark:text-slate-100">{s.reference}</span>
                 <StatusBadge status={s.status} />
               </div>
-              <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500">
+              <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                 <ModeIcon mode={s.mode} className="w-3 h-3" />
                 {s.origin} → {s.destination}
               </div>
@@ -133,36 +133,36 @@ export default function TrackingClient({
 
       {/* Map + details */}
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-sm h-80">
+        <div className="bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm h-80">
           <TrackingMap shipment={selected} />
         </div>
 
         {selected && (
           <>
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
                     <Package className="w-4 h-4 text-pink-600" /> {selected.reference}
                   </h3>
-                  <p className="text-xs text-slate-500">{selected.tracking_number}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{selected.tracking_number}</p>
                 </div>
                 <StatusBadge status={selected.status} />
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Carrier</div><div className="font-semibold text-slate-800">{selected.carrier ?? "—"}</div></div>
-                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Vessel</div><div className="font-semibold text-slate-800">{selected.vessel ?? "—"}</div></div>
-                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">ETA</div><div className="font-semibold text-slate-800 font-mono">{selected.eta ?? "—"}</div></div>
-                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Location</div><div className="font-semibold text-slate-800">{selected.current_location ?? "—"}</div></div>
+                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Carrier</div><div className="font-semibold text-slate-800 dark:text-slate-200">{selected.carrier ?? "—"}</div></div>
+                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Vessel</div><div className="font-semibold text-slate-800 dark:text-slate-200">{selected.vessel ?? "—"}</div></div>
+                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">ETA</div><div className="font-semibold text-slate-800 dark:text-slate-200 font-mono">{selected.eta ?? "—"}</div></div>
+                <div><div className="text-slate-400 uppercase text-[10px] font-semibold">Location</div><div className="font-semibold text-slate-800 dark:text-slate-200">{selected.current_location ?? "—"}</div></div>
               </div>
 
               <div className="mt-4">
-                <div className="flex justify-between text-[11px] font-medium text-slate-500 mb-1">
+                <div className="flex justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                   <span className="flex items-center gap-1"><Gauge className="w-3.5 h-3.5" /> Progress</span>
                   <span className="font-mono">{selected.progress}%</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-pink-600 to-rose-500" style={{ width: `${selected.progress}%` }} />
                 </div>
               </div>
@@ -171,21 +171,21 @@ export default function TrackingClient({
             {canPost && <LocationUpdateForm shipmentId={selected.id} />}
 
             {/* Timeline */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-pink-600" /> Status Timeline
               </h3>
               {logs.length === 0 ? (
-                <p className="text-xs text-slate-400">No tracking events yet.</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">No tracking events yet.</p>
               ) : (
-                <ol className="relative border-l border-slate-200 ml-2 space-y-4">
+                <ol className="relative border-l border-slate-200 dark:border-slate-700 ml-2 space-y-4">
                   {logs.map((log) => (
                     <li key={log.id} className="ml-4">
-                      <span className={`absolute -left-1.5 w-3 h-3 rounded-full border-2 border-white ${
+                      <span className={`absolute -left-1.5 w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 ${
                         log.level === "warning" ? "bg-amber-500" : log.level === "success" ? "bg-emerald-500" : "bg-pink-500"
                       }`} />
-                      <p className="text-xs text-slate-800">{log.message}</p>
-                      <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                      <p className="text-xs text-slate-800 dark:text-slate-200">{log.message}</p>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3 h-3" />
                         {log.location ?? "—"} · {new Date(log.created_at).toLocaleString()}
                       </span>
@@ -236,11 +236,11 @@ function LocationUpdateForm({ shipmentId }: { shipmentId: string }) {
     setStatus("");
   }
 
-  const field = "border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
+  const field = "border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500";
 
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-      <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
+    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2 mb-3">
         <Navigation className="w-4 h-4 text-pink-600" /> Post Location Update
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -257,7 +257,7 @@ function LocationUpdateForm({ shipmentId }: { shipmentId: string }) {
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Post
         </button>
       </div>
-      {error && <p className="text-[11px] text-rose-600 mt-2">{error}</p>}
+      {error && <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-2">{error}</p>}
     </div>
   );
 }

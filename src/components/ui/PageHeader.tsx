@@ -17,11 +17,11 @@ export default function PageHeader({
             {eyebrow}
           </div>
         )}
-        <h2 className="text-xl font-black tracking-tight text-slate-900">
+        <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
           {title}
         </h2>
         {description && (
-          <p className="text-xs text-slate-500 mt-1">{description}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{description}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
