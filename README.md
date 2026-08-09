@@ -59,9 +59,6 @@ tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
 6. **PO Integration & SLA** — link purchase orders to shipments and track line-item
    fulfillment progress.
 
-An **Admin-only Schema** page renders the live
-`supabase/migrations/0001_initial_schema.sql` for reference.
-
 ---
 
 ## Architecture

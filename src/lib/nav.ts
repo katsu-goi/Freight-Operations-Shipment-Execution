@@ -6,7 +6,6 @@ import {
   FileText,
   Navigation,
   Layers,
-  Database,
   Cpu,
   type LucideIcon,
 } from "lucide-react";
@@ -67,12 +66,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: "PO Integration & SLA",
     icon: Layers,
     roles: ["Admin", "Dispatcher", "Planner", "Client"],
-  },
-  {
-    href: "/schema",
-    label: "Supabase DDL Schema",
-    icon: Database,
-    roles: ["Admin"],
   },
 ];
 
