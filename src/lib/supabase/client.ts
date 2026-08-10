@@ -12,3 +12,14 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 }
+
+/**
+ * Unique Realtime channel name per mount. Supabase dedupes channels by name:
+ * in React Strict Mode the effect mounts twice, and reusing a fixed name on
+ * the second mount returns the already-subscribed channel — calling
+ * `.on()`/`.subscribe()` on it throws ("...after subscribe()"). A per-call
+ * suffix guarantees a fresh channel object every time.
+ */
+export function uniqueChannel(base: string): string {
+  return `${base}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`;
+}

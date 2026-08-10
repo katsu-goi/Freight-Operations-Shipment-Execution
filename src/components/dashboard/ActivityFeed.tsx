@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Radio } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, uniqueChannel } from "@/lib/supabase/client";
 import type { TrackingLog } from "@/types";
 
 function levelDot(level: string) {
@@ -29,7 +29,7 @@ export default function ActivityFeed({ initial }: { initial: TrackingLog[] }) {
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel("dashboard-activity-feed")
+      .channel(uniqueChannel("dashboard-activity-feed"))
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "shipment_tracking_logs" },

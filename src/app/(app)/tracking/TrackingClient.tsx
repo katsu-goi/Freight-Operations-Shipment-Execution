@@ -15,7 +15,7 @@ import {
 import ModeIcon from "@/components/ui/ModeIcon";
 import StatusBadge from "@/components/ui/StatusBadge";
 import EmptyState from "@/components/ui/EmptyState";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, uniqueChannel } from "@/lib/supabase/client";
 import { SHIPMENT_STATUSES } from "@/lib/utils";
 import { postLocationUpdate } from "./actions";
 import type { Shipment, ShipmentStatus, TrackingLog } from "@/types";
@@ -51,7 +51,7 @@ export default function TrackingClient({
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel("tracking-live")
+      .channel(uniqueChannel("tracking-live"))
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "shipments" },

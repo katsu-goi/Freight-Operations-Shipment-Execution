@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Radio } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, uniqueChannel } from "@/lib/supabase/client";
 
 /**
  * Footer indicator that reflects the live Supabase Realtime channel state
@@ -14,7 +14,7 @@ export default function RealtimeIndicator() {
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel("sidebar-realtime-status")
+      .channel(uniqueChannel("sidebar-realtime-status"))
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "shipment_tracking_logs" },
