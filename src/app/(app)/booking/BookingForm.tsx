@@ -87,7 +87,7 @@ export default function BookingForm({ aiEnabled }: { aiEnabled: boolean }) {
       setSubmitError(result.error ?? "Booking failed");
       return;
     }
-    router.push(`/tracking?shipment=${result.shipmentId}`);
+    router.push(`/tracking?shipment=${result.value.shipmentId}`);
   }
 
   const canRoute =

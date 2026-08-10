@@ -1,39 +1,14 @@
 import { requireRole, isStaff, OPS_ROLES } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { listContainersWithShipments } from "@/lib/repos/containers";
 import PageHeader from "@/components/ui/PageHeader";
 import ConsolidationBoard from "./ConsolidationBoard";
-import type { ContainerWithShipments } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConsolidationPage() {
   const profile = await requireRole(OPS_ROLES);
-  const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("containers")
-    .select(
-      "*, container_shipments(shipments(id, reference, weight_kg, volume_cbm, cargo_type))",
-    )
-    .order("created_at", { ascending: false });
-
-  const containers: ContainerWithShipments[] = (data ?? []).map((c) => {
-    const row = c as unknown as {
-      container_shipments?: {
-        shipments: ContainerWithShipments["shipments"][number] | null;
-      }[];
-    } & Omit<ContainerWithShipments, "shipments">;
-    const links = row.container_shipments ?? [];
-    const { container_shipments: _links, ...rest } = row as typeof row & {
-      container_shipments?: unknown;
-    };
-    return {
-      ...(rest as ContainerWithShipments),
-      shipments: links
-        .map((l) => l.shipments)
-        .filter(Boolean) as ContainerWithShipments["shipments"],
-    };
-  });
+  const containers = await listContainersWithShipments();
 
   return (
     <div className="max-w-6xl mx-auto">

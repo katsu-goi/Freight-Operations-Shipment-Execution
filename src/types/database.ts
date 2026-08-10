@@ -513,12 +513,43 @@ export interface Database {
           },
         ];
       };
+      audit_logs: {
+        Row: {
+          id: number;
+          table_name: string;
+          record_id: string | null;
+          action: "INSERT" | "UPDATE" | "DELETE";
+          actor_id: string | null;
+          old_data: Record<string, unknown> | null;
+          new_data: Record<string, unknown> | null;
+          created_at: string;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      webhook_events: {
+        Row: {
+          id: number;
+          source: string;
+          event_type: string;
+          idempotency_key: string;
+          payload: Record<string, unknown>;
+          status: "received" | "processed" | "failed";
+          error: string | null;
+          created_at: string;
+          processed_at: string | null;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      current_role: { Args: Record<string, never>; Returns: AppRole };
+      current_role: { Args: Record<string, never>; Returns: AppRole | null };
       is_staff: { Args: Record<string, never>; Returns: boolean };
       is_ops: { Args: Record<string, never>; Returns: boolean };
       can_approve_load_plans: {
@@ -536,6 +567,33 @@ export interface Database {
           p_status?: ShipmentStatus | null;
         };
         Returns: { ok: boolean; error?: string | null };
+      };
+      next_shipment_reference: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      next_bol_number: { Args: { p_bol_type: string }; Returns: string };
+      next_container_reference: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      ingest_crm_po: {
+        Args: {
+          p_idempotency_key: string;
+          p_po_number: string;
+          p_client_name: string;
+          p_vendor: string;
+          p_currency: string;
+          p_total_amount: number;
+          p_client_email: string;
+          p_items: Record<string, unknown>[];
+          p_notes: string;
+        };
+        Returns: {
+          ok: boolean;
+          duplicate: boolean;
+          po_id?: string | null;
+        };
       };
     };
     Enums: {

@@ -32,8 +32,8 @@ export default function Header({
     .toUpperCase();
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-sm z-10">
-      <form onSubmit={onSearch} className="relative w-80">
+    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 pl-16 lg:pl-6 pr-6 flex items-center justify-between shrink-0 shadow-sm z-10">
+      <form onSubmit={onSearch} className="relative w-64 lg:w-80">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
           type="text"

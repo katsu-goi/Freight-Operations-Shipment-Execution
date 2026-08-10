@@ -1,32 +1,23 @@
 import { requireRole, isStaff, OPS_ROLES } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
 import { aiEnabled } from "@/lib/ai";
+import { listShipmentsForBol } from "@/lib/repos/shipments";
+import { listBillsOfLading } from "@/lib/repos/bol";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils";
 import { FileText } from "lucide-react";
 import BolGenerator from "./BolGenerator";
-import type { BillOfLading, Shipment } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function BolPage() {
   const profile = await requireRole(OPS_ROLES);
-  const supabase = await createClient();
 
-  const [{ data: shipments }, { data: bols }] = await Promise.all([
-    supabase
-      .from("shipments")
-      .select("id, reference, shipper, consignee, vessel, origin, destination, container_no, weight_kg, volume_cbm")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("bills_of_lading")
-      .select("*")
-      .order("created_at", { ascending: false }),
+  const [shipments, bolList] = await Promise.all([
+    listShipmentsForBol(),
+    listBillsOfLading(),
   ]);
-
-  const bolList = (bols ?? []) as BillOfLading[];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -37,10 +28,7 @@ export default async function BolPage() {
       />
 
       {isStaff(profile.role) ? (
-        <BolGenerator
-          shipments={(shipments ?? []) as Shipment[]}
-          aiEnabled={aiEnabled()}
-        />
+        <BolGenerator shipments={shipments} aiEnabled={aiEnabled()} />
       ) : (
         <p className="text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">
           Planner access is read-only here. Ask Admin/Dispatcher to issue Bills of Lading.

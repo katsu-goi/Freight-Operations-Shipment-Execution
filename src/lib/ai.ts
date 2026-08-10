@@ -18,24 +18,60 @@ export function aiEnabled(): boolean {
   return activeProvider() !== null;
 }
 
+const REQUEST_TIMEOUT_MS = 20_000;
+const MAX_RESPONSE_BYTES = 64 * 1024;
+const MAX_INPUT_CHARS = 20_000;
+
+/** fetch with an AbortController timeout and a response-size guard. */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    const text = await res.text();
+    if (text.length > MAX_RESPONSE_BYTES) {
+      throw new Error("AI response exceeded the allowed size");
+    }
+    return new Response(text, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Truncate and normalize unstructured input before it reaches a paid model. */
+function sanitize(text: string): string {
+  return text.slice(0, MAX_INPUT_CHARS);
+}
+
 /** Extract the first JSON value from a model's text response. */
-function extractJson<T>(text: string): T {
+function extractJson<T>(text: string, validate?: (v: T) => boolean): T {
   const cleaned = text
     .trim()
     .replace(/^```(?:json)?/i, "")
     .replace(/```$/i, "")
     .trim();
-  try {
-    return JSON.parse(cleaned) as T;
-  } catch {
-    const match = cleaned.match(/[[{][\s\S]*[\]}]/);
-    if (match) return JSON.parse(match[0]) as T;
-    throw new Error("AI response was not valid JSON");
+  for (const candidate of [cleaned, cleaned.match(/[{][\s\S]*[}]/)?.[0], cleaned.match(/[[]{[\s\S]*[}\]]/)?.[0]]) {
+    if (!candidate) continue;
+    try {
+      const value = JSON.parse(candidate) as T;
+      if (!validate || validate(value)) return value;
+    } catch {
+      // try the next candidate
+    }
   }
+  throw new Error("AI response was not valid JSON");
 }
 
 async function callGroq(system: string, user: string): Promise<string> {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  const res = await fetchWithTimeout("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,14 +88,16 @@ async function callGroq(system: string, user: string): Promise<string> {
     }),
   });
   if (!res.ok) throw new Error(`Groq API error: ${res.status} ${await res.text()}`);
-  const data = await res.json();
+  const data = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
   return data.choices?.[0]?.message?.content ?? "";
 }
 
 async function callGemini(system: string, user: string): Promise<string> {
   const model = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -68,14 +106,37 @@ async function callGemini(system: string, user: string): Promise<string> {
     }),
   });
   if (!res.ok) throw new Error(`Gemini API error: ${res.status} ${await res.text()}`);
-  const data = await res.json();
+  const data = (await res.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
-async function complete(system: string, user: string): Promise<string> {
+async function complete(
+  system: string,
+  user: string,
+  validate?: (t: unknown) => boolean,
+): Promise<unknown> {
   const provider = activeProvider();
   if (!provider) throw new Error("No AI provider configured");
-  return provider === "groq" ? callGroq(system, user) : callGemini(system, user);
+
+  let raw: string;
+  try {
+    raw = provider === "groq" ? await callGroq(system, user) : await callGemini(system, user);
+  } catch (e) {
+    if (e instanceof Error && /abort/i.test(e.message)) {
+      throw new Error("AI request timed out; try again");
+    }
+    throw e;
+  }
+
+  // Retry once on malformed JSON before failing to the user.
+  try {
+    return extractJson(raw, validate);
+  } catch {
+    raw = provider === "groq" ? await callGroq(system, user) : await callGemini(system, user);
+    return extractJson(raw, validate);
+  }
 }
 
 export async function recommendRoutes(
@@ -90,18 +151,23 @@ export async function recommendRoutes(
     "(fastest, most economical, greenest). Do not suggest international routes.";
 
   const user = `Plan domestic Philippine freight routing for:
-- Origin: ${req.origin}
-- Destination: ${req.destination}
+- Origin: ${sanitize(req.origin)}
+- Destination: ${sanitize(req.destination)}
 - Mode: ${req.mode}
 - Weight: ${req.weightKg} kg
 - Volume: ${req.volumeCbm} CBM
-- Incoterms: ${req.incoterms}`;
+- Incoterms: ${sanitize(req.incoterms)}`;
 
-  const raw = await complete(system, user);
-  const parsed = extractJson<
+  const isRouteShape = (v: unknown): boolean => {
+    const routes = Array.isArray(v) ? v : (v as { routes?: unknown[] })?.routes;
+    return Array.isArray(routes) && routes.length > 0;
+  };
+
+  // A wrong `estimatedCostUSD` default is silently ignored; PHP is authoritative.
+  const parsed = (await complete(system, user, isRouteShape)) as
     | { routes?: Array<RouteRecommendation & { estimatedCostUSD?: number }> }
-    | Array<RouteRecommendation & { estimatedCostUSD?: number }>
-  >(raw);
+    | Array<RouteRecommendation & { estimatedCostUSD?: number }>;
+
   const routes = Array.isArray(parsed) ? parsed : (parsed.routes ?? []);
   if (!routes.length) throw new Error("AI returned no routes");
   return routes.map((r) => ({
@@ -121,6 +187,9 @@ export async function parseBillOfLading(text: string): Promise<ParsedBillOfLadin
     "totalVolumeCbm (number), goodsDescription. Use empty string or 0 when a " +
     "field is absent.";
 
-  const raw = await complete(system, `Bill of Lading text:\n"""\n${text}\n"""`);
-  return extractJson<ParsedBillOfLading>(raw);
+  const isParsed = (v: unknown): boolean =>
+    typeof v === "object" && v !== null && "billOfLadingNumber" in (v as object);
+
+  const user = `Bill of Lading text:\n"""\n${sanitize(text)}\n"""`;
+  return (await complete(system, user, isParsed)) as ParsedBillOfLading;
 }

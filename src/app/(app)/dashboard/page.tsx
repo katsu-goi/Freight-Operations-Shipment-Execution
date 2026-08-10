@@ -10,34 +10,25 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile, isStaff } from "@/lib/auth";
+import { listRecentShipments } from "@/lib/repos/shipments";
+import { listTrackingLogs } from "@/lib/repos/loadplans";
 import { computeStats, monthlyVolume } from "@/lib/queries";
 import { formatNumber } from "@/lib/utils";
 import KpiCard from "@/components/ui/KpiCard";
 import VolumeChart from "@/components/dashboard/VolumeChart";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import ShipmentsTable from "@/components/shipments/ShipmentsTable";
-import type { Shipment, TrackingLog } from "@/types";
+import type { TrackingLog } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
-  const supabase = await createClient();
 
-  const [{ data: shipments }, { data: logs }] = await Promise.all([
-    supabase
-      .from("shipments")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500),
-    supabase
-      .from("shipment_tracking_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(15),
+  const [list, recentLogs] = await Promise.all([
+    listRecentShipments(),
+    listTrackingLogs(undefined, 15),
   ]);
-
-  const list = (shipments ?? []) as Shipment[];
   const stats = computeStats(list);
   const volume = monthlyVolume(list);
   const staff = isStaff(profile.role);
@@ -144,7 +135,7 @@ export default async function DashboardPage() {
           <VolumeChart data={volume} />
         </div>
 
-        <ActivityFeed initial={(logs ?? []) as TrackingLog[]} />
+        <ActivityFeed initial={(recentLogs) as TrackingLog[]} />
       </div>
 
       {/* Shipments table */}

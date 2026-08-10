@@ -1,15 +1,15 @@
 import { requireRole } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { listPurchaseOrdersWithItems } from "@/lib/repos/po";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/utils";
 import { Layers, Link2, Package } from "lucide-react";
-import type { PurchaseOrderWithItems } from "@/types";
+import type { PurchaseOrderItem } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-function fulfillment(items: PurchaseOrderWithItems["items"]) {
+function fulfillment(items: PurchaseOrderItem[]) {
   const ordered = items.reduce((a, i) => a + Number(i.qty_ordered), 0);
   const shipped = items.reduce((a, i) => a + Number(i.qty_shipped), 0);
   return { ordered, shipped, pct: ordered ? Math.round((shipped / ordered) * 100) : 0 };
@@ -17,16 +17,8 @@ function fulfillment(items: PurchaseOrderWithItems["items"]) {
 
 export default async function PurchaseOrdersPage() {
   await requireRole(["Admin", "Dispatcher", "Planner", "Client"]);
-  const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("purchase_orders")
-    .select("*, items:purchase_order_items(*), shipment:shipments(reference, status)")
-    .order("created_at", { ascending: false });
-
-  const orders = (data ?? []) as unknown as (PurchaseOrderWithItems & {
-    shipment: { reference: string; status: string } | null;
-  })[];
+  const orders = await listPurchaseOrdersWithItems();
 
   return (
     <div className="max-w-6xl mx-auto">

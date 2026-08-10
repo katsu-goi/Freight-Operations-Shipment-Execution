@@ -1,45 +1,45 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { recommendRoutes, aiEnabled } from "@/lib/ai";
-import type { RoutingRequest } from "@/types";
+import {
+  requireUser,
+  validate,
+  withErrors,
+  rateLimit,
+  clientIp,
+  jsonOk,
+  ApiError,
+} from "@/lib/server/api";
+import { routingRequestSchema } from "@/lib/validation/schemas";
+
+const RATE_LIMIT = { perMinute: 20 };
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  return withErrors(async () => {
+    const supabase = await createClient();
+    await requireUser(supabase);
 
-  if (!aiEnabled()) {
-    return NextResponse.json(
-      { error: "AI provider not configured. Set GROQ_API_KEY or GEMINI_API_KEY." },
-      { status: 503 },
-    );
-  }
+    if (!aiEnabled()) {
+      throw new ApiError(
+        503,
+        "AI provider not configured. Set GROQ_API_KEY or GEMINI_API_KEY.",
+      );
+    }
+    if (!rateLimit(`ai:routing:${clientIp(request)}`, RATE_LIMIT.perMinute)) {
+      throw new ApiError(429, "Rate limit exceeded; try again shortly");
+    }
 
-  let body: RoutingRequest;
-  try {
-    body = (await request.json()) as RoutingRequest;
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
+    const body = await request
+      .json()
+      .catch(() => {
+        throw new ApiError(400, "Invalid JSON body");
+      });
+    const input = validate(routingRequestSchema, body);
 
-  if (!body.origin || !body.destination) {
-    return NextResponse.json(
-      { error: "origin and destination are required" },
-      { status: 400 },
-    );
-  }
-
-  try {
-    const routes = await recommendRoutes(body);
-    return NextResponse.json({ routes });
-  } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Routing failed" },
-      { status: 502 },
-    );
-  }
+    try {
+      const routes = await recommendRoutes(input);
+      return jsonOk({ routes });
+    } catch (e) {
+      throw new ApiError(502, e instanceof Error ? e.message : "Routing failed");
+    }
+  }, "routing");
 }

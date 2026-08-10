@@ -32,13 +32,19 @@ export async function requireProfile(): Promise<Profile> {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile) return profile;
+  if (profile) {
+    // Deactivated users are refused at the app layer too (RLS also locks them
+    // out via current_role() → NULL). The role always comes from the DB row;
+    // user_metadata is never trusted for authorization.
+    if (profile.is_active === false) redirect("/login");
+    return profile;
+  }
 
   return {
     id: user.id,
     email: user.email ?? null,
     full_name: (user.user_metadata?.full_name as string) ?? user.email ?? null,
-    role: parseAppRole(user.user_metadata?.role) ?? "Client",
+    role: "Client",
     org_name: null,
     is_active: true,
     invited_by: null,
