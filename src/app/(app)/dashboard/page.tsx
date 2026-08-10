@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { requireProfile, isStaff } from "@/lib/auth";
 import { listRecentShipments } from "@/lib/repos/shipments";
 import { listTrackingLogs } from "@/lib/repos/loadplans";
