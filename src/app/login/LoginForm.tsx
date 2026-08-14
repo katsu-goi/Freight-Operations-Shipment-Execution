@@ -24,7 +24,7 @@ const ROLES: AppRole[] = ["Client", "Carrier"];
 const QUICK_ROLES: { role: AppRole; icon: LucideIcon; hint: string }[] = [
   { role: "Admin", icon: ShieldCheck, hint: "Full access" },
   { role: "Dispatcher", icon: Radar, hint: "Operations" },
-  { role: "Planner", icon: Boxes, hint: "ML load drafts" },
+  { role: "Planner", icon: Boxes, hint: "Carrier batching drafts" },
   { role: "Carrier", icon: Truck, hint: "Assigned loads" },
   { role: "Client", icon: Building2, hint: "Own shipments" },
 ];

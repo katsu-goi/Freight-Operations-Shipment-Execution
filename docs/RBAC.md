@@ -1,4 +1,4 @@
-# RBAC — Airship Express FOSE
+# RBAC — Airship Express FOSE (Authorized Drop-Off Hub)
 
 Four layers: **Auth session → nav visibility → `requireRole` → Postgres RLS**.
 
@@ -7,27 +7,27 @@ Four layers: **Auth session → nav visibility → `requireRole` → Postgres RL
 | Role | Purpose |
 |------|---------|
 | **Admin** | Full ops + schema + approvals |
-| **Dispatcher** | Ops writes + load-plan approvals |
-| **Planner** | Ops visibility; **draft** ML load plans only |
-| **Carrier** | Assigned shipments + live tracking posts |
-| **Client** | Own shipments / POs |
+| **Dispatcher** | Ops writes + handover/manifest approvals |
+| **Planner** | Ops visibility; plan intake, batch, and handover |
+| **Carrier** | Read-only handover sign-off visibility |
+| **Client** | Dashboard scope only (no hub ops) |
 
-## Maker–checker (load allocation)
+## Lifecycle owner (maker–checker)
 
-- **Maker (Planner / ops):** generate Draft plans on `/load-allocation`
-- **Checker (Admin / Dispatcher):** Approve or Reject Draft only
+- **Manifest batching:** ops (Dispatcher/Planner) create Draft manifests on `/manifest`
+- **Handover sign-off:** Admin/Dispatcher finalize a Ready manifest to a rider on `/handover`
+  (guard: `canFinalizeHandover` → staff only)
 
 ## Module matrix
 
 | Module | Admin | Dispatcher | Planner | Carrier | Client |
 |--------|:-----:|:----------:|:-------:|:-------:|:------:|
 | Dashboard | ✓ | ✓ | ✓ | scoped | scoped |
+| Pickup & Intake | ✓ | ✓ | ✓ | — | — |
 | Booking | ✓ | ✓ | ✓ | — | — |
-| Consolidation | ✓ | ✓ | view | — | — |
-| ML Load Allocation | approve | approve | draft | — | — |
-| BoL | write | write | read | — | — |
-| Tracking | ✓ | ✓ | read | own | own |
-| PO | ✓ | ✓ | read | — | own |
+| Manifest & Consolidation | ✓ | ✓ | ✓ | — | — |
+| Carrier Handover | ✓ | ✓ | ✓ | view | — |
+| Waybill | write | write | read | — | — |
 | Schema | ✓ | — | — | — | — |
 
-Helpers in SQL: `is_staff()`, `is_ops()`, `can_approve_load_plans()`.
+Helpers in SQL: `is_staff()`, `is_ops()`, `can_approve_load_plans()` (legacy load plans).

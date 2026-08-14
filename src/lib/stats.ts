@@ -1,41 +1,59 @@
-import type { Shipment, ShipmentStats } from "@/types";
+import type { Shipment, HubStats } from "@/types";
+import { DELIVERY_PLATFORMS } from "@/lib/utils";
 
-/** Compute dashboard KPI roll-up from a shipment set. */
-export function computeStats(shipments: Pick<Shipment, "status" | "weight_kg">[]): ShipmentStats {
+/**
+ * Compute hub dashboard KPIs from a parcel set.
+ *
+ * Lifecycle: Intake → Batched → Handed Over (terminal). Cancelled/Archived
+ * are the soft-exit states and never count as active parcels.
+ */
+export function computeHubStats(
+  parcels: Pick<Shipment, "status" | "weight_kg">[],
+): HubStats {
+  const active = parcels.filter(
+    (p) => p.status !== "Handed Over" && p.status !== "Cancelled" && p.status !== "Archived",
+  ).length;
   return {
-    active: shipments.filter((s) => s.status !== "Delivered" && s.status !== "Cancelled").length,
-    inTransit: shipments.filter((s) => s.status === "In Transit").length,
-    customsHold: shipments.filter((s) => s.status === "Customs Hold").length,
-    delivered: shipments.filter((s) => s.status === "Delivered").length,
-    delayed: shipments.filter((s) => s.status === "Delayed").length,
-    totalWeightKg: shipments.reduce((acc, s) => acc + Number(s.weight_kg ?? 0), 0),
+    activeParcels: active,
+    intakeToday: parcels.filter((p) => p.status === "Intake").length,
+    pendingHandovers: parcels.filter((p) => p.status === "Batched").length,
+    completedDispatches: parcels.filter((p) => p.status === "Handed Over").length,
+    intaken: parcels.filter((p) => p.status === "Intake").length,
+    batched: parcels.filter((p) => p.status === "Batched").length,
+    handedOver: parcels.filter((p) => p.status === "Handed Over").length,
+    cancelled: parcels.filter((p) => p.status === "Cancelled").length,
+    totalWeightKg: parcels.reduce(
+      (acc, p) =>
+        acc +
+        (p.status !== "Cancelled" && p.status !== "Archived"
+          ? Number(p.weight_kg ?? 0)
+          : 0),
+      0,
+    ),
   };
 }
 
-export const MODES = ["Ocean", "Air", "Road", "Rail"] as const;
+export type IntakeRow = {
+  month: string;
+  [platform: string]: string | number;
+};
 
 /**
- * Monthly multimodal volume (count of shipments per mode per month).
- * Data is expected to arrive newest-first; the newest 7 month buckets are kept.
+ * Monthly parcels-per-platform counts for the dashboard chart.
+ * Data arrives newest-first; the newest 7 month buckets are kept.
  */
-export function monthlyVolume(
-  shipments: Pick<Shipment, "mode" | "created_at">[],
-): { month: string; Ocean: number; Air: number; Road: number; Rail: number }[] {
+export function monthlyIntakeVolume(
+  parcels: Pick<Shipment, "platform" | "created_at">[],
+): IntakeRow[] {
   const buckets = new Map<string, Record<string, number>>();
-  for (const s of shipments) {
-    const d = new Date(s.created_at);
+  for (const p of parcels) {
+    const d = new Date(p.created_at);
     const key = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
-    const bucket = buckets.get(key) ?? { Ocean: 0, Air: 0, Road: 0, Rail: 0 };
-    bucket[s.mode] = (bucket[s.mode] ?? 0) + 1;
+    const bucket = buckets.get(key) ?? Object.fromEntries(DELIVERY_PLATFORMS.map((pl) => [pl, 0]));
+    bucket[p.platform] = (bucket[p.platform] ?? 0) + 1;
     buckets.set(key, bucket);
   }
   return Array.from(buckets.entries())
     .slice(0, 7)
-    .map(([month, v]) => ({
-      month,
-      Ocean: v.Ocean ?? 0,
-      Air: v.Air ?? 0,
-      Road: v.Road ?? 0,
-      Rail: v.Rail ?? 0,
-    }));
+    .map(([month, v]) => ({ month, ...v }));
 }

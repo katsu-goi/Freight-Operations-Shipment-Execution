@@ -32,7 +32,7 @@ tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
 | ------------ | ----------------------------------------------------------------- |
 | Framework    | Next.js 14 (App Router, Server Components, Server Actions)         |
 | UI           | React 18, Tailwind CSS, Lucide React icons                        |
-| Charts / Map | Recharts, Leaflet + React-Leaflet                                 |
+| Charts        | Recharts                                                           |
 | Backend      | Next.js Route Handlers + Server Actions (Node runtime)            |
 | Database     | Supabase (PostgreSQL) with Row Level Security                     |
 | Auth         | Supabase Auth (email/password) + RBAC via a `profiles` table      |
@@ -54,7 +54,7 @@ tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
    into containers, with live capacity utilization.
 4. **House & Master BoL** — generate printable House and Master Bills of Lading; parse
    unstructured BoL text into structured fields via AI.
-5. **Live Shipment Tracking** — Leaflet map, status timeline, and location logs updated
+5. **Live Shipment Tracking** — Branch Hub → Carrier Batching → Handover to J&T handover path, status timeline, and location logs updated
    in real time through Supabase Realtime.
 6. **PO Integration & SLA** — link purchase orders to shipments and track line-item
    fulfillment progress.
@@ -201,17 +201,17 @@ The provider is chosen automatically: **Groq** if `GROQ_API_KEY` is set, otherwi
 src/
 ├── app/
 │   ├── (app)/                 # Authenticated app shell (sidebar + header)
-│   │   ├── dashboard/         # Module 1 — KPIs, feed, analytics
-│   │   ├── booking/           # Module 2 — booking + AI routing
-│   │   ├── consolidation/     # Module 3 — LCL/FCL container planning
-│   │   ├── bol/               # Module 4 — House & Master BoL
-│   │   ├── tracking/          # Module 5 — live map + timeline
-│   │   ├── purchase-orders/   # Module 6 — PO integration
+│   │   ├── dashboard/         # Hub KPIs, platform volume, live feed
+│   │   ├── pickup/            # Seller pickup scheduling & quick intake
+│   │   ├── booking/           # Parcel intake + dynamic delivery-platform dropdown
+│   │   ├── manifest/          # Courier manifesting (batch by platform)
+│   │   ├── handover/          # Rider sign-off & handover history
+│   │   ├── waybill/           # Waybill / document generator
 │   │   └── schema/            # Admin-only DDL viewer
 │   ├── api/ai/                # Server-only AI route handlers
 │   ├── login/                 # Auth (sign in / register) + server actions
 │   └── layout.tsx             # Root layout
-├── components/                # UI, layout, dashboard, tracking, shipments
+├── components/                # UI, layout, dashboard
 ├── lib/
 │   ├── supabase/              # Browser, server, middleware, admin clients
 │   ├── ai.ts                  # Groq / Gemini helpers
@@ -229,7 +229,7 @@ supabase/
 ├── migrations/
 │   ├── 0001_initial_schema.sql   # Full DDL: enums, tables, RLS, realtime, triggers
 │   └── 20260806_planner_rbac.sql # Incremental Planner/load-plan RBAC (idempotent)
-└── seed.sql                   # Optional demo data (applied on `supabase db reset`)
+└── seed.sql                   # Demo parcels, sellers, manifests (applied on `supabase db reset`)
 ```
 
 ---

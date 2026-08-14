@@ -10,10 +10,10 @@ import type { AppRole } from "@/types";
 /** Shared nav list; rendered in the desktop sidebar and the mobile drawer. */
 export default function SidebarNav({
   role,
-  containerCount,
+  pendingBatchCount,
 }: {
   role: AppRole;
-  containerCount: number;
+  pendingBatchCount: number;
 }) {
   const pathname = usePathname();
   const items = visibleNav(role);
@@ -57,7 +57,7 @@ export default function SidebarNav({
             )}
             {item.badge?.kind === "count" && (
               <span className="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full">
-                {containerCount}
+                {pendingBatchCount}
               </span>
             )}
             {!item.badge && active && (

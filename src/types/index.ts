@@ -16,17 +16,56 @@ export type PurchaseOrderItem =
 export type LoadPlan = Database["public"]["Tables"]["load_plans"]["Row"];
 export type LoadPlanItem =
   Database["public"]["Tables"]["load_plan_items"]["Row"];
+export type Seller = Database["public"]["Tables"]["sellers"]["Row"];
+export type PickupRequest =
+  Database["public"]["Tables"]["pickup_requests"]["Row"];
+export type CarrierBatch =
+  Database["public"]["Tables"]["carrier_batches"]["Row"];
+export type CarrierBatchItem =
+  Database["public"]["Tables"]["carrier_batch_items"]["Row"];
+export type Handover = Database["public"]["Tables"]["handovers"]["Row"];
 
 export type {
   AppRole,
   TransportMode,
+  DeliveryPlatform,
   ShipmentStatus,
   ContainerStatus,
   BolType,
   PoStatus,
   LoadType,
   LoadPlanStatus,
+  PickupStatus,
+  BatchStatus,
 } from "./database";
+
+/** Seller joined with its pickup request counters. */
+export interface SellerWithStats extends Seller {
+  pickupCount: number;
+  parcelCount: number;
+}
+
+/** Pickup request joined with its seller. */
+export interface PickupRequestWithSeller extends PickupRequest {
+  seller: Pick<Seller, "id" | "name" | "phone"> | null;
+}
+
+/** Carrier batch joined with its parcels. */
+export interface CarrierBatchWithItems extends CarrierBatch {
+  items: Pick<
+    Shipment,
+    | "id"
+    | "reference"
+    | "tracking_number"
+    | "client_name"
+    | "consignee"
+    | "destination"
+    | "weight_kg"
+    | "cod_amount"
+    | "service_type"
+    | "status"
+  >[];
+}
 
 /** Container joined with the shipments consolidated into it. */
 export interface ContainerWithShipments extends Container {
@@ -51,6 +90,19 @@ export interface ShipmentStats {
   totalWeightKg: number;
 }
 
+/** Hub intake roll-up for the operations dashboard. */
+export interface HubStats {
+  intakeToday: number;
+  activeParcels: number;
+  pendingHandovers: number;
+  completedDispatches: number;
+  intaken: number;
+  batched: number;
+  handedOver: number;
+  cancelled: number;
+  totalWeightKg: number;
+}
+
 /** ----- AI feature contracts ----- */
 
 /** One carrier/route recommendation returned by the routing engine. */
@@ -70,10 +122,6 @@ export interface ParsedBillOfLading {
   billOfLadingNumber: string;
   shipperName: string;
   consigneeName: string;
-  vesselName: string;
-  voyageNo: string;
-  portOfLoading: string;
-  portOfDischarge: string;
   containerNumber: string;
   totalWeightKg: number;
   totalVolumeCbm: number;

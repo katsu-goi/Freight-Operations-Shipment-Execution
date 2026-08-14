@@ -11,8 +11,7 @@ declare
   v_carrier  uuid;
   v_client   uuid;
   v_ship     uuid;
-  v_cont     uuid;
-  v_po       uuid;
+  v_batch    uuid;
   v_pass     text := crypt('demo123456', gen_salt('bf'));
 begin
   -- ---- demo users (idempotent: skip if already registered). Emails and names
@@ -116,45 +115,62 @@ begin
 
   -- ---- sample data (skip when already loaded) ----
   if exists (select 1 from public.shipments) then
-    raise notice 'Demo shipments already present; skipping data seeding.';
+    raise notice 'Demo parcels already present; skipping data seeding.';
     return;
   end if;
 
-  insert into public.shipments
-    (reference, tracking_number, client_name, shipper, consignee, origin, destination,
-     mode, status, etd, eta, cargo_type, vessel, carrier, po_number, weight_kg, volume_cbm,
-     incoterms, current_location, current_lat, current_lng, progress, created_by,
-     client_id, carrier_id)
+  -- sellers
+  insert into public.sellers
+    (reference, name, contact_person, phone, email, address, pickup_frequency, created_by)
   values
-    ('SHP-2026-8801', 'TRK-ROAD-99812', 'Jollibee Foods Logistics', 'Davao Agri Exports Co.',
-     'Manila North Harbor Whse', 'Davao Port (PHDVO)', 'Manila Port (PHMNL)',
-     'Road', 'In Transit', '2026-07-28', '2026-08-02', 'LCL Truckload', 'Fleet PH-NLEX',
-     '2GO Express', 'PO-MNL-99420', 8200, 28.5, 'DAP', 'NLEX Exit 15', 14.735, 120.955, 62,
-     v_admin, v_client, v_carrier)
+    ('SEL-2026-001', 'Jollibee Foods Logistics', 'M. Tan', '0917-000-0101', 'logistics@jollibeefoods.demo', 'Pasig City', 'Daily', v_admin),
+    ('SEL-2026-002', 'Lazada Seller Hub Manila', 'R. Cruz', '0917-000-0202', 'hub.manila@sellerlazada.demo', 'Manila CBD', 'On-demand', v_admin),
+    ('SEL-2026-003', 'Shopee Sellers Quezon City', 'K. Reyes', '0917-000-0303', 'qc.shopee.sellers@demo.ph', 'Quezon City', '2x per week', v_admin);
+
+  insert into public.shipments
+    (reference, tracking_number, client_name, consignee, origin, destination,
+     platform, status, service_type, weight_kg, cod_amount, current_location,
+     progress, created_by, seller_id)
+  values
+    ('SHP-2026-8801', 'TRK-HUB-99812', 'Jollibee Foods Logistics', 'J. Dela Cruz', 'Branch Hub', 'Quezon City',
+     'J&T Express', 'Intake', 'Standard', 12.5, 0, 'Branch Hub', 10, v_admin,
+     (select id from public.sellers where reference = 'SEL-2026-001')),
+    ('SHP-2026-8802', 'TRK-HUB-99813', 'Jollibee Foods Logistics', 'A. Santos', 'Branch Hub', 'Manila CBD',
+     'J&T Express', 'Intake', 'COD', 4.2, 1250, 'Branch Hub', 10, v_admin,
+     (select id from public.sellers where reference = 'SEL-2026-001')),
+    ('SHP-2026-8803', 'TRK-HUB-99814', 'Lazada Seller Hub Manila', 'M. Garcia', 'Branch Hub', 'Cainta',
+     'Flash Express', 'Intake', 'Standard', 8.0, 0, 'Branch Hub', 10, v_admin,
+     (select id from public.sellers where reference = 'SEL-2026-002')),
+    ('SHP-2026-8804', 'TRK-HUB-99815', 'Shopee Sellers Quezon City', 'L. Ramos', 'Branch Hub', 'Pasig',
+     'Shopee Drop-Off', 'Intake', 'Next-Day', 2.1, 890, 'Branch Hub', 10, v_admin,
+     (select id from public.sellers where reference = 'SEL-2026-003'))
   returning id into v_ship;
 
-  insert into public.shipment_tracking_logs (shipment_id, event_type, level, message, location, lat, lng, created_by)
-  values (v_ship, 'gps', 'info', 'Convoy cleared NLEX southbound', 'NLEX Exit 15', 14.735, 120.955, v_admin);
+  insert into public.shipment_tracking_logs (shipment_id, event_type, level, message, location, created_by)
+  values (v_ship, 'intake', 'success', 'Parcel intaken at Branch Hub', 'Branch Hub', v_admin);
 
-  insert into public.containers
-    (reference, container_type, load_type, max_volume_cbm, max_weight_kg, current_volume_cbm,
-     current_weight_kg, origin, destination, vessel, status, created_by)
-  values
-    ('CONT-40HQ-1029', '40ft High Cube Container', 'FCL', 76.2, 28600, 58.4, 21800,
-     'Manila Port (PHMNL)', 'Cebu Port (PHCEB)', 'MV SuperCat Visayas',
-     'Loading in Progress', v_admin)
-  returning id into v_cont;
+  -- one manifest mid-lifecycle: Batch A (J&T) is Draft
+  insert into public.carrier_batches
+    (reference, platform, status, parcel_count, total_weight_kg, created_by)
+  values ('MNF-2026-1001', 'J&T Express', 'Draft', 3, 24.7, v_admin)
+  returning id into v_batch;
 
-  insert into public.container_shipments (container_id, shipment_id) values (v_cont, v_ship);
+  insert into public.carrier_batch_items (batch_id, shipment_id, sequence_no)
+  select v_batch, id, row_number() over (order by reference)
+    from public.shipments where platform = 'J&T Express';
 
-  insert into public.purchase_orders (po_number, client_name, vendor, currency, total_amount, status, shipment_id, created_by)
-  values ('PO-MNL-99420', 'Jollibee Foods Logistics', 'Davao Agri Exports Co.', 'PHP', 1245000, 'In Transit', v_ship, v_admin)
-  returning id into v_po;
+  -- one manifest already handed over to a rider
+  insert into public.carrier_batches
+    (reference, platform, status, parcel_count, total_weight_kg, rider_name,
+     rider_phone, handover_notes, handed_over_by, handed_over_at, created_by)
+  values ('MNF-2026-1000', 'Flash Express', 'Handed Over', 2, 9.5, 'Banjo Rider',
+          '0917-000-0999', 'Signed off at counter', v_admin, now() - interval '4 hours', v_admin)
+  returning id into v_batch;
 
-  insert into public.purchase_order_items (po_id, sku, name, qty_ordered, qty_shipped, unit_price)
-  values
-    (v_po, 'BEV-CRT24', 'Beverage crates (24-pack)', 5000, 5000, 180.00),
-    (v_po, 'DRY-SKU12', 'Dry goods tote bins', 2000, 1200, 95.00);
+  insert into public.handovers
+    (batch_id, platform, rider_name, rider_phone, parcel_count, notes, handed_over_by, handed_over_at)
+  values (v_batch, 'Flash Express', 'Banjo Rider', '0917-000-0999', 2, 'Signed off at counter', v_admin,
+          now() - interval '4 hours');
 
   raise notice 'Demo seed complete: {admin,dispatcher,planner,carrier,client}@freightos.demo, shared password demo123456';
 end $$;

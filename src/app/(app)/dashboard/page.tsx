@@ -2,35 +2,36 @@ import Link from "next/link";
 import {
   Activity,
   Plus,
-  FileText,
+  PackageCheck,
   Package,
-  Globe,
-  AlertTriangle,
-  CheckCircle,
+  Truck,
+  Handshake,
+  ArrowRight,
 } from "lucide-react";
 import { requireProfile, isStaff } from "@/lib/auth";
-import { listRecentShipments } from "@/lib/repos/shipments";
-import { listTrackingLogs } from "@/lib/repos/loadplans";
-import { computeStats, monthlyVolume } from "@/lib/queries";
+import { getHubDashboard } from "@/lib/queries";
+import { computeHubStats, monthlyIntakeVolume } from "@/lib/stats";
 import { formatNumber } from "@/lib/utils";
 import KpiCard from "@/components/ui/KpiCard";
 import VolumeChart from "@/components/dashboard/VolumeChart";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import ShipmentsTable from "@/components/shipments/ShipmentsTable";
+import { listTrackingLogs } from "@/lib/repos/loadplans";
+import { formatDate } from "@/lib/utils";
 import type { TrackingLog } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
+  const staff = isStaff(profile.role);
 
-  const [list, recentLogs] = await Promise.all([
-    listRecentShipments(),
+  const [{ shipments, batches, handovers }, recentLogs] = await Promise.all([
+    getHubDashboard(),
     listTrackingLogs(undefined, 15),
   ]);
-  const stats = computeStats(list);
-  const volume = monthlyVolume(list);
-  const staff = isStaff(profile.role);
+
+  const stats = computeHubStats(shipments);
+  const volume = monthlyIntakeVolume(shipments);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -38,14 +39,14 @@ export default async function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-pink-950 p-6 rounded-2xl text-white shadow-xl">
         <div>
           <div className="text-xs font-bold uppercase tracking-wider text-pink-400 mb-1 flex items-center gap-2">
-            <Activity className="w-4 h-4" /> Active Freight Execution Hub
+            <Activity className="w-4 h-4" /> Authorized Drop-Off Hub — Branch Hub
           </div>
           <h2 className="text-2xl font-black tracking-tight">
-            Shipment &amp; Logistics Operations
+            Parcel Intake &amp; Courier Operations
           </h2>
           <p className="text-slate-300 text-xs mt-1">
-            Real-time monitoring of domestic Philippine freight, container
-            consolidation, and automated compliance.
+            Intake → manifest → handover for J&amp;T, Flash, LBC, GoGo, Shopee,
+            Lazada and TikTok couriers.
           </p>
         </div>
         {staff && (
@@ -55,14 +56,14 @@ export default async function DashboardPage() {
               className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-pink-600/30 flex items-center space-x-2 transition-all active:scale-95"
             >
               <Plus className="w-4 h-4" />
-              <span>Create New Booking</span>
+              <span>Intake New Parcel</span>
             </Link>
             <Link
-              href="/bol"
+              href="/manifest"
               className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all"
             >
-              <FileText className="w-4 h-4" />
-              <span>Generate BoL</span>
+              <Truck className="w-4 h-4" />
+              <span>Manifest</span>
             </Link>
           </div>
         )}
@@ -71,32 +72,32 @@ export default async function DashboardPage() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          label="Active Shipments"
-          value={stats.active}
+          label="Active Parcels"
+          value={stats.activeParcels}
           icon={Package}
           tone="pink"
-          hint={`${formatNumber(stats.totalWeightKg)} kg total cargo`}
+          hint={`${formatNumber(stats.totalWeightKg)} kg total weight`}
         />
         <KpiCard
-          label="In Transit (Global)"
-          value={stats.inTransit}
-          icon={Globe}
+          label="Intaken Today"
+          value={stats.intakeToday}
+          icon={PackageCheck}
           tone="blue"
-          hint="Currently moving"
+          hint="At Intake, ready to manifest"
         />
         <KpiCard
-          label="Customs / Holds"
-          value={stats.customsHold}
-          icon={AlertTriangle}
+          label="Pending Handovers"
+          value={stats.pendingHandovers}
+          icon={Handshake}
           tone="amber"
-          hint={stats.customsHold ? "Action required" : "All clear"}
+          hint={stats.pendingHandovers ? "Batched — waiting for rider" : "All manifests dispatched"}
         />
         <KpiCard
-          label="Delivered"
-          value={stats.delivered}
-          icon={CheckCircle}
+          label="Completed Dispatches"
+          value={stats.completedDispatches}
+          icon={Truck}
           tone="emerald"
-          hint={`${stats.delayed} delayed`}
+          hint={`${stats.cancelled} cancelled`}
         />
       </div>
 
@@ -106,29 +107,11 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-                Monthly Multimodal Volume
+                Monthly Intake by Platform
               </h3>
               <p className="text-slate-500 dark:text-slate-400 text-xs">
-                Ocean vs Air vs Road vs Rail distribution
+                Parcels intaken per courier platform per month
               </p>
-            </div>
-            <div className="flex items-center space-x-2 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-              <span className="flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-slate-200 inline-block mr-1" />
-                Ocean
-              </span>
-              <span className="flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block mr-1" />
-                Air
-              </span>
-              <span className="flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block mr-1" />
-                Road
-              </span>
-              <span className="flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block mr-1" />
-                Rail
-              </span>
             </div>
           </div>
           <VolumeChart data={volume} />
@@ -137,8 +120,61 @@ export default async function DashboardPage() {
         <ActivityFeed initial={(recentLogs) as TrackingLog[]} />
       </div>
 
-      {/* Shipments table */}
-      <ShipmentsTable shipments={list} />
+      {/* Open batches */}
+      {batches.length > 0 && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+              Open Manifests
+            </h3>
+            <Link
+              href="/handover"
+              className="text-[11px] font-bold text-pink-600 dark:text-pink-400 flex items-center gap-1 hover:underline"
+            >
+              Hand over now <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {batches.map((b) => (
+              <div key={b.id} className="px-5 py-3 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    {b.reference}
+                  </span>
+                  <span className="text-slate-500 dark:text-slate-400 ml-2">
+                    {b.platform} · {b.parcel_count} parcels · {Number(b.total_weight_kg).toFixed(1)} kg
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400">
+                  {b.status === "Ready" ? "Ready for sign-off" : formatDate(b.created_at)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent handovers */}
+      {handovers.length > 0 && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+              Recent Handovers
+            </h3>
+          </div>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {handovers.map((h) => (
+              <div key={h.id} className="px-5 py-3 flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-300">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{h.platform}</span>{" "}
+                  → {h.rider_name} · {h.parcel_count} parcels
+                </span>
+                <span className="text-[10px] text-slate-400">{formatDate(h.handed_over_at)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

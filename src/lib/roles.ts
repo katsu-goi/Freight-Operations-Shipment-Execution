@@ -18,7 +18,7 @@ export function isStaff(role: AppRole): boolean {
   return role === "Admin" || role === "Dispatcher";
 }
 
-/** Staff + Planner — ops visibility and ML draft proposals. */
+/** Staff + Planner — ops visibility and carrier batching drafts. */
 export function isOps(role: AppRole): boolean {
   return isStaff(role) || role === "Planner";
 }
@@ -28,7 +28,12 @@ export function canApproveLoadPlans(role: AppRole): boolean {
   return isStaff(role);
 }
 
-/** Live tracking posts: staff or assigned carrier. */
+/** Final sign-off on carrier handovers. */
+export function canFinalizeHandover(role: AppRole): boolean {
+  return isStaff(role);
+}
+
+/** Live tracking posts: staff or assigned carrier (legacy GPS feed). */
 export function canPostTracking(role: AppRole): boolean {
   return isStaff(role) || role === "Carrier";
 }

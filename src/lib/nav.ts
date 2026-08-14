@@ -1,12 +1,11 @@
 import type { AppRole } from "@/types";
 import {
-  BarChart3,
-  Plus,
-  Boxes,
+  LayoutDashboard,
+  PackageSearch,
+  PackagePlus,
+  ClipboardList,
+  Handshake,
   FileText,
-  Navigation,
-  Layers,
-  Cpu,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,53 +18,44 @@ export interface NavItem {
   badge?: { text: string; kind: "ai" | "live" | "count" };
 }
 
-/** Ordered navigation for the fixed dark sidebar. */
+/** Ordered navigation for the fixed dark sidebar. Local e-commerce hub scope. */
 export const NAV_ITEMS: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Dashboard Overview",
-    icon: BarChart3,
+    label: "Operations Dashboard",
+    icon: LayoutDashboard,
     roles: [],
   },
   {
-    href: "/booking",
-    label: "Booking & AI Routing",
-    icon: Plus,
+    href: "/pickup",
+    label: "Seller Pickup & Intake",
+    icon: PackageSearch,
     roles: ["Admin", "Dispatcher", "Planner"],
-    badge: { text: "AI", kind: "ai" },
   },
   {
-    href: "/consolidation",
-    label: "LCL / FCL Consolidation",
-    icon: Boxes,
+    href: "/booking",
+    label: "Shipment Bookings",
+    icon: PackagePlus,
+    roles: ["Admin", "Dispatcher", "Planner"],
+  },
+  {
+    href: "/manifest",
+    label: "Manifest & Consolidation",
+    icon: ClipboardList,
     roles: ["Admin", "Dispatcher", "Planner"],
     badge: { text: "count", kind: "count" },
   },
   {
-    href: "/load-allocation",
-    label: "ML Load Allocation",
-    icon: Cpu,
-    roles: ["Admin", "Dispatcher", "Planner"],
-    badge: { text: "AI", kind: "ai" },
+    href: "/handover",
+    label: "Carrier Handover & History",
+    icon: Handshake,
+    roles: ["Admin", "Dispatcher", "Planner", "Carrier"],
   },
   {
-    href: "/bol",
-    label: "House & Master BoL",
+    href: "/waybill",
+    label: "Waybill & Document Generator",
     icon: FileText,
     roles: ["Admin", "Dispatcher", "Planner"],
-  },
-  {
-    href: "/tracking",
-    label: "Live Shipment Tracking",
-    icon: Navigation,
-    roles: [],
-    badge: { text: "LIVE", kind: "live" },
-  },
-  {
-    href: "/purchase-orders",
-    label: "PO Integration & SLA",
-    icon: Layers,
-    roles: ["Admin", "Dispatcher", "Planner", "Client"],
   },
 ];
 

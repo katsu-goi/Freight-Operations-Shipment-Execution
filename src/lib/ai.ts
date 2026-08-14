@@ -182,8 +182,7 @@ export async function parseBillOfLading(text: string): Promise<ParsedBillOfLadin
   const system =
     "You extract structured data from unstructured Bill of Lading / shipping " +
     "advice text. Return ONLY a JSON object with keys: billOfLadingNumber, " +
-    "shipperName, consigneeName, vesselName, voyageNo, portOfLoading, " +
-    "portOfDischarge, containerNumber, totalWeightKg (number), " +
+    "shipperName, consigneeName, containerNumber, totalWeightKg (number), " +
     "totalVolumeCbm (number), goodsDescription. Use empty string or 0 when a " +
     "field is absent.";
 

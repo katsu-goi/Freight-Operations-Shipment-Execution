@@ -33,20 +33,6 @@ body {
   background: transparent;
 }
 
-/* Leaflet map container needs an explicit height + z-index below the header */
-.leaflet-container {
-  height: 100%;
-  width: 100%;
-  z-index: 0;
-  background: #e2e8f0;
-}
-
-/* Dark-mode filter for the OpenStreetMap tile layer */
-.dark .leaflet-tile-pane {
-  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg)
-    saturate(0.3) brightness(0.7);
-}
-
 /* Dark-mode scrollbar thumb */
 .dark .scroll-thin::-webkit-scrollbar-thumb {
   background: #475569;

@@ -21,7 +21,7 @@ export default function Header({
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
     const q = term.trim();
-    if (q) router.push(`/tracking?q=${encodeURIComponent(q)}`);
+    if (q) router.push(`/booking?q=${encodeURIComponent(q)}`);
   }
 
   const initials = (profile.full_name ?? profile.email ?? "U")
@@ -39,7 +39,7 @@ export default function Header({
           type="text"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Search Shipment ID, PO #, Container or Client..."
+          placeholder="Search Parcel Ref, Tracking #, Client or Recipient..."
           className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
         />
       </form>

@@ -1,7 +1,7 @@
 /**
  * Generated-style Supabase schema types.
- * Mirrors supabase/migrations/0001_initial_schema.sql. Keep in sync when the
- * DDL changes (or regenerate with `supabase gen types typescript`).
+ * Mirrors supabase/migrations (0001 + 0005). Keep in sync when the DDL
+ * changes (or regenerate with `supabase gen types typescript`).
  */
 
 export type AppRole =
@@ -11,12 +11,25 @@ export type AppRole =
   | "Carrier"
   | "Client";
 export type TransportMode = "Ocean" | "Air" | "Road" | "Rail";
+export type DeliveryPlatform =
+  | "J&T Express"
+  | "Flash Express"
+  | "LBC Express"
+  | "GoGo Xpress"
+  | "Shopee Drop-Off"
+  | "Lazada Drop-Off"
+  | "TikTok Shop Drop-Off"
+  | "Custom Partner";
 export type ShipmentStatus =
   | "Booked"
+  | "Intake"
+  | "Batched"
+  | "Handed Over"
+  | "Cancelled"
+  | "Archived"
   | "In Transit"
   | "Customs Hold"
   | "Delivered"
-  | "Cancelled"
   | "Delayed";
 export type ContainerStatus =
   | "Planned"
@@ -34,6 +47,13 @@ export type PoStatus =
   | "Cancelled";
 export type LoadType = "LCL" | "FCL";
 export type LoadPlanStatus = "Draft" | "Approved" | "Rejected";
+export type PickupStatus =
+  | "Scheduled"
+  | "In Transit"
+  | "Received"
+  | "No Show"
+  | "Cancelled";
+export type BatchStatus = "Draft" | "Ready" | "Handed Over";
 
 export interface Database {
   public: {
@@ -70,6 +90,86 @@ export interface Database {
           },
         ];
       };
+      sellers: {
+        Row: {
+          id: string;
+          reference: string;
+          name: string;
+          contact_person: string | null;
+          phone: string | null;
+          email: string | null;
+          address: string | null;
+          pickup_frequency: string | null;
+          notes: string | null;
+          is_active: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference: string;
+          name: string;
+          contact_person?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          pickup_frequency?: string | null;
+          notes?: string | null;
+          is_active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["sellers"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "sellers_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      pickup_requests: {
+        Row: {
+          id: string;
+          reference: string;
+          seller_id: string;
+          scheduled_at: string;
+          status: PickupStatus;
+          parcel_count: number;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference: string;
+          seller_id: string;
+          scheduled_at: string;
+          status?: PickupStatus;
+          parcel_count?: number;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["pickup_requests"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "pickup_requests_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "sellers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       shipments: {
         Row: {
           id: string;
@@ -86,7 +186,6 @@ export interface Database {
           eta: string | null;
           container_no: string | null;
           cargo_type: string | null;
-          vessel: string | null;
           carrier: string | null;
           po_number: string | null;
           weight_kg: number;
@@ -97,6 +196,12 @@ export interface Database {
           current_lat: number | null;
           current_lng: number | null;
           progress: number;
+          platform: DeliveryPlatform;
+          seller_id: string | null;
+          service_type: string;
+          cod_amount: number;
+          cancel_reason: string | null;
+          archived_at: string | null;
           client_id: string | null;
           carrier_id: string | null;
           created_by: string | null;
@@ -112,13 +217,12 @@ export interface Database {
           consignee?: string | null;
           origin: string;
           destination: string;
-          mode: TransportMode;
+          mode?: TransportMode;
           status?: ShipmentStatus;
           etd?: string | null;
           eta?: string | null;
           container_no?: string | null;
           cargo_type?: string | null;
-          vessel?: string | null;
           carrier?: string | null;
           po_number?: string | null;
           weight_kg?: number;
@@ -129,6 +233,12 @@ export interface Database {
           current_lat?: number | null;
           current_lng?: number | null;
           progress?: number;
+          platform?: DeliveryPlatform;
+          seller_id?: string | null;
+          service_type?: string;
+          cod_amount?: number;
+          cancel_reason?: string | null;
+          archived_at?: string | null;
           client_id?: string | null;
           carrier_id?: string | null;
           created_by?: string | null;
@@ -149,6 +259,13 @@ export interface Database {
             columns: ["carrier_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shipments_seller_id_fkey";
+            columns: ["seller_id"];
+            isOneToOne: false;
+            referencedRelation: "sellers";
             referencedColumns: ["id"];
           },
           {
@@ -210,7 +327,6 @@ export interface Database {
           current_weight_kg: number;
           origin: string | null;
           destination: string | null;
-          vessel: string | null;
           status: ContainerStatus;
           created_by: string | null;
           created_at: string;
@@ -227,7 +343,6 @@ export interface Database {
           current_weight_kg?: number;
           origin?: string | null;
           destination?: string | null;
-          vessel?: string | null;
           status?: ContainerStatus;
           created_by?: string | null;
           created_at?: string;
@@ -277,11 +392,6 @@ export interface Database {
           shipper_name: string | null;
           consignee_name: string | null;
           notify_party: string | null;
-          vessel_name: string | null;
-          voyage_no: string | null;
-          port_of_loading: string | null;
-          port_of_discharge: string | null;
-          place_of_delivery: string | null;
           container_number: string | null;
           seal_number: string | null;
           total_weight_kg: number | null;
@@ -302,11 +412,6 @@ export interface Database {
           shipper_name?: string | null;
           consignee_name?: string | null;
           notify_party?: string | null;
-          vessel_name?: string | null;
-          voyage_no?: string | null;
-          port_of_loading?: string | null;
-          port_of_discharge?: string | null;
-          place_of_delivery?: string | null;
           container_number?: string | null;
           seal_number?: string | null;
           total_weight_kg?: number | null;
@@ -461,22 +566,7 @@ export interface Database {
           approved_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["load_plans"]["Insert"]>;
-        Relationships: [
-          {
-            foreignKeyName: "load_plans_created_by_fkey";
-            columns: ["created_by"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "load_plans_approved_by_fkey";
-            columns: ["approved_by"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       load_plan_items: {
         Row: {
@@ -509,6 +599,123 @@ export interface Database {
             columns: ["shipment_id"];
             isOneToOne: false;
             referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      carrier_batches: {
+        Row: {
+          id: string;
+          reference: string;
+          platform: DeliveryPlatform;
+          status: BatchStatus;
+          parcel_count: number;
+          total_weight_kg: number;
+          rider_name: string | null;
+          rider_phone: string | null;
+          handover_notes: string | null;
+          handed_over_by: string | null;
+          handed_over_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference: string;
+          platform: DeliveryPlatform;
+          status?: BatchStatus;
+          parcel_count?: number;
+          total_weight_kg?: number;
+          rider_name?: string | null;
+          rider_phone?: string | null;
+          handover_notes?: string | null;
+          handed_over_by?: string | null;
+          handed_over_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["carrier_batches"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "carrier_batches_handed_over_by_fkey";
+            columns: ["handed_over_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      carrier_batch_items: {
+        Row: {
+          id: string;
+          batch_id: string;
+          shipment_id: string;
+          sequence_no: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          batch_id: string;
+          shipment_id: string;
+          sequence_no?: number;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["carrier_batch_items"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "carrier_batch_items_batch_id_fkey";
+            columns: ["batch_id"];
+            isOneToOne: false;
+            referencedRelation: "carrier_batches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "carrier_batch_items_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      handovers: {
+        Row: {
+          id: string;
+          batch_id: string | null;
+          platform: DeliveryPlatform;
+          rider_name: string;
+          rider_phone: string | null;
+          parcel_count: number;
+          notes: string | null;
+          handed_over_by: string | null;
+          handed_over_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          batch_id?: string | null;
+          platform: DeliveryPlatform;
+          rider_name: string;
+          rider_phone?: string | null;
+          parcel_count?: number;
+          notes?: string | null;
+          handed_over_by?: string | null;
+          handed_over_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["handovers"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "handovers_batch_id_fkey";
+            columns: ["batch_id"];
+            isOneToOne: false;
+            referencedRelation: "carrier_batches";
             referencedColumns: ["id"];
           },
         ];
@@ -599,12 +806,15 @@ export interface Database {
     Enums: {
       app_role: AppRole;
       transport_mode: TransportMode;
+      delivery_platform: DeliveryPlatform;
       shipment_status: ShipmentStatus;
       container_status: ContainerStatus;
       bol_type: BolType;
       po_status: PoStatus;
       load_type: LoadType;
       load_plan_status: LoadPlanStatus;
+      pickup_status: PickupStatus;
+      batch_status: BatchStatus;
     };
     CompositeTypes: {
       [_ in never]: never;

@@ -10,6 +10,7 @@ export {
   isOps,
   canApproveLoadPlans,
   canPostTracking,
+  canFinalizeHandover,
   OPS_ROLES,
   STAFF_ROLES,
 } from "@/lib/roles";

@@ -5,6 +5,8 @@ import type { Shipment } from "@/types";
 export interface ShipmentQuery {
   q?: string;
   status?: string;
+  platform?: string;
+  includeArchived?: boolean;
   page?: number;
   perPage?: number;
 }
@@ -17,8 +19,9 @@ export interface Paged<T> {
 }
 
 /**
- * Paginated, searchable shipment listing. RLS-scoped to the caller.
- * Memoized per request via React `cache()` so parallel RSC reads are deduped.
+ * Paginated, searchable parcel listing (Batched → Intake → history).
+ * Archived parcels are hidden unless explicitly requested.
+ * RLS-scoped to the caller; memoized per request via React `cache()`.
  */
 export const listShipments = cache(
   async (opts: ShipmentQuery = {}): Promise<Paged<Shipment>> => {
@@ -28,11 +31,15 @@ export const listShipments = cache(
     const from = (page - 1) * perPage;
 
     let query = supabase.from("shipments").select("*", { count: "exact" });
+    if (!opts.includeArchived) query = query.is("archived_at", null);
     if (opts.status) query = query.eq("status", opts.status as Shipment["status"]);
+    if (opts.platform) {
+      query = query.eq("platform", opts.platform as Shipment["platform"]);
+    }
     if (opts.q && opts.q.trim()) {
       const q = opts.q.trim();
       query = query.or(
-        `reference.ilike.%${q}%,tracking_number.ilike.%${q}%,client_name.ilike.%${q}%,po_number.ilike.%${q}%`,
+        `reference.ilike.%${q}%,tracking_number.ilike.%${q}%,client_name.ilike.%${q}%,consignee.ilike.%${q}%`,
       );
     }
     const { data, count } = await query
@@ -65,7 +72,6 @@ export const listShipmentsForBol = cache(
       | "reference"
       | "shipper"
       | "consignee"
-      | "vessel"
       | "origin"
       | "destination"
       | "container_no"
@@ -77,7 +83,7 @@ export const listShipmentsForBol = cache(
     const { data } = await supabase
       .from("shipments")
       .select(
-        "id, reference, shipper, consignee, vessel, origin, destination, container_no, weight_kg, volume_cbm",
+        "id, reference, shipper, consignee, origin, destination, container_no, weight_kg, volume_cbm",
       )
       .order("created_at", { ascending: false });
     return data ?? [];

@@ -19,11 +19,6 @@ const EMPTY: BolInput = {
   shipperName: "",
   consigneeName: "",
   notifyParty: "",
-  vesselName: "",
-  voyageNo: "",
-  portOfLoading: "",
-  portOfDischarge: "",
-  placeOfDelivery: "",
   containerNumber: "",
   sealNumber: "",
   totalWeightKg: 0,
@@ -36,7 +31,7 @@ export default function BolGenerator({
   shipments,
   aiEnabled,
 }: {
-  shipments: Pick<Shipment, "id" | "reference" | "shipper" | "consignee" | "vessel" | "origin" | "destination" | "container_no" | "weight_kg" | "volume_cbm">[];
+  shipments: Pick<Shipment, "id" | "reference" | "shipper" | "consignee" | "origin" | "destination" | "container_no" | "weight_kg" | "volume_cbm">[];
   aiEnabled: boolean;
 }) {
   const [form, setForm] = useState<BolInput>(EMPTY);
@@ -64,9 +59,6 @@ export default function BolGenerator({
       shipmentId: s.id,
       shipperName: s.shipper ?? f.shipperName,
       consigneeName: s.consignee ?? f.consigneeName,
-      vesselName: s.vessel ?? f.vesselName,
-      portOfLoading: s.origin ?? f.portOfLoading,
-      portOfDischarge: s.destination ?? f.portOfDischarge,
       containerNumber: s.container_no ?? f.containerNumber,
       totalWeightKg: Number(s.weight_kg ?? f.totalWeightKg),
       totalVolumeCbm: Number(s.volume_cbm ?? f.totalVolumeCbm),
@@ -91,10 +83,6 @@ export default function BolGenerator({
         bolNumber: p.billOfLadingNumber || f.bolNumber,
         shipperName: p.shipperName || f.shipperName,
         consigneeName: p.consigneeName || f.consigneeName,
-        vesselName: p.vesselName || f.vesselName,
-        voyageNo: p.voyageNo || f.voyageNo,
-        portOfLoading: p.portOfLoading || f.portOfLoading,
-        portOfDischarge: p.portOfDischarge || f.portOfDischarge,
         containerNumber: p.containerNumber || f.containerNumber,
         totalWeightKg: p.totalWeightKg || f.totalWeightKg,
         totalVolumeCbm: p.totalVolumeCbm || f.totalVolumeCbm,
@@ -211,10 +199,6 @@ export default function BolGenerator({
                 <option>Prepaid</option><option>Collect</option>
               </select>
             </div>
-            <div><label className={label}>Vessel</label><input className={field} value={form.vesselName} onChange={(e) => set("vesselName", e.target.value)} /></div>
-            <div><label className={label}>Voyage no.</label><input className={field} value={form.voyageNo} onChange={(e) => set("voyageNo", e.target.value)} /></div>
-            <div><label className={label}>Port of loading</label><input className={field} value={form.portOfLoading} onChange={(e) => set("portOfLoading", e.target.value)} /></div>
-            <div><label className={label}>Port of discharge</label><input className={field} value={form.portOfDischarge} onChange={(e) => set("portOfDischarge", e.target.value)} /></div>
             <div><label className={label}>Container no.</label><input className={field} value={form.containerNumber} onChange={(e) => set("containerNumber", e.target.value)} /></div>
             <div><label className={label}>Seal no.</label><input className={field} value={form.sealNumber} onChange={(e) => set("sealNumber", e.target.value)} /></div>
             <div><label className={label}>Weight (kg)</label><input type="number" className={field} value={form.totalWeightKg || ""} onChange={(e) => set("totalWeightKg", Number(e.target.value))} /></div>
@@ -259,9 +243,6 @@ export default function BolGenerator({
             <div className="cell"><div className="label">Shipper</div><div className="value">{form.shipperName || "—"}</div></div>
             <div className="cell"><div className="label">Consignee</div><div className="value">{form.consigneeName || "—"}</div></div>
             <div className="cell"><div className="label">Notify Party</div><div className="value">{form.notifyParty || "—"}</div></div>
-            <div className="cell"><div className="label">Vessel / Voyage</div><div className="value">{form.vesselName || "—"} {form.voyageNo && `/ ${form.voyageNo}`}</div></div>
-            <div className="cell"><div className="label">Port of Loading</div><div className="value">{form.portOfLoading || "—"}</div></div>
-            <div className="cell"><div className="label">Port of Discharge</div><div className="value">{form.portOfDischarge || "—"}</div></div>
             <div className="cell"><div className="label">Container No.</div><div className="value">{form.containerNumber || "—"}</div></div>
             <div className="cell"><div className="label">Seal No.</div><div className="value">{form.sealNumber || "—"}</div></div>
             <div className="cell"><div className="label">Gross Weight</div><div className="value">{form.totalWeightKg ? `${form.totalWeightKg.toLocaleString()} kg` : "—"}</div></div>

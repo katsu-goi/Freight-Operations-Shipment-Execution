@@ -8,11 +8,11 @@ import { bolSchema, type BolInput } from "@/lib/validation/schemas";
 
 export type { BolInput };
 
-/** Insert a House or Master Bill of Lading. Staff only. */
+/** Insert a House or Master Waybill / Bill of Lading. Staff only. */
 export async function createBillOfLading(
   input: BolInput,
 ): Promise<ActionResult<{ id: string }>> {
-  return runAction("bol.createBillOfLading", bolSchema, input, async (form) => {
+  return runAction("waybill.createBillOfLading", bolSchema, input, async (form) => {
     const profile = await requireRole(["Admin", "Dispatcher"]);
     const supabase = await createClient();
 
@@ -25,11 +25,6 @@ export async function createBillOfLading(
         shipper_name: form.shipperName,
         consignee_name: form.consigneeName,
         notify_party: form.notifyParty,
-        vessel_name: form.vesselName,
-        voyage_no: form.voyageNo,
-        port_of_loading: form.portOfLoading,
-        port_of_discharge: form.portOfDischarge,
-        place_of_delivery: form.placeOfDelivery,
         container_number: form.containerNumber,
         seal_number: form.sealNumber,
         total_weight_kg: form.totalWeightKg,
@@ -43,7 +38,7 @@ export async function createBillOfLading(
       .single();
 
     if (error) return fail(error.message);
-    revalidatePath("/bol");
+    revalidatePath("/waybill");
     return ok({ id: data.id });
   });
 }
