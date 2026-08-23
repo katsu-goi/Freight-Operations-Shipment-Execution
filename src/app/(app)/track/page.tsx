@@ -104,9 +104,7 @@ export default async function TrackPage({
                 <strong>{formatDateTime(parcel.expected_delivery_date).split(" — ")[0]}</strong>
               </p>
             )}
-            {(profile.role === "Admin" ||
-              profile.role === "Dispatcher" ||
-              profile.role === "Planner") && (
+            {profile.role === "Admin" && (
               <Link
                 href={`/parcels/${parcel.id}`}
                 className="mt-4 inline-block text-xs font-bold text-pink-400 hover:text-pink-300 underline"

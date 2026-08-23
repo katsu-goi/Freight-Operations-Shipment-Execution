@@ -13,7 +13,7 @@ export const listCustomers = cache(async (): Promise<CustomerRow[]> => {
     supabase
       .from("profiles")
       .select("id, full_name, email, role, is_active, created_at")
-      .in("role", ["Customer", "Client"])
+      .in("role", ["Customer"])
       .order("created_at", { ascending: false }),
     supabase.from("shipments").select("id, client_id, status"),
   ]);

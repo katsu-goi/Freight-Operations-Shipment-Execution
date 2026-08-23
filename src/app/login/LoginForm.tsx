@@ -8,8 +8,6 @@ import {
   LogIn,
   UserPlus,
   ShieldCheck,
-  Radar,
-  Truck,
   Building2,
   Boxes,
   Zap,
@@ -19,15 +17,12 @@ import { signIn, signUp, quickLogin, type AuthState } from "./actions";
 import type { AppRole } from "@/types";
 
 /** Roles available for self-registration. Staff roles are admin-provisioned. */
-const ROLES: AppRole[] = ["Customer", "Client", "Carrier"];
+const ROLES: AppRole[] = ["Customer"];
 
 const QUICK_ROLES: { role: AppRole; icon: LucideIcon; hint: string }[] = [
   { role: "Admin", icon: ShieldCheck, hint: "Full access" },
   { role: "Seller", icon: Building2, hint: "Send parcels" },
   { role: "Customer", icon: Boxes, hint: "Receive parcels" },
-  { role: "Dispatcher", icon: Radar, hint: "Operations" },
-  { role: "Planner", icon: Boxes, hint: "Carrier batching drafts" },
-  { role: "Client", icon: Building2, hint: "Legacy recipient" },
 ];
 
 function SubmitButton({ mode }: { mode: "signin" | "signup" }) {
@@ -231,7 +226,7 @@ export default function LoginForm() {
       </div>
 
       <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
-        Role-based access · Admin · Dispatcher · Carrier · Client
+        Role-based access · Admin · Seller · Customer
       </p>
     </div>
   );

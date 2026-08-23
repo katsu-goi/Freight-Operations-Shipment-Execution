@@ -16,6 +16,7 @@ describe("rbac permission matrix", () => {
     expect(can("Admin", "settings.manage")).toBe(true);
     expect(can("Admin", "parcels.updateStatus")).toBe(true);
     expect(can("Admin", "parcels.create")).toBe(true);
+    expect(can("Admin", "hubs.manage")).toBe(true);
   });
 
   it("sellers can create parcels but never manage the system", () => {
@@ -25,13 +26,7 @@ describe("rbac permission matrix", () => {
     expect(can("Seller", "audit.view")).toBe(false);
     expect(can("Seller", "settings.manage")).toBe(false);
     expect(can("Seller", "hubs.manage")).toBe(false);
-  });
-
-  it("sellers cannot change parcel status — staff only", () => {
     expect(can("Seller", "parcels.updateStatus")).toBe(false);
-    expect(can("Customer", "parcels.updateStatus")).toBe(false);
-    expect(can("Dispatcher", "parcels.updateStatus")).toBe(true);
-    expect(can("Planner", "parcels.updateStatus")).toBe(true);
   });
 
   it("customers have no administrative permissions at all", () => {
@@ -39,18 +34,22 @@ describe("rbac permission matrix", () => {
       "sellers.manage",
       "customers.view",
       "parcels.viewAll",
+      "parcels.updateStatus",
       "hubs.manage",
       "audit.view",
       "settings.manage",
-      "parcels.updateStatus",
+      "parcels.create",
     ] as const;
     for (const perm of adminOnly) {
       expect(can("Customer", perm)).toBe(false);
-      expect(can("Client", perm)).toBe(false);
     }
-    // Customers also cannot create parcels.
-    expect(can("Customer", "parcels.create")).toBe(false);
-    expect(can("Client", "parcels.create")).toBe(false);
+  });
+
+  it("carriers have no administrative permissions", () => {
+    expect(parseAppRole("Carrier")).toBeNull();
+    expect(roleTier("Admin")).toBe("ADMIN");
+    expect(roleTier("Seller")).toBe("SELLER");
+    expect(roleTier("Customer")).toBe("CUSTOMER");
   });
 });
 
@@ -59,27 +58,22 @@ describe("role tiers & predicates", () => {
     expect(roleTier("Admin")).toBe("ADMIN");
     expect(roleTier("Seller")).toBe("SELLER");
     expect(roleTier("Customer")).toBe("CUSTOMER");
-    expect(roleTier("Client")).toBe("CUSTOMER"); // legacy alias
-    expect(roleTier("Carrier")).toBe("CARRIER");
-    expect(roleTier("Dispatcher")).toBe("STAFF");
   });
 
-  it("customer predicate treats Client as legacy alias", () => {
+  it("predicates are exact-match on the canonical roles", () => {
     expect(isCustomerRole("Customer")).toBe(true);
-    expect(isCustomerRole("Client")).toBe(true);
     expect(isCustomerRole("Seller")).toBe(false);
-  });
-
-  it("seller/staff/admin predicates", () => {
     expect(isSellerRole("Seller")).toBe(true);
     expect(isAdminRole("Admin")).toBe(true);
-    expect(isStaffRole("Planner")).toBe(true);
-    expect(isStaffRole("Seller")).toBe(false);
-  });
-
-  it("parseAppRole accepts the new roles and rejects junk", () => {
-    expect(parseAppRole("Seller")).toBe("Seller");
-    expect(parseAppRole("Customer")).toBe("Customer");
+    expect(isStaffRole("Admin")).toBe(true);
+    // Removed roles are rejected outright.
+    for (const r of ["Admin", "Seller", "Customer"] as const) {
+      expect(parseAppRole(r)).toBe(r);
+    }
+    expect(parseAppRole("Dispatcher")).toBeNull();
+    expect(parseAppRole("Planner")).toBeNull();
+    expect(parseAppRole("Client")).toBeNull();
+    expect(parseAppRole("Carrier")).toBeNull();
     expect(parseAppRole("SuperAdmin")).toBeNull();
   });
 });

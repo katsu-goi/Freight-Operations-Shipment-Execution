@@ -35,7 +35,7 @@ export async function createBooking(
   input: BookingFields,
 ): Promise<ActionResult<{ reference: string; shipmentId: string }>> {
   return runAction("booking.createBooking", bookingSchema, input, async (form) => {
-    const profile = await requireRole(["Admin", "Dispatcher", "Planner"]);
+    const profile = await requireRole(["Admin"]);
     const supabase = await createClient();
 
     let lastError: string | null = null;
@@ -101,7 +101,7 @@ export async function cancelBooking(
     shipmentId,
     cancelReason,
   }, async ({ cancelReason: reason }) => {
-    await requireRole(["Admin", "Dispatcher", "Planner"]);
+    await requireRole(["Admin"]);
     const supabase = await createClient();
     const { error } = await supabase
       .from("shipments")
@@ -121,7 +121,7 @@ export async function archiveBooking(shipmentId: string): Promise<ActionResult> 
     z.object({ shipmentId: z.string().uuid() }),
     { shipmentId },
     async () => {
-      await requireRole(["Admin", "Dispatcher", "Planner"]);
+      await requireRole(["Admin"]);
       const supabase = await createClient();
       const { error } = await supabase
         .from("shipments")

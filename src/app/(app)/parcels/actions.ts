@@ -30,7 +30,15 @@ import { serverLog } from "@/lib/server/log";
 /** Register a new parcel. Sellers create their own; staff may pick a seller. */
 export async function createParcel(
   input: unknown,
-): Promise<ActionResult<{ id: string; trackingNumber: string; reference: string }>> {
+): Promise<
+  ActionResult<{
+    id: string;
+    trackingNumber: string;
+    reference: string;
+    /** Non-fatal notice, e.g. recipient email didn't match an account. */
+    warning?: string;
+  }>
+> {
   return runAction("parcels.create", parcelCreateSchema, input, async (form) => {
     const check = await checkPermission("parcels.create");
     if ("error" in check) return fail("You are not allowed to create parcels");
@@ -68,7 +76,7 @@ export async function createParcel(
         .from("profiles")
         .select("id")
         .eq("email", form.customerEmail)
-        .in("role", ["Customer", "Client"])
+        .eq("role", "Customer")
         .maybeSingle();
       clientId = customer?.id ?? null;
     }
@@ -122,12 +130,31 @@ export async function createParcel(
     });
 
     serverLog.info("parcels.create", { tracking_number: data.tracking_number });
+
+    // Sellers may attach a REGISTERED customer account by email via the
+    // authorization-checked RPC (staff already resolved client_id directly).
+    let warning: string | undefined;
+    if (isSellerRole(profile.role) && form.customerEmail) {
+      const attach = await supabase.rpc("attach_parcel_customer", {
+        p_parcel_id: data.id,
+        p_customer_email: form.customerEmail,
+      });
+      const result = attach.data as { ok: boolean; error?: string } | null;
+      if (attach.error || !result?.ok) {
+        warning =
+          result?.error ??
+          "Parcel registered, but the recipient account could not be attached.";
+        serverLog.warn("parcels.attachCustomer", { err: warning });
+      }
+    }
+
     revalidatePath("/parcels");
     revalidatePath("/dashboard");
     return ok({
       id: data.id,
       trackingNumber: data.tracking_number ?? "",
       reference: data.reference,
+      ...(warning ? { warning } : {}),
     });
   });
 }

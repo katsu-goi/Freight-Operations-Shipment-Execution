@@ -29,6 +29,7 @@ export default function ParcelForm({
   const [created, setCreated] = useState<{
     trackingNumber: string;
     id: string;
+    warning?: string;
   } | null>(null);
 
   const isSeller = role === "Seller";
@@ -38,6 +39,7 @@ export default function ParcelForm({
     const formData = new FormData(form);
     const payload = {
       sellerId: isSeller ? undefined : String(formData.get("sellerId") ?? "") || undefined,
+      customerEmail: String(formData.get("customerEmail") ?? ""),
       consignee: String(formData.get("consignee") ?? ""),
       recipientPhone: String(formData.get("recipientPhone") ?? ""),
       destination: String(formData.get("destination") ?? ""),
@@ -55,7 +57,11 @@ export default function ParcelForm({
       const res = await createParcel(payload);
       if (res.ok && res.value) {
         toast.success(`Parcel ${res.value.trackingNumber} registered`);
-        setCreated({ trackingNumber: res.value.trackingNumber, id: res.value.id });
+        setCreated({
+          trackingNumber: res.value.trackingNumber,
+          id: res.value.id,
+          warning: res.value.warning,
+        });
         router.refresh();
       } else if (!res.ok) {
         setError(res.error);
@@ -76,6 +82,11 @@ export default function ParcelForm({
         <p className="mt-4 inline-block font-mono text-xl font-black tracking-wider text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 rounded-xl px-6 py-3">
           {created.trackingNumber}
         </p>
+        {created.warning && (
+          <p className="mt-4 mx-auto max-w-sm text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg px-3 py-2">
+            {created.warning} The parcel was still registered — you can ask an admin to link the recipient later.
+          </p>
+        )}
         <div className="mt-6 flex items-center justify-center gap-3">
           <button
             onClick={() => setCreated(null)}
@@ -144,6 +155,22 @@ export default function ParcelForm({
             className={inputCls}
             placeholder="+63 917 000 0000"
           />
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="customerEmail">
+            Recipient Account Email
+          </label>
+          <input
+            id="customerEmail"
+            name="customerEmail"
+            type="email"
+            className={inputCls}
+            placeholder="customer@email.com (optional)"
+          />
+          <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+            If the recipient has a registered account, they&apos;ll automatically see this parcel and get status notifications.
+          </p>
         </div>
 
         <div>

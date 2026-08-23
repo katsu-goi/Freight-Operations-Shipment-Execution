@@ -4,14 +4,7 @@
  * changes (or regenerate with `supabase gen types typescript`).
  */
 
-export type AppRole =
-  | "Admin"
-  | "Seller"
-  | "Customer"
-  | "Dispatcher"
-  | "Planner"
-  | "Carrier"
-  | "Client";
+export type AppRole = "Admin" | "Seller" | "Customer";
 export type TransportMode = "Ocean" | "Air" | "Road" | "Rail";
 export type DeliveryPlatform =
   | "J&T Express"
@@ -908,6 +901,13 @@ export interface Database {
           p_location?: string | null;
           p_hub_id?: string | null;
           p_description?: string | null;
+        };
+        Returns: { ok: boolean; error?: string | null };
+      };
+      attach_parcel_customer: {
+        Args: {
+          p_parcel_id: string;
+          p_customer_email: string;
         };
         Returns: { ok: boolean; error?: string | null };
       };

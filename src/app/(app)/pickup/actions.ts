@@ -23,7 +23,7 @@ export async function createSeller(
   input: unknown,
 ): Promise<ActionResult<{ id: string; reference: string }>> {
   return runAction("pickup.createSeller", sellerSchema, input, async (form) => {
-    const profile = await requireRole(["Admin", "Dispatcher", "Planner"]);
+    const profile = await requireRole(["Admin"]);
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("sellers")
@@ -51,7 +51,7 @@ export async function createPickup(
   input: unknown,
 ): Promise<ActionResult<{ id: string; reference: string }>> {
   return runAction("pickup.createPickup", pickupSchema, input, async (form) => {
-    await requireRole(["Admin", "Dispatcher", "Planner"]);
+    await requireRole(["Admin"]);
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("pickup_requests")
@@ -82,7 +82,7 @@ export async function updatePickupStatus(
     pickupId,
     status,
   }, async ({ status: s }) => {
-    await requireRole(["Admin", "Dispatcher", "Planner"]);
+    await requireRole(["Admin"]);
     const supabase = await createClient();
     const { error } = await supabase
 .from("pickup_requests")
@@ -104,7 +104,7 @@ export async function quickIntake(
   input: unknown,
 ): Promise<ActionResult<{ reference: string }>> {
   return runAction("pickup.quickIntake", parcelIntakeSchema, input, async (form) => {
-    const profile = await requireRole(["Admin", "Dispatcher", "Planner"]);
+    const profile = await requireRole(["Admin"]);
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("shipments")

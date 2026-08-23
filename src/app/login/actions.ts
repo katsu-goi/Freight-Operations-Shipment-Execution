@@ -14,9 +14,9 @@ export interface AuthState {
 /** Shared password for the one-click demo accounts. */
 const DEMO_PASSWORD = "demo123456";
 
-/** Roles a new user may self-assign at registration. Staff roles are
+/** Roles a new user may self-assign at registration. Staff/Seller roles are
  *  provisioned by an administrator only — never via self-signup. */
-const SELF_SIGNUP_ROLES: AppRole[] = ["Customer", "Client", "Carrier"];
+const SELF_SIGNUP_ROLES: AppRole[] = ["Customer"];
 
 /** One-click demo login: enabled in development, production requires opt-in. */
 const QUICK_LOGIN_ENABLED =
@@ -28,12 +28,8 @@ const DEMO_USERS: Record<
   { email: string; fullName: string }
 > = {
   Admin: { email: "admin@freightos.demo", fullName: "Sol, Emmanuel M." },
-  Dispatcher: { email: "dispatcher@freightos.demo", fullName: "Munoz, Arnold M." },
-  Planner: { email: "planner@freightos.demo", fullName: "Pace, Emmanuel Jason D." },
-  Carrier: { email: "carrier@freightos.demo", fullName: "Sogale, Christian Jericho C." },
   Seller: { email: "seller@freightos.demo", fullName: "Amora, Daniella Sophia P." },
   Customer: { email: "customer@freightos.demo", fullName: "Reyes, Miguel A." },
-  Client: { email: "client@freightos.demo", fullName: "Dela Cruz, Juan" },
 };
 
 export async function signIn(
@@ -58,9 +54,9 @@ export async function signUp(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("fullName") ?? "");
-  const requested = String(formData.get("role") ?? "Client") as AppRole;
-  // Self-signup may only claim an untrusted role. Anything else → Client.
-  const role = SELF_SIGNUP_ROLES.includes(requested) ? requested : "Client";
+  const requested = String(formData.get("role") ?? "Customer") as AppRole;
+  // Self-signup may only claim an untrusted role. Anything else → Customer.
+  const role = SELF_SIGNUP_ROLES.includes(requested) ? requested : "Customer";
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({

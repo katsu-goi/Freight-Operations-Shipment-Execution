@@ -1,21 +1,7 @@
 import type { AppRole } from "@/types";
-import {
-  isAdminRole,
-  isStaffRole,
-  isOpsStaffRole,
-  isSellerRole,
-  isCustomerRole,
-} from "@/lib/rbac";
+import { isStaffRole, isOpsStaffRole } from "@/lib/rbac";
 
-export const ALL_ROLES: AppRole[] = [
-  "Admin",
-  "Seller",
-  "Customer",
-  "Dispatcher",
-  "Planner",
-  "Carrier",
-  "Client",
-];
+export const ALL_ROLES: AppRole[] = ["Admin", "Seller", "Customer"];
 
 export function parseAppRole(value: unknown): AppRole | null {
   if (typeof value !== "string") return null;
@@ -36,17 +22,16 @@ export {
 export type { Permission } from "@/lib/rbac";
 
 /** Legacy aliases — kept so existing call sites continue to work.
- *  Semantics match the database helpers exactly:
- *  is_staff() = Admin/Dispatcher; is_ops() adds Planner. */
+ *  Semantics match the database helpers exactly (Admin-only staff). */
 
-/** Admin + Dispatcher — full operational writes. */
+/** Admin — full operational writes. */
 export function isStaff(role: AppRole): boolean {
-  return role === "Admin" || role === "Dispatcher";
+  return role === "Admin";
 }
 
-/** Staff + Planner — ops visibility and carrier batching drafts. */
+/** Admin (historically included Planner; ops roles were consolidated). */
 export function isOps(role: AppRole): boolean {
-  return isStaff(role) || role === "Planner";
+  return isStaffRole(role);
 }
 
 /** Maker–checker: only staff may approve/reject load plans. */
@@ -56,13 +41,13 @@ export function canApproveLoadPlans(role: AppRole): boolean {
 
 /** Final sign-off on carrier handovers. */
 export function canFinalizeHandover(role: AppRole): boolean {
-  return role === "Admin" || role === "Dispatcher";
+  return isStaff(role);
 }
 
-/** Live tracking posts: staff or assigned carrier (legacy GPS feed). */
+/** Live tracking posts (legacy GPS feed): admin only. */
 export function canPostTracking(role: AppRole): boolean {
-  return isStaff(role) || role === "Carrier";
+  return isStaff(role);
 }
 
-export const OPS_ROLES: AppRole[] = ["Admin", "Dispatcher", "Planner"];
-export const STAFF_ROLES: AppRole[] = ["Admin", "Dispatcher"];
+export const OPS_ROLES: AppRole[] = ["Admin"];
+export const STAFF_ROLES: AppRole[] = ["Admin"];

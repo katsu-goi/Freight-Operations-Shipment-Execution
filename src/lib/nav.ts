@@ -29,66 +29,51 @@ export interface NavItem {
 
 /**
  * Role-specific navigation.
- * Admin/staff see the full operations suite; Sellers and Customers only see
- * their own scoped entries. Visibility is cosmetic — every route re-checks
+ * Admin sees the full operations suite; Sellers and Customers only see their
+ * own scoped entries. Visibility is cosmetic — every route re-checks
  * permissions server-side (requirePermission / RLS).
  */
 export const NAV_ITEMS: NavItem[] = [
   // ---- Everyone ----
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: [] },
+  { href: "/parcels", label: "Parcels", icon: Package, roles: ["Admin"] },
   {
     href: "/parcels",
-    label: "Parcels",
+    label: "My Parcels",
     icon: Package,
-    roles: ["Admin", "Dispatcher", "Planner"],
+    roles: ["Seller", "Customer"],
   },
-  { href: "/parcels", label: "My Parcels", icon: Package, roles: ["Seller", "Customer", "Client"] },
   {
     href: "/parcels/new",
     label: "Create Parcel",
     icon: PackagePlus,
-    roles: ["Admin", "Dispatcher", "Seller"],
+    roles: ["Admin", "Seller"],
   },
   { href: "/track", label: "Track Parcel", icon: Radar, roles: [] },
   { href: "/notifications", label: "Notifications", icon: Bell, roles: [] },
 
-  // ---- Admin / staff only ----
-  { href: "/sellers", label: "Sellers", icon: Building2, roles: ["Admin", "Dispatcher"] },
-  { href: "/customers", label: "Customers", icon: Users, roles: ["Admin", "Dispatcher", "Planner"] },
-  { href: "/hubs", label: "Hubs / Facilities", icon: Warehouse, roles: ["Admin", "Dispatcher"] },
+  // ---- Admin only ----
+  { href: "/sellers", label: "Sellers", icon: Building2, roles: ["Admin"] },
+  { href: "/customers", label: "Customers", icon: Users, roles: ["Admin"] },
+  { href: "/hubs", label: "Hubs / Facilities", icon: Warehouse, roles: ["Admin"] },
 
-  // ---- Legacy operations suite (staff) ----
-  {
-    href: "/pickup",
-    label: "Pickup & Intake",
-    icon: PackageSearch,
-    roles: ["Admin", "Dispatcher", "Planner"],
-  },
-  {
-    href: "/booking",
-    label: "Shipment Bookings",
-    icon: PackagePlus,
-    roles: ["Admin", "Dispatcher", "Planner"],
-  },
+  // ---- Legacy operations suite (admin) ----
+  { href: "/pickup", label: "Pickup & Intake", icon: PackageSearch, roles: ["Admin"] },
+  { href: "/booking", label: "Shipment Bookings", icon: PackagePlus, roles: ["Admin"] },
   {
     href: "/manifest",
     label: "Manifest & Consolidation",
     icon: ClipboardList,
-    roles: ["Admin", "Dispatcher", "Planner"],
+    roles: ["Admin"],
     badge: { text: "count", kind: "count" },
   },
   {
     href: "/handover",
     label: "Carrier Handover & History",
     icon: Handshake,
-    roles: ["Admin", "Dispatcher", "Planner", "Carrier"],
+    roles: ["Admin"],
   },
-  {
-    href: "/waybill",
-    label: "Waybill Generator",
-    icon: FileText,
-    roles: ["Admin", "Dispatcher", "Planner"],
-  },
+  { href: "/waybill", label: "Waybill Generator", icon: FileText, roles: ["Admin"] },
 
   // ---- Admin only ----
   { href: "/audit-logs", label: "Audit Logs", icon: ScrollText, roles: ["Admin"] },

@@ -1,46 +1,39 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseAppRole,
-  isStaff,
-  isOps,
-  canApproveLoadPlans,
-  canPostTracking,
-} from "@/lib/roles";
+import { parseAppRole, isStaff, isOps, canApproveLoadPlans, canPostTracking } from "@/lib/roles";
 
 describe("parseAppRole", () => {
   it("accepts only the defined enum roles", () => {
     expect(parseAppRole("Admin")).toBe("Admin");
-    expect(parseAppRole("Carrier")).toBe("Carrier");
-    expect(parseAppRole("GodMode")).toBeNull();
+    expect(parseAppRole("Seller")).toBe("Seller");
+    expect(parseAppRole("Customer")).toBe("Customer");
+    expect(parseAppRole("Dispatcher")).toBeNull(); // removed role
+    expect(parseAppRole("Planner")).toBeNull(); // removed role
+    expect(parseAppRole("Client")).toBeNull(); // removed role
+    expect(parseAppRole("Carrier")).toBeNull(); // removed role
     expect(parseAppRole(42)).toBeNull();
     expect(parseAppRole(null)).toBeNull();
   });
 });
 
-describe("role predicates", () => {
-  it("isStaff is Admin/Dispatcher only", () => {
+describe("role predicates (consolidated)", () => {
+  it("isStaff is Admin only", () => {
     expect(isStaff("Admin")).toBe(true);
-    expect(isStaff("Dispatcher")).toBe(true);
-    expect(isStaff("Planner")).toBe(false);
-    expect(isStaff("Carrier")).toBe(false);
-    expect(isStaff("Client")).toBe(false);
+    expect(isStaff("Seller")).toBe(false);
+    expect(isStaff("Customer")).toBe(false);
   });
 
-  it("isOps includes Planner", () => {
-    expect(isOps("Planner")).toBe(true);
-    expect(isOps("Carrier")).toBe(false);
+  it("isOps is Admin only after consolidation", () => {
+    expect(isOps("Admin")).toBe(true);
   });
 
   it("only staff can approve load plans", () => {
     expect(canApproveLoadPlans("Admin")).toBe(true);
-    expect(canApproveLoadPlans("Dispatcher")).toBe(true);
-    expect(canApproveLoadPlans("Planner")).toBe(false);
+    expect(canApproveLoadPlans("Seller")).toBe(false);
   });
 
-  it("staff and carrier may post tracking updates", () => {
+  it("only admin may post legacy tracking updates", () => {
     expect(canPostTracking("Admin")).toBe(true);
-    expect(canPostTracking("Carrier")).toBe(true);
-    expect(canPostTracking("Client")).toBe(false);
-    expect(canPostTracking("Planner")).toBe(false);
+    expect(canPostTracking("Customer")).toBe(false);
+    expect(canPostTracking("Seller")).toBe(false);
   });
 });
