@@ -1,0 +1,285 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Loader2, PackagePlus, CheckCircle2 } from "lucide-react";
+import { DELIVERY_PLATFORMS } from "@/lib/utils";
+import { createParcel } from "../actions";
+import type { Seller } from "@/types";
+import { useToast } from "@/components/ui/Toast";
+
+const inputCls =
+  "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all";
+const labelCls =
+  "block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1";
+
+export default function ParcelForm({
+  role,
+  sellers,
+}: {
+  /** AppRole of the signed-in user (server-verified). */
+  role: string;
+  sellers: Pick<Seller, "id" | "name" | "reference">[];
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<{
+    trackingNumber: string;
+    id: string;
+  } | null>(null);
+
+  const isSeller = role === "Seller";
+
+  function onSubmit(form: HTMLFormElement) {
+    setError(null);
+    const formData = new FormData(form);
+    const payload = {
+      sellerId: isSeller ? undefined : String(formData.get("sellerId") ?? "") || undefined,
+      consignee: String(formData.get("consignee") ?? ""),
+      recipientPhone: String(formData.get("recipientPhone") ?? ""),
+      destination: String(formData.get("destination") ?? ""),
+      origin: String(formData.get("origin") ?? "Branch Hub"),
+      platform: String(formData.get("platform") ?? ""),
+      serviceType: String(formData.get("serviceType") ?? "Standard"),
+      description: String(formData.get("description") ?? ""),
+      dimensions: String(formData.get("dimensions") ?? ""),
+      weightKg: Number(formData.get("weightKg") ?? 0) || 0,
+      shippingFee: Number(formData.get("shippingFee") ?? 0) || 0,
+      codAmount: Number(formData.get("codAmount") ?? 0) || 0,
+      expectedDeliveryDate: String(formData.get("expectedDeliveryDate") ?? ""),
+    };
+    startTransition(async () => {
+      const res = await createParcel(payload);
+      if (res.ok && res.value) {
+        toast.success(`Parcel ${res.value.trackingNumber} registered`);
+        setCreated({ trackingNumber: res.value.trackingNumber, id: res.value.id });
+        router.refresh();
+      } else if (!res.ok) {
+        setError(res.error);
+      }
+    });
+  }
+
+  if (created) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-10 text-center">
+        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+        <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">
+          Parcel Registered
+        </h3>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Your parcel is now in the system.
+        </p>
+        <p className="mt-4 inline-block font-mono text-xl font-black tracking-wider text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 rounded-xl px-6 py-3">
+          {created.trackingNumber}
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setCreated(null)}
+            className="border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+          >
+            Register Another
+          </button>
+          <Link
+            href={`/parcels/${created.id}`}
+            className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-pink-600/30 transition-all"
+          >
+            View Tracking
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e.currentTarget);
+      }}
+      className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-6 space-y-5"
+    >
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {!isSeller && (
+          <div className="sm:col-span-2">
+            <label className={labelCls} htmlFor="sellerId">
+              Seller (client sending the parcel)
+            </label>
+            <select id="sellerId" name="sellerId" className={inputCls} defaultValue="">
+              <option value="">Walk-in / unassigned</option>
+              {sellers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.reference})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className={labelCls} htmlFor="consignee">
+            Recipient Name *
+          </label>
+          <input
+            id="consignee"
+            name="consignee"
+            required
+            minLength={2}
+            maxLength={200}
+            className={inputCls}
+            placeholder="Juan Dela Cruz"
+          />
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="recipientPhone">
+            Recipient Phone
+          </label>
+          <input
+            id="recipientPhone"
+            name="recipientPhone"
+            className={inputCls}
+            placeholder="+63 917 000 0000"
+          />
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="destination">
+            Destination *
+          </label>
+          <input
+            id="destination"
+            name="destination"
+            required
+            minLength={2}
+            className={inputCls}
+            placeholder="Quezon City, Metro Manila"
+          />
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="platform">
+            Delivery Platform *
+          </label>
+          <select id="platform" name="platform" required className={inputCls}>
+            {DELIVERY_PLATFORMS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="serviceType">
+            Service Type
+          </label>
+          <select id="serviceType" name="serviceType" className={inputCls}>
+            <option>Standard</option>
+            <option>COD</option>
+            <option>Express</option>
+          </select>
+        </div>
+
+        <div>
+          <label className={labelCls} htmlFor="expectedDeliveryDate">
+            Expected Delivery
+          </label>
+          <input
+            id="expectedDeliveryDate"
+            name="expectedDeliveryDate"
+            type="date"
+            className={inputCls}
+          />
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div>
+          <label className={labelCls} htmlFor="weightKg">
+            Weight (kg)
+          </label>
+          <input
+            id="weightKg"
+            name="weightKg"
+            type="number"
+            min="0"
+            step="0.01"
+            defaultValue="0"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="dimensions">
+            Dimensions (L×W×H cm)
+          </label>
+          <input
+            id="dimensions"
+            name="dimensions"
+            className={inputCls}
+            placeholder="30×20×10"
+          />
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="shippingFee">
+            Shipping Fee (₱)
+          </label>
+          <input
+            id="shippingFee"
+            name="shippingFee"
+            type="number"
+            min="0"
+            step="0.01"
+            defaultValue="0"
+            className={inputCls}
+          />
+        </div>
+      </section>
+
+      <section>
+        <label className={labelCls} htmlFor="description">
+          Parcel Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={2}
+          maxLength={500}
+          className={inputCls}
+          placeholder="e.g. 2 pairs of shoes, fragile"
+        />
+      </section>
+
+      {error && (
+        <p className="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      <div className="flex items-center justify-end gap-3 pt-2">
+        <Link
+          href="/parcels"
+          className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+        >
+          Cancel
+        </Link>
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 disabled:opacity-60 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-pink-600/30 transition-all active:scale-95"
+        >
+          {pending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <PackagePlus className="w-4 h-4" />
+          )}
+          Register Parcel
+        </button>
+      </div>
+    </form>
+  );
+}
+

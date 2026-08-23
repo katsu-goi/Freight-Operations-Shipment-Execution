@@ -7,14 +7,17 @@ import {
   Truck,
   Handshake,
   ArrowRight,
+  Boxes,
 } from "lucide-react";
-import { requireProfile, isStaff } from "@/lib/auth";
-import { getHubDashboard } from "@/lib/queries";
-import { computeHubStats, monthlyIntakeVolume } from "@/lib/stats";
+import { requireProfile, isStaff, isSellerRole, isCustomerRole } from "@/lib/auth";
+import { getHubDashboard, getShipments } from "@/lib/queries";import { computeHubStats, monthlyIntakeVolume } from "@/lib/stats";
 import { formatNumber } from "@/lib/utils";
 import KpiCard from "@/components/ui/KpiCard";
 import VolumeChart from "@/components/dashboard/VolumeChart";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import SellerDashboard from "@/components/dashboard/SellerDashboard";
+import CustomerDashboard from "@/components/dashboard/CustomerDashboard";
+import EmptyState from "@/components/ui/EmptyState";
 import { listTrackingLogs } from "@/lib/repos/loadplans";
 import { formatDate } from "@/lib/utils";
 import type { TrackingLog } from "@/types";
@@ -23,6 +26,20 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
+
+  // ---- Seller view: their own parcels only ----
+  if (isSellerRole(profile.role)) {
+    const parcels = await getShipments();
+    return <SellerDashboard parcels={parcels} sellerName={null} />;
+  }
+
+  // ---- Customer view: assigned parcels, deliberately simple ----
+  if (isCustomerRole(profile.role)) {
+    const parcels = await getShipments();
+    return <CustomerDashboard parcels={parcels} />;
+  }
+
+  // ---- Staff / admin operations view ----
   const staff = isStaff(profile.role);
 
   const [{ shipments, batches, handovers }, recentLogs] = await Promise.all([
@@ -121,19 +138,25 @@ export default async function DashboardPage() {
       </div>
 
       {/* Open batches */}
-      {batches.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-              Open Manifests
-            </h3>
-            <Link
-              href="/handover"
-              className="text-[11px] font-bold text-pink-600 dark:text-pink-400 flex items-center gap-1 hover:underline"
-            >
-              Hand over now <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+            Open Manifests
+          </h3>
+          <Link
+            href="/handover"
+            className="text-[11px] font-bold text-pink-600 dark:text-pink-400 flex items-center gap-1 hover:underline"
+          >
+            Hand over now <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        {batches.length === 0 ? (
+          <EmptyState
+            icon={Boxes}
+            title="No open manifests"
+            description="Create a batch from the Manifest page once parcels are intaken."
+          />
+        ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {batches.map((b) => (
               <div key={b.id} className="px-5 py-3 flex items-center justify-between text-xs">
@@ -151,17 +174,23 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Recent handovers */}
-      {handovers.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-              Recent Handovers
-            </h3>
-          </div>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+            Recent Handovers
+          </h3>
+        </div>
+        {handovers.length === 0 ? (
+          <EmptyState
+            icon={Handshake}
+            title="No handovers yet"
+            description="Completed rider handovers will appear here."
+          />
+        ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {handovers.map((h) => (
               <div key={h.id} className="px-5 py-3 flex items-center justify-between text-xs">
@@ -173,8 +202,8 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

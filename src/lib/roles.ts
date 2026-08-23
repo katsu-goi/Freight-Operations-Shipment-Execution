@@ -1,7 +1,16 @@
 import type { AppRole } from "@/types";
+import {
+  isAdminRole,
+  isStaffRole,
+  isOpsStaffRole,
+  isSellerRole,
+  isCustomerRole,
+} from "@/lib/rbac";
 
 export const ALL_ROLES: AppRole[] = [
   "Admin",
+  "Seller",
+  "Customer",
   "Dispatcher",
   "Planner",
   "Carrier",
@@ -13,7 +22,24 @@ export function parseAppRole(value: unknown): AppRole | null {
   return (ALL_ROLES as string[]).includes(value) ? (value as AppRole) : null;
 }
 
-/** Admin + Dispatcher — final writes / approvals. */
+export {
+  isAdminRole,
+  isStaffRole,
+  isOpsStaffRole,
+  isSellerRole,
+  isCustomerRole,
+  can,
+  canCreateParcels,
+  canUpdateParcelStatus,
+  roleTier,
+} from "@/lib/rbac";
+export type { Permission } from "@/lib/rbac";
+
+/** Legacy aliases — kept so existing call sites continue to work.
+ *  Semantics match the database helpers exactly:
+ *  is_staff() = Admin/Dispatcher; is_ops() adds Planner. */
+
+/** Admin + Dispatcher — full operational writes. */
 export function isStaff(role: AppRole): boolean {
   return role === "Admin" || role === "Dispatcher";
 }
@@ -30,7 +56,7 @@ export function canApproveLoadPlans(role: AppRole): boolean {
 
 /** Final sign-off on carrier handovers. */
 export function canFinalizeHandover(role: AppRole): boolean {
-  return isStaff(role);
+  return role === "Admin" || role === "Dispatcher";
 }
 
 /** Live tracking posts: staff or assigned carrier (legacy GPS feed). */

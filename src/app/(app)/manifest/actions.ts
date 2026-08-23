@@ -1,13 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import { runAction, ok, okVoid, fail, type ActionResult } from "@/lib/actions/result";
 import { batchCreateSchema, batchReadySchema } from "@/lib/validation/schemas";
 import { serverLog } from "@/lib/server/log";
-import type { DeliveryPlatform } from "@/types";
 
 function newReference() {
   const yr = new Date().getFullYear();
@@ -157,7 +155,3 @@ export async function releaseBatch(batchId: string): Promise<ActionResult> {
     },
   );
 }
-
-/** Not used here; kept for parity with the role helper bundle. */
-export const _platformGuard = (_p: DeliveryPlatform) => true;
-export { firstZodError } from "@/lib/validation/schemas";

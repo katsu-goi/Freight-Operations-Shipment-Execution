@@ -10,9 +10,11 @@ import RealtimeIndicator from "./RealtimeIndicator";
 export default function Sidebar({
   role,
   pendingBatchCount,
+  unreadNotifications = 0,
 }: {
   role: AppRole;
   pendingBatchCount: number;
+  unreadNotifications?: number;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -32,7 +34,11 @@ export default function Sidebar({
         <div>
           <Brand role={role} />
           <RoleBadge role={role} />
-          <SidebarNav role={role} pendingBatchCount={pendingBatchCount} />
+          <SidebarNav
+            role={role}
+            pendingBatchCount={pendingBatchCount}
+            unreadNotifications={unreadNotifications}
+          />
         </div>
         <RealtimeIndicator />
       </aside>
@@ -66,7 +72,11 @@ export default function Sidebar({
               </button>
             </div>
             <RoleBadge role={role} />
-            <SidebarNav role={role} pendingBatchCount={pendingBatchCount} />
+            <SidebarNav
+              role={role}
+              pendingBatchCount={pendingBatchCount}
+              unreadNotifications={unreadNotifications}
+            />
           </div>
           <RealtimeIndicator />
         </aside>

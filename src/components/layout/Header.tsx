@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Search, Sparkles, LogOut, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Search, Sparkles, LogOut, Loader2, Bell } from "lucide-react";
 import type { Profile } from "@/types";
 import { signOut } from "@/app/login/actions";
 import ThemeToggle from "./ThemeToggle";
@@ -10,9 +11,11 @@ import ThemeToggle from "./ThemeToggle";
 export default function Header({
   profile,
   aiEnabled,
+  unreadCount = 0,
 }: {
   profile: Profile;
   aiEnabled: boolean;
+  unreadCount?: number;
 }) {
   const router = useRouter();
   const [term, setTerm] = useState("");
@@ -21,7 +24,8 @@ export default function Header({
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
     const q = term.trim();
-    if (q) router.push(`/booking?q=${encodeURIComponent(q)}`);
+    // Global parcel search — RLS scopes results to the caller's role.
+    if (q) router.push(`/parcels?q=${encodeURIComponent(q)}`);
   }
 
   const initials = (profile.full_name ?? profile.email ?? "U")
@@ -53,10 +57,24 @@ export default function Header({
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>{aiEnabled ? "AI Engine Enabled" : "AI Engine Offline"}</span>
+          <span>{aiEnabled ? "AI Engine Online" : "AI Engine Offline"}</span>
         </div>
 
         <ThemeToggle />
+
+        <Link
+          href="/notifications"
+          aria-label="Notifications"
+          className="relative p-2 rounded-lg text-slate-500 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-950/40 transition-all"
+        >
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-pink-600 text-white text-[9px] font-black flex items-center justify-center">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </Link>
+
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
 
         <div className="flex items-center space-x-3">

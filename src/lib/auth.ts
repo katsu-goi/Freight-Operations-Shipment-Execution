@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { parseAppRole } from "@/lib/roles";
-import type { AppRole, Profile } from "@/types";
+import { parseAppRole, isStaff, isOps } from "@/lib/roles";
+import {
+  can,
+  type Permission,
+  isSellerRole,
+  isCustomerRole,
+} from "@/lib/rbac";
+import type { AppRole, Profile, Seller } from "@/types";
 
 export {
   ALL_ROLES,
@@ -11,9 +17,16 @@ export {
   canApproveLoadPlans,
   canPostTracking,
   canFinalizeHandover,
-  OPS_ROLES,
-  STAFF_ROLES,
 } from "@/lib/roles";
+export {
+  can,
+  roleTier,
+  isAdminRole,
+  isStaffRole,
+  isSellerRole,
+  isCustomerRole,
+  type Permission,
+} from "@/lib/rbac";
 
 /**
  * Resolve the signed-in user's profile for Server Components.
@@ -45,10 +58,11 @@ export async function requireProfile(): Promise<Profile> {
     id: user.id,
     email: user.email ?? null,
     full_name: (user.user_metadata?.full_name as string) ?? user.email ?? null,
-    role: "Client",
+    role: "Customer",
     org_name: null,
     is_active: true,
     invited_by: null,
+    seller_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -57,6 +71,61 @@ export async function requireProfile(): Promise<Profile> {
 /** Guard a page/action to a set of roles; redirect to /dashboard otherwise. */
 export async function requireRole(roles: AppRole[]): Promise<Profile> {
   const profile = await requireProfile();
-  if (!roles.includes(profile.role)) redirect("/dashboard");
+  if (!roles.includes(profile.role)) redirect("/forbidden");
   return profile;
+}
+
+/**
+ * Central permission gate for pages and server actions. The permission check
+ * runs against the DB-backed profile — a forged client role cannot pass.
+ * Unauthorized users are redirected to /forbidden (403-equivalent for pages).
+ */
+export async function requirePermission(
+  permission: Permission,
+): Promise<Profile> {
+  const profile = await requireProfile();
+  if (!can(profile.role, permission)) redirect("/forbidden");
+  return profile;
+}
+
+/** Non-redirecting variant for API routes / actions returning ActionResult. */
+export async function checkPermission(
+  permission: Permission,
+): Promise<{ profile: Profile } | { error: "forbidden" }> {
+  const profile = await requireProfile();
+  return can(profile.role, permission)
+    ? { profile }
+    : { error: "forbidden" };
+}
+
+export interface SellerContext {
+  profile: Profile;
+  /** The sellers row owned by this profile (Seller role only). */
+  seller: Seller | null;
+}
+
+/**
+ * Resolve the signed-in Seller's linked business record. Sellers without a
+ * linked seller record cannot transact until an admin links one.
+ */
+export async function getSellerContext(): Promise<SellerContext | null> {
+  const profile = await requireProfile();
+  if (!isSellerRole(profile.role)) return null;
+
+  let seller: Seller | null = null;
+  if (profile.seller_id) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("sellers")
+      .select("*")
+      .eq("id", profile.seller_id)
+      .maybeSingle();
+    seller = (data as Seller) ?? null;
+  }
+  return { profile, seller };
+}
+
+export async function isCustomer(): Promise<boolean> {
+  const profile = await requireProfile();
+  return isCustomerRole(profile.role);
 }

@@ -11,9 +11,11 @@ import type { AppRole } from "@/types";
 export default function SidebarNav({
   role,
   pendingBatchCount,
+  unreadNotifications = 0,
 }: {
   role: AppRole;
   pendingBatchCount: number;
+  unreadNotifications?: number;
 }) {
   const pathname = usePathname();
   const items = visibleNav(role);
@@ -26,7 +28,7 @@ export default function SidebarNav({
         const Icon = item.icon;
         return (
           <Link
-            key={item.href}
+            key={`${item.href}-${item.label}`}
             href={item.href}
             className={cn(
               "w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all",
@@ -51,16 +53,21 @@ export default function SidebarNav({
               </span>
             )}
             {item.badge?.kind === "live" && (
-              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">
+              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-mono font-bold">
                 LIVE
               </span>
             )}
-            {item.badge?.kind === "count" && (
+            {item.badge?.kind === "count" && pendingBatchCount > 0 && (
               <span className="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full">
                 {pendingBatchCount}
               </span>
             )}
-            {!item.badge && active && (
+            {item.href === "/notifications" && unreadNotifications > 0 && (
+              <span className="bg-pink-600 text-white text-[10px] font-black min-w-5 text-center px-1.5 py-0.5 rounded-full">
+                {unreadNotifications > 99 ? "99+" : unreadNotifications}
+              </span>
+            )}
+            {!item.badge && item.href !== "/notifications" && active && (
               <ChevronRight className="w-3.5 h-3.5 rotate-90" />
             )}
           </Link>

@@ -50,6 +50,7 @@ export function monthlyIntakeVolume(
     const d = new Date(p.created_at);
     const key = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
     const bucket = buckets.get(key) ?? Object.fromEntries(DELIVERY_PLATFORMS.map((pl) => [pl, 0]));
+    if (!p.platform || !DELIVERY_PLATFORMS.includes(p.platform)) continue;
     bucket[p.platform] = (bucket[p.platform] ?? 0) + 1;
     buckets.set(key, bucket);
   }

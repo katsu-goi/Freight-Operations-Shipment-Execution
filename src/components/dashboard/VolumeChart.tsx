@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import EmptyState from "@/components/ui/EmptyState";
 import { BarChart3 } from "lucide-react";
+import { DELIVERY_PLATFORMS } from "@/lib/utils";
 import type { IntakeRow } from "@/lib/stats";
 
 const COLORS = ["#ec4899", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ef4444", "#14b8a6", "#64748b"];
@@ -42,7 +43,7 @@ export default function VolumeChart({ data }: { data: IntakeRow[] }) {
     );
   }
 
-  const platforms = Object.keys(data[0]).filter((k) => k !== "month");
+  const platforms = DELIVERY_PLATFORMS.filter((p) => p in data[0]);
 
   return (
     <div className="h-64 w-full">
@@ -61,7 +62,7 @@ export default function VolumeChart({ data }: { data: IntakeRow[] }) {
           />
           <Legend wrapperStyle={{ fontSize: "11px" }} />
           {platforms.map((p, i) => (
-            <Bar key={p} dataKey={p} fill={COLORS[i % COLORS.length]} radius={[3, 3, 0, 0]} />
+            <Bar key={p} name={p} dataKey={p} fill={COLORS[i % COLORS.length]} radius={[3, 3, 0, 0]} />
           ))}
         </BarChart>
       </ResponsiveContainer>

@@ -50,11 +50,6 @@ export default function RealtimeIndicator() {
           {connected ? "ACTIVE" : "OFFLINE"}
         </span>
       </div>
-      <p className="text-[11px] text-slate-500 leading-tight">
-        Listening on{" "}
-        <span className="font-mono text-slate-400">shipment_tracking_logs</span>{" "}
-        stream.
-      </p>
     </div>
   );
 }

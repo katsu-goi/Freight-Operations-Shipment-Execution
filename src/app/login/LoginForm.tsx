@@ -19,14 +19,15 @@ import { signIn, signUp, quickLogin, type AuthState } from "./actions";
 import type { AppRole } from "@/types";
 
 /** Roles available for self-registration. Staff roles are admin-provisioned. */
-const ROLES: AppRole[] = ["Client", "Carrier"];
+const ROLES: AppRole[] = ["Customer", "Client", "Carrier"];
 
 const QUICK_ROLES: { role: AppRole; icon: LucideIcon; hint: string }[] = [
   { role: "Admin", icon: ShieldCheck, hint: "Full access" },
+  { role: "Seller", icon: Building2, hint: "Send parcels" },
+  { role: "Customer", icon: Boxes, hint: "Receive parcels" },
   { role: "Dispatcher", icon: Radar, hint: "Operations" },
   { role: "Planner", icon: Boxes, hint: "Carrier batching drafts" },
-  { role: "Carrier", icon: Truck, hint: "Assigned loads" },
-  { role: "Client", icon: Building2, hint: "Own shipments" },
+  { role: "Client", icon: Building2, hint: "Legacy recipient" },
 ];
 
 function SubmitButton({ mode }: { mode: "signin" | "signup" }) {
@@ -152,7 +153,7 @@ export default function LoginForm() {
               </label>
               <select
                 name="role"
-                defaultValue="Client"
+                defaultValue="Customer"
                 className="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500"
               >
                 {ROLES.map((r) => (

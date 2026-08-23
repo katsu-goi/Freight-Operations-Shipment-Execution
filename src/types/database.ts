@@ -6,6 +6,8 @@
 
 export type AppRole =
   | "Admin"
+  | "Seller"
+  | "Customer"
   | "Dispatcher"
   | "Planner"
   | "Carrier"
@@ -22,14 +24,23 @@ export type DeliveryPlatform =
   | "Custom Partner";
 export type ShipmentStatus =
   | "Booked"
+  | "Registered"
+  | "Pickup Scheduled"
+  | "Picked Up"
+  | "Dropped Off"
+  | "At Origin Hub"
   | "Intake"
   | "Batched"
   | "Handed Over"
+  | "In Transit"
+  | "At Destination Hub"
+  | "Out for Delivery"
+  | "Delivered"
+  | "Delivery Failed"
+  | "Returned"
   | "Cancelled"
   | "Archived"
-  | "In Transit"
   | "Customs Hold"
-  | "Delivered"
   | "Delayed";
 export type ContainerStatus =
   | "Planned"
@@ -67,6 +78,7 @@ export interface Database {
           org_name: string | null;
           is_active: boolean;
           invited_by: string | null;
+          seller_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -78,6 +90,7 @@ export interface Database {
           org_name?: string | null;
           is_active?: boolean;
           invited_by?: string | null;
+          seller_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
         Relationships: [
@@ -95,6 +108,7 @@ export interface Database {
           id: string;
           reference: string;
           name: string;
+          business_name: string | null;
           contact_person: string | null;
           phone: string | null;
           email: string | null;
@@ -102,6 +116,8 @@ export interface Database {
           pickup_frequency: string | null;
           notes: string | null;
           is_active: boolean;
+          archived_at: string | null;
+          last_activity_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -110,6 +126,7 @@ export interface Database {
           id?: string;
           reference: string;
           name: string;
+          business_name?: string | null;
           contact_person?: string | null;
           phone?: string | null;
           email?: string | null;
@@ -117,6 +134,8 @@ export interface Database {
           pickup_frequency?: string | null;
           notes?: string | null;
           is_active?: boolean;
+          archived_at?: string | null;
+          last_activity_at?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -195,6 +214,12 @@ export interface Database {
           current_location: string | null;
           current_lat: number | null;
           current_lng: number | null;
+          description: string | null;
+          dimensions: string | null;
+          shipping_fee: number | null;
+          recipient_phone: string | null;
+          expected_delivery_date: string | null;
+          current_hub_id: string | null;
           progress: number;
           platform: DeliveryPlatform;
           seller_id: string | null;
@@ -232,6 +257,12 @@ export interface Database {
           current_location?: string | null;
           current_lat?: number | null;
           current_lng?: number | null;
+          description?: string | null;
+          dimensions?: string | null;
+          shipping_fee?: number | null;
+          recipient_phone?: string | null;
+          expected_delivery_date?: string | null;
+          current_hub_id?: string | null;
           progress?: number;
           platform?: DeliveryPlatform;
           seller_id?: string | null;
@@ -275,6 +306,13 @@ export interface Database {
             referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "shipments_current_hub_id_fkey";
+            columns: ["current_hub_id"];
+            isOneToOne: false;
+            referencedRelation: "hubs";
+            referencedColumns: ["id"];
+          },
         ];
       };
       shipment_tracking_logs: {
@@ -287,6 +325,7 @@ export interface Database {
           lat: number | null;
           lng: number | null;
           location: string | null;
+          status: ShipmentStatus | null;
           created_by: string | null;
           created_at: string;
         };
@@ -299,6 +338,7 @@ export interface Database {
           lat?: number | null;
           lng?: number | null;
           location?: string | null;
+          status?: ShipmentStatus | null;
           created_by?: string | null;
           created_at?: string;
         };
@@ -720,6 +760,79 @@ export interface Database {
           },
         ];
       };
+      hubs: {
+        Row: {
+          id: string;
+          name: string;
+          code: string | null;
+          address: string | null;
+          city: string | null;
+          province: string | null;
+          contact: string | null;
+          is_active: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          code?: string | null;
+          address?: string | null;
+          city?: string | null;
+          province?: string | null;
+          contact?: string | null;
+          is_active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["hubs"]["Insert"]>;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          parcel_id: string | null;
+          tracking_number: string | null;
+          title: string;
+          message: string;
+          status: string | null;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          parcel_id?: string | null;
+          tracking_number?: string | null;
+          title: string;
+          message: string;
+          status?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["notifications"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_parcel_id_fkey";
+            columns: ["parcel_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       audit_logs: {
         Row: {
           id: number;
@@ -783,6 +896,20 @@ export interface Database {
       next_container_reference: {
         Args: Record<string, never>;
         Returns: string;
+      };
+      next_parcel_tracking_number: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      update_parcel_status: {
+        Args: {
+          p_parcel_id: string;
+          p_status: string;
+          p_location?: string | null;
+          p_hub_id?: string | null;
+          p_description?: string | null;
+        };
+        Returns: { ok: boolean; error?: string | null };
       };
       ingest_crm_po: {
         Args: {

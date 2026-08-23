@@ -1,4 +1,4 @@
-import type { Database, TransportMode } from "./database";
+import type { Database, TransportMode, AppRole } from "./database";
 
 /** Convenience row aliases used across the UI. */
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -24,6 +24,9 @@ export type CarrierBatch =
 export type CarrierBatchItem =
   Database["public"]["Tables"]["carrier_batch_items"]["Row"];
 export type Handover = Database["public"]["Tables"]["handovers"]["Row"];
+export type Hub = Database["public"]["Tables"]["hubs"]["Row"];
+export type AppNotification =
+  Database["public"]["Tables"]["notifications"]["Row"];
 
 export type {
   AppRole,
@@ -43,6 +46,26 @@ export type {
 export interface SellerWithStats extends Seller {
   pickupCount: number;
   parcelCount: number;
+}
+
+/** Seller row plus admin-table roll-ups (parcel count, owner account). */
+export interface SellerAdminRow extends SellerWithStats {
+  archived: boolean;
+  ownerEmail: string | null;
+  lastActivityAt: string | null;
+}
+
+/** Customer (recipient) profile joined with assigned-parcel counters. */
+export interface CustomerRow {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: AppRole;
+  is_active: boolean;
+  createdAt: string;
+  parcelCount: number;
+  activeCount: number;
+  deliveredCount: number;
 }
 
 /** Pickup request joined with its seller. */

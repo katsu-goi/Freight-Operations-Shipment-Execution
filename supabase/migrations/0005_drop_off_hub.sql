@@ -217,9 +217,21 @@ create policy "handovers: staff insert"
 -- ---------------------------------------------------------------------------
 -- REALTIME — the tables the hub UI subscribes to
 -- ---------------------------------------------------------------------------
-alter publication supabase_realtime add table public.shipments;
-alter publication supabase_realtime add table public.carrier_batches;
-alter publication supabase_realtime add table public.handovers;
+do $$
+declare
+  _pub text := 'supabase_realtime';
+  _tbl text;
+begin
+  foreach _tbl in array array['public.shipments', 'public.carrier_batches', 'public.handovers'] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = _pub and schemaname = split_part(_tbl, '.', 1)
+        and tablename = split_part(_tbl, '.', 2)
+    ) then
+      execute format('alter publication %I add table %s', _pub, _tbl);
+    end if;
+  end loop;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- TRIGGERS — updated_at maintenance for the new tables

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole, canFinalizeHandover } from "@/lib/auth";
 import { runAction, ok, fail, type ActionResult } from "@/lib/actions/result";
@@ -80,6 +79,3 @@ export async function signHandover(
     return ok({ batchId: batch.id });
   });
 }
-
-export const handoverSchemaGuard = z.object({});
-export { firstZodError } from "@/lib/validation/schemas";

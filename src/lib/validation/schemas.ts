@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DELIVERY_PLATFORMS, PICKUP_STATUSES } from "@/lib/utils";
+import { SETTABLE_STATUSES } from "@/lib/parcelWorkflow";
 
 /**
  * Canonical zod schemas for every server mutation. Mirrors the client form
@@ -150,3 +151,114 @@ export const bolParseSchema = z.object({
 export function firstZodError(error: z.ZodError): string {
   return error.issues[0]?.message ?? "Invalid input";
 }
+
+/** ----- Parcel management & tracking ----- */
+
+/** Register a new parcel (Seller creates own; staff may pick any seller). */
+export const parcelCreateSchema = z.object({
+  sellerId: z.string().uuid().optional().nullable(),
+  customerEmail: z.string().trim().email().optional().or(z.literal("")).default(""),
+  consignee: z.string().trim().min(2, "Recipient name is required").max(200),
+  recipientPhone: z.string().trim().max(40).optional().default(""),
+  destination: z.string().trim().min(2, "Destination is required").max(200),
+  origin: z.string().trim().min(1).max(200).default("Branch Hub"),
+  platform: z.enum(DELIVERY_PLATFORMS),
+  serviceType: z.string().trim().max(40).default("Standard"),
+  description: z.string().trim().max(500).optional().default(""),
+  dimensions: z.string().trim().max(60).optional().default(""),
+  weightKg: positiveNumber("Weight must be >= 0").default(0),
+  shippingFee: positiveNumber("Shipping fee must be >= 0").default(0),
+  codAmount: positiveNumber("COD amount must be >= 0").default(0),
+  expectedDeliveryDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+    .optional()
+    .or(z.literal(""))
+    .default(""),
+});
+export type ParcelCreateInput = z.infer<typeof parcelCreateSchema>;
+
+/** Staff-only parcel status change (drives tracking + notifications via RPC). */
+export const parcelStatusSchema = z.object({
+  parcelId: z.string().uuid(),
+  status: z.enum(SETTABLE_STATUSES as [string, ...string[]]),
+  hubId: z.string().uuid().optional().or(z.literal("")).default(""),
+  location: z.string().trim().max(200).optional().default(""),
+  description: z.string().trim().max(500).optional().default(""),
+});
+
+/** Admin-only current location / hub update. */
+export const parcelLocationSchema = z.object({
+  parcelId: z.string().uuid(),
+  hubId: z.string().uuid().optional().or(z.literal("")).default(""),
+  location: z.string().trim().max(200).optional().default(""),
+});
+
+/** Seller edit of own parcel details while still Registered. */
+export const parcelEditSchema = z.object({
+  parcelId: z.string().uuid(),
+  consignee: z.string().trim().min(2).max(200),
+  recipientPhone: z.string().trim().max(40).optional().default(""),
+  description: z.string().trim().max(500).optional().default(""),
+  weightKg: positiveNumber("Weight must be >= 0").default(0),
+});
+
+/** ----- Seller account lifecycle (admin) ----- */
+
+const passwordRule = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(72);
+
+/** Create a seller with a login account. Password handled by Supabase Auth. */
+export const sellerAccountSchema = sellerSchema.extend({
+  businessName: z.string().trim().max(200).optional().default(""),
+  password: passwordRule,
+});
+
+export const sellerUpdateSchema = z.object({
+  sellerId: z.string().uuid(),
+  name: z.string().trim().min(2, "Seller name is required").max(200),
+  businessName: z.string().trim().max(200).optional().default(""),
+  contactPerson: z.string().trim().max(120).optional().default(""),
+  phone: z.string().trim().max(40).optional().default(""),
+  email: z.string().trim().email().optional().or(z.literal("")).default(""),
+  address: z.string().trim().max(300).optional().default(""),
+  pickupFrequency: z.string().trim().max(40).optional().default("On-demand"),
+  notes: z.string().trim().max(500).optional().default(""),
+});
+
+export const sellerArchiveSchema = z.object({ sellerId: z.string().uuid() });
+
+/** Permanent delete requires the exact confirmation word typed by the admin. */
+export const sellerDeleteSchema = z.object({
+  sellerId: z.string().uuid(),
+  confirmText: z.literal("DELETE", {
+    message: 'Type DELETE to confirm permanent deletion',
+  }),
+});
+
+/** ----- Hubs ----- */
+
+export const hubSchema = z.object({
+  name: z.string().trim().min(2, "Hub name is required").max(200),
+  code: z.string().trim().max(20).optional().default(""),
+  address: z.string().trim().max(300).optional().default(""),
+  city: z.string().trim().max(100).optional().default(""),
+  province: z.string().trim().max(100).optional().default(""),
+  contact: z.string().trim().max(200).optional().default(""),
+});
+export type HubInput = z.infer<typeof hubSchema>;
+
+export const hubUpdateSchema = hubSchema.extend({ hubId: z.string().uuid() });
+
+/** ----- Notifications & profile ----- */
+
+export const notificationReadSchema = z.object({
+  notificationId: z.string().uuid().optional(),
+  all: z.boolean().optional().default(false),
+});
+
+export const passwordChangeSchema = z.object({
+  password: passwordRule,
+});

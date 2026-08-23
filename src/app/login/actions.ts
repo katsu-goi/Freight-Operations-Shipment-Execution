@@ -16,7 +16,7 @@ const DEMO_PASSWORD = "demo123456";
 
 /** Roles a new user may self-assign at registration. Staff roles are
  *  provisioned by an administrator only — never via self-signup. */
-const SELF_SIGNUP_ROLES: AppRole[] = ["Client", "Carrier"];
+const SELF_SIGNUP_ROLES: AppRole[] = ["Customer", "Client", "Carrier"];
 
 /** One-click demo login: enabled in development, production requires opt-in. */
 const QUICK_LOGIN_ENABLED =
@@ -31,7 +31,9 @@ const DEMO_USERS: Record<
   Dispatcher: { email: "dispatcher@freightos.demo", fullName: "Munoz, Arnold M." },
   Planner: { email: "planner@freightos.demo", fullName: "Pace, Emmanuel Jason D." },
   Carrier: { email: "carrier@freightos.demo", fullName: "Sogale, Christian Jericho C." },
-  Client: { email: "client@freightos.demo", fullName: "Amora, Daniella Sophia P." },
+  Seller: { email: "seller@freightos.demo", fullName: "Amora, Daniella Sophia P." },
+  Customer: { email: "customer@freightos.demo", fullName: "Reyes, Miguel A." },
+  Client: { email: "client@freightos.demo", fullName: "Dela Cruz, Juan" },
 };
 
 export async function signIn(
@@ -136,6 +138,26 @@ export async function quickLogin(role: AppRole): Promise<AuthState> {
       ban_duration: "none",
       user_metadata: { full_name: demo.fullName, role },
     });
+
+    // Seller demo accounts need a linked sellers business record.
+    let sellerId: string | null = null;
+    if (role === "Seller") {
+      const { data: seller } = await admin
+        .from("sellers")
+        .upsert(
+          {
+            reference: "SELL-DEMO-0001",
+            name: demo.fullName,
+            email: demo.email,
+            is_active: true,
+          },
+          { onConflict: "reference" },
+        )
+        .select("id")
+        .maybeSingle();
+      sellerId = seller?.id ?? null;
+    }
+
     await admin.from("profiles").upsert(
       {
         id: authUser.id,
@@ -143,6 +165,7 @@ export async function quickLogin(role: AppRole): Promise<AuthState> {
         full_name: demo.fullName,
         role,
         is_active: true,
+        seller_id: sellerId,
       },
       { onConflict: "id" },
     );
