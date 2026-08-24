@@ -297,18 +297,21 @@ export default function SellersClient({ sellers }: { sellers: SellerAdminRow[] }
             onSubmit={(e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
+              // FormData.get() yields null for absent inputs; coerce to ""
+              // so the string schemas never receive a null.
+              const val = (key: string) => String(fd.get(key) ?? "");
               if (dialog.kind === "add") {
                 run(
                   () =>
                     createSellerAccount({
-                      name: fd.get("name"),
-                      businessName: fd.get("businessName"),
-                      contactPerson: fd.get("contactPerson"),
-                      phone: fd.get("phone"),
-                      email: fd.get("email"),
-                      address: fd.get("address"),
-                      pickupFrequency: fd.get("pickupFrequency"),
-                      password: fd.get("password"),
+                      name: val("name"),
+                      businessName: val("businessName"),
+                      contactPerson: val("contactPerson"),
+                      phone: val("phone"),
+                      email: val("email"),
+                      address: val("address"),
+                      pickupFrequency: val("pickupFrequency"),
+                      password: val("password"),
                     }),
                   "Seller account created",
                 );
@@ -317,14 +320,14 @@ export default function SellersClient({ sellers }: { sellers: SellerAdminRow[] }
                   () =>
                     updateSeller({
                       sellerId: dialog.seller.id,
-                      name: fd.get("name"),
-                      businessName: fd.get("businessName"),
-                      contactPerson: fd.get("contactPerson"),
-                      phone: fd.get("phone"),
-                      email: fd.get("email"),
-                      address: fd.get("address"),
-                      pickupFrequency: fd.get("pickupFrequency"),
-                      notes: fd.get("notes") ?? dialog.seller.notes ?? "",
+                      name: val("name"),
+                      businessName: val("businessName"),
+                      contactPerson: val("contactPerson"),
+                      phone: val("phone"),
+                      email: val("email"),
+                      address: val("address"),
+                      pickupFrequency: val("pickupFrequency"),
+                      notes: val("notes") || dialog.seller.notes || "",
                     }),
                   "Seller updated",
                 );
@@ -371,6 +374,15 @@ export default function SellersClient({ sellers }: { sellers: SellerAdminRow[] }
                   defaultValue={dialog.kind === "edit" ? dialog.seller.phone ?? "" : ""}
                   className={inputCls}
                   placeholder="+63 917 000 0000"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Contact Person</label>
+                <input
+                  name="contactPerson"
+                  defaultValue={dialog.kind === "edit" ? dialog.seller.contact_person ?? "" : ""}
+                  className={inputCls}
+                  placeholder="M. Tan"
                 />
               </div>
               <div>

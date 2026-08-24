@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { RefreshCw, Loader2, MapPin } from "lucide-react";
 import { SETTABLE_STATUSES } from "@/lib/parcelWorkflow";
 import { updateParcelStatus, updateParcelLocation } from "../actions";
+import { enqueueOfflineAction } from "@/lib/offline/outbox";
 import type { Hub } from "@/types";
 import { useToast } from "@/components/ui/Toast";
 
@@ -34,14 +35,24 @@ export default function ParcelOpsPanel({
 
   function onStatusSubmit(formData: FormData) {
     setError(null);
+    const command = {
+      parcelId,
+      status: String(formData.get("status") ?? ""),
+      hubId: String(formData.get("hubId") ?? ""),
+      location: String(formData.get("location") ?? ""),
+      description: String(formData.get("description") ?? ""),
+    };
+
+    // Offline-first: queue the mutation locally; ConnectivityGuard replays
+    // it (with full server-side re-validation) when connectivity returns.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      void enqueueOfflineAction("update_parcel_status", command);
+      toast.info("You're offline — status update queued for sync");
+      return;
+    }
+
     startTransition(async () => {
-      const res = await updateParcelStatus({
-        parcelId,
-        status: String(formData.get("status") ?? ""),
-        hubId: String(formData.get("hubId") ?? ""),
-        location: String(formData.get("location") ?? ""),
-        description: String(formData.get("description") ?? ""),
-      });
+      const res = await updateParcelStatus(command);
       if (res.ok) {
         toast.success("Parcel status updated");
         router.refresh();

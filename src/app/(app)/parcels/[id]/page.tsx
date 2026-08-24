@@ -18,6 +18,8 @@ import { listHubs } from "@/lib/repos/hubs";
 import TrackingTimeline from "@/components/parcels/TrackingTimeline";
 import StatusBadge from "@/components/ui/StatusBadge";
 import PageHeader from "@/components/ui/PageHeader";
+import ParcelMapLazy from "@/components/map/ParcelMapLazy";
+import ShareLocationButton from "@/components/map/ShareLocationButton";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
 import ParcelOpsPanel from "./ParcelOpsPanel";
 
@@ -151,8 +153,27 @@ export default async function ParcelDetailPage({
           )}
         </div>
 
-        {/* Timeline */}
-        <div className="lg:col-span-2 order-1 lg:order-2">
+        {/* Timeline + map */}
+        <div className="lg:col-span-2 order-1 lg:order-2 space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-6">
+            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+              <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
+                Live Location
+              </h3>
+              {staffOps && <ShareLocationButton parcelId={parcel.id} />}
+            </div>
+            <ParcelMapLazy
+              parcelId={parcel.id}
+              lat={parcel.current_lat}
+              lng={parcel.current_lng}
+              trackingNumber={parcel.tracking_number ?? parcel.reference}
+            />
+            <p className="mt-2 text-[11px] text-slate-400">
+              Position updates stream live over WebSocket. Visited map tiles are
+              cached for offline viewing; the last known position always stays visible.
+            </p>
+          </div>
+
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-6">
             <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 mb-5">
               Tracking History

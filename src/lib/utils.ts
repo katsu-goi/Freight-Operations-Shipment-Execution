@@ -7,6 +7,14 @@ import type {
 } from "@/types";
 import { DEFAULT_CURRENCY } from "@/lib/locale";
 
+/**
+ * All date/currency formatting is pinned to an explicit locale AND timezone
+ * so server-rendered HTML always matches the client render exactly
+ * (prevents React hydration mismatches across environments).
+ */
+const LOCALE = "en-US";
+const TIME_ZONE = "Asia/Manila";
+
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
@@ -25,7 +33,7 @@ export function formatCurrency(
 }
 
 export function formatNumber(n: number): string {
-  return new Intl.NumberFormat("en-US").format(n);
+  return new Intl.NumberFormat(LOCALE).format(n);
 }
 
 export function formatDate(value: string | null | undefined): string {
@@ -33,7 +41,12 @@ export function formatDate(value: string | null | undefined): string {
   const d = new Date(value);
   return Number.isNaN(d.getTime())
     ? "—"
-    : d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    : d.toLocaleDateString(LOCALE, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: TIME_ZONE,
+      });
 }
 
 /** e.g. "August 22, 2026 — 10:45 AM" */
@@ -41,14 +54,16 @@ export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  const date = d.toLocaleDateString("en-US", {
+  const date = d.toLocaleDateString(LOCALE, {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: TIME_ZONE,
   });
-  const time = d.toLocaleTimeString("en-US", {
+  const time = d.toLocaleTimeString(LOCALE, {
     hour: "numeric",
     minute: "2-digit",
+    timeZone: TIME_ZONE,
   });
   return `${date} — ${time}`;
 }

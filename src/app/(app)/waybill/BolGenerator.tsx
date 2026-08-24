@@ -245,7 +245,7 @@ export default function BolGenerator({
             <div className="cell"><div className="label">Notify Party</div><div className="value">{form.notifyParty || "—"}</div></div>
             <div className="cell"><div className="label">Container No.</div><div className="value">{form.containerNumber || "—"}</div></div>
             <div className="cell"><div className="label">Seal No.</div><div className="value">{form.sealNumber || "—"}</div></div>
-            <div className="cell"><div className="label">Gross Weight</div><div className="value">{form.totalWeightKg ? `${form.totalWeightKg.toLocaleString()} kg` : "—"}</div></div>
+            <div className="cell"><div className="label">Gross Weight</div><div className="value">{form.totalWeightKg ? `${form.totalWeightKg.toLocaleString("en-US")} kg` : "—"}</div></div>
             <div className="cell"><div className="label">Measurement</div><div className="value">{form.totalVolumeCbm ? `${form.totalVolumeCbm} CBM` : "—"}</div></div>
             <div className="cell full"><div className="label">Description of Goods</div><div className="value">{form.goodsDescription || "—"}</div></div>
           </div>

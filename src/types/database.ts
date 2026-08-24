@@ -873,7 +873,7 @@ export interface Database {
         Args: {
           p_shipment_id: string;
           p_message: string;
-          p_location: string;
+          p_location?: string | null;
           p_lat?: number | null;
           p_lng?: number | null;
           p_progress?: number | null;

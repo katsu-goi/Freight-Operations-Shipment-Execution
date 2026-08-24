@@ -4,6 +4,7 @@ import { aiEnabled } from "@/lib/ai";
 import { getUnreadCount } from "@/lib/repos/notifications";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import ConnectivityGuard from "@/components/pwa/ConnectivityGuard";
 
 export default async function AppLayout({
   children,
@@ -32,6 +33,7 @@ export default async function AppLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50 dark:bg-slate-900">
         <Header profile={profile} aiEnabled={aiEnabled()} unreadCount={unreadNotifications} />
         <main className="flex-1 overflow-y-auto p-6 scroll-thin">{children}</main>
+        <ConnectivityGuard />
       </div>
     </div>
   );

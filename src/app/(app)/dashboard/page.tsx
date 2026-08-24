@@ -13,7 +13,7 @@ import { requireProfile, isStaff, isSellerRole, isCustomerRole } from "@/lib/aut
 import { getHubDashboard, getShipments } from "@/lib/queries";import { computeHubStats, monthlyIntakeVolume } from "@/lib/stats";
 import { formatNumber } from "@/lib/utils";
 import KpiCard from "@/components/ui/KpiCard";
-import VolumeChart from "@/components/dashboard/VolumeChart";
+import VolumeChartLazy from "@/components/dashboard/VolumeChartLazy";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import SellerDashboard from "@/components/dashboard/SellerDashboard";
 import CustomerDashboard from "@/components/dashboard/CustomerDashboard";
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <VolumeChart data={volume} />
+          <VolumeChartLazy data={volume} />
         </div>
 
         <ActivityFeed initial={(recentLogs) as TrackingLog[]} />

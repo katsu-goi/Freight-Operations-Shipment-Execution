@@ -41,7 +41,7 @@ export default function Pagination({
       <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
         Showing <span className="font-bold">{from}</span>–
         <span className="font-bold">{to}</span> of{" "}
-        <span className="font-bold">{total.toLocaleString()}</span>
+        <span className="font-bold">{total.toLocaleString("en-US")}</span>
       </p>
       <div className="flex items-center gap-1">
         {page > 1 && (

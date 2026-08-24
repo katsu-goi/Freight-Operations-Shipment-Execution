@@ -13,9 +13,11 @@ function levelDot(level: string) {
 }
 
 function time(iso: string) {
-  return new Date(iso).toLocaleTimeString([], {
+  // Pinned locale + timezone so SSR HTML always matches the client render.
+  return new Date(iso).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Manila",
   });
 }
 
