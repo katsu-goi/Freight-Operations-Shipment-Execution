@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   visibleNav,
@@ -128,9 +128,6 @@ export default function SidebarNav({
                 <span className="bg-pink-600 text-white text-[10px] font-black min-w-5 text-center px-1.5 py-0.5 rounded-full">
                   {unreadNotifications > 99 ? "99+" : unreadNotifications}
                 </span>
-              )}
-              {!item.badge && item.href !== "/notifications" && active && (
-                <ChevronRight className="w-3.5 h-3.5 rotate-90" />
               )}
             </Link>
           );
