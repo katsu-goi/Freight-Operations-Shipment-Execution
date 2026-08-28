@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Ship, ShieldCheck, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/types";
@@ -17,6 +18,12 @@ export default function Sidebar({
   unreadNotifications?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close mobile drawer on route change so the selected page is visible
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -30,10 +37,10 @@ export default function Sidebar({
       </button>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 bg-slate-900 text-slate-300 flex-col justify-between shrink-0 shadow-2xl z-20">
-        <div>
-          <Brand role={role} />
-          <RoleBadge role={role} />
+      <aside className="hidden lg:flex w-72 bg-slate-900 text-slate-300 flex-col shrink-0 shadow-2xl z-20 h-screen sticky top-0">
+        <Brand role={role} />
+        <RoleBadge role={role} />
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <SidebarNav
             role={role}
             pendingBatchCount={pendingBatchCount}
@@ -56,22 +63,22 @@ export default function Sidebar({
         />
         <aside
           className={cn(
-            "absolute left-0 top-0 h-full w-72 bg-slate-900 text-slate-300 flex flex-col justify-between shadow-2xl transition-transform",
+            "absolute left-0 top-0 h-full w-72 bg-slate-900 text-slate-300 flex flex-col shadow-2xl transition-transform overflow-hidden",
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <div>
-            <div className="flex items-center justify-between pr-4">
-              <Brand role={role} />
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="Close navigation"
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <RoleBadge role={role} />
+          <div className="flex items-center justify-between pr-4 shrink-0">
+            <Brand role={role} />
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close navigation"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <RoleBadge role={role} />
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             <SidebarNav
               role={role}
               pendingBatchCount={pendingBatchCount}

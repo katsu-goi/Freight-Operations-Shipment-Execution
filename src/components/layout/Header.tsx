@@ -7,6 +7,7 @@ import { Search, Sparkles, LogOut, Loader2, Bell } from "lucide-react";
 import type { Profile } from "@/types";
 import { signOut } from "@/app/login/actions";
 import ThemeToggle from "./ThemeToggle";
+import SettingsMenu from "./SettingsMenu";
 
 export default function Header({
   profile,
@@ -74,6 +75,8 @@ export default function Header({
             </span>
           )}
         </Link>
+
+        <SettingsMenu role={profile.role} />
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
 
