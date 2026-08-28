@@ -3,7 +3,6 @@
 import { useState, useTransition, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import {
-  Ship,
   Loader2,
   LogIn,
   UserPlus,
@@ -70,8 +69,17 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="flex items-center gap-3 mb-8">
-        <div className="bg-gradient-to-tr from-pink-600 to-rose-500 p-3 rounded-2xl shadow-lg shadow-pink-500/20 text-white">
-          <Ship className="w-7 h-7 stroke-[2.5]" />
+        <div className="bg-white p-2.5 rounded-2xl shadow-lg ring-1 ring-white/20 flex items-center justify-center w-14 h-14 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/icons/airship-mark.png"
+            alt="Airship Express"
+            width={56}
+            height={32}
+            className="w-full h-full object-contain"
+            loading="eager"
+            decoding="async"
+          />
         </div>
         <div>
           <h1 className="font-black text-white text-2xl tracking-tight">

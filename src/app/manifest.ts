@@ -14,6 +14,12 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#ec4899",
     icons: [
       {
+        src: "/icons/airship-logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
         src: "/icons/icon.svg",
         sizes: "any",
         type: "image/svg+xml",

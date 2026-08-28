@@ -163,15 +163,15 @@ export default function Sidebar({
 function Brand({ role: _role }: BrandProps): React.JSX.Element {
   return (
     <div className="p-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
-      {/* New AX mark from user artwork — dark-bg variant for slate sidebar */}
-      <div className="w-[52px] h-10 flex items-center justify-center shrink-0 -ml-1">
+      {/* User-provided AX artwork — PNG on white pill for contrast on dark sidebar */}
+      <div className="w-11 h-10 bg-white rounded-xl p-1.5 shadow-md ring-1 ring-white/10 flex items-center justify-center shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/icons/airship-mark-dark.svg"
+          src="/icons/airship-mark.png"
           alt="Airship Express"
-          width={52}
-          height={30}
-          className="w-full h-full object-contain object-left drop-shadow-sm"
+          width={44}
+          height={28}
+          className="w-full h-full object-contain"
           loading="eager"
           decoding="async"
         />

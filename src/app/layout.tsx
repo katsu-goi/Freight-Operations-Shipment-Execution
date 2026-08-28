@@ -12,7 +12,13 @@ export const metadata: Metadata = {
     "Parcel management platform: booking, live tracking, seller tools and customer notifications.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Airship" },
-  icons: { icon: "/icons/icon.svg" },
+  icons: {
+    icon: [
+      { url: "/icons/airship-logo.png", type: "image/png" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icons/airship-logo.png",
+  },
 };
 
 export const viewport: Viewport = {
