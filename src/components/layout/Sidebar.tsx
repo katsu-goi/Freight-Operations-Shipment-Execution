@@ -162,26 +162,26 @@ export default function Sidebar({
 
 function Brand({ role: _role }: BrandProps): React.JSX.Element {
   return (
-    <div className="p-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
-      {/* Pink AX artwork — exact user PNG (black AX + white chevrons on #E81B75) */}
-      <div className="w-11 h-10 rounded-xl overflow-hidden shadow-md ring-1 ring-pink-500/20 flex items-center justify-center shrink-0 bg-[#E81B75]">
+    <div className="px-3 py-3 border-b border-slate-800 flex items-center gap-2.5 shrink-0 overflow-hidden">
+      {/* Pink AX — exact user artwork, compact to avoid header overlap */}
+      <div className="w-9 h-8 rounded-lg overflow-hidden shadow-sm ring-1 ring-pink-500/20 flex items-center justify-center shrink-0 bg-[#E81B75]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icons/airship-pink-mark.png"
           alt="Airship Express"
-          width={44}
-          height={28}
+          width={36}
+          height={22}
           className="w-full h-full object-contain"
           loading="eager"
           decoding="async"
         />
       </div>
-      <div className="min-w-0 flex flex-col justify-center">
-        <h1 className="font-black text-white text-[15px] tracking-wide leading-none flex items-baseline gap-1">
-          <span>AIRSHIP</span>
-          <span className="text-pink-500">EXPRESS</span>
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <h1 className="font-black text-white text-[13px] tracking-wide leading-none truncate flex items-baseline gap-1">
+          <span className="truncate">AIRSHIP</span>
+          <span className="text-pink-500 shrink-0">EXPRESS</span>
         </h1>
-        <span className="mt-1 inline-block text-[10px] uppercase tracking-widest text-pink-300 font-semibold bg-pink-950/50 px-1.5 py-0.5 rounded border border-pink-900/50 leading-none">
+        <span className="mt-1 inline-flex text-[9px] uppercase tracking-widest text-pink-300 font-semibold bg-pink-950/50 px-1 py-0.5 rounded border border-pink-900/50 leading-none truncate max-w-full">
           Subsystem v3.1
         </span>
       </div>

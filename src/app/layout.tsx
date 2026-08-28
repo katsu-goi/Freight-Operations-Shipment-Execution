@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Airship" },
   icons: {
     icon: [
-      { url: "/icons/airship-icon.png", type: "image/png", sizes: "512x512" },
-      { url: "/icons/airship-pink-mark.png", type: "image/png", sizes: "512x256" },
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon.svg?v=2", type: "image/svg+xml" },
+      { url: "/icons/airship-icon.png?v=2", type: "image/png", sizes: "512x512" },
+      { url: "/icons/airship-pink-mark.png?v=2", type: "image/png" },
     ],
-    apple: "/icons/airship-icon.png",
+    apple: "/icons/airship-icon.png?v=2",
   },
 };
 

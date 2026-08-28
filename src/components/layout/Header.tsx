@@ -37,15 +37,15 @@ export default function Header({
     .toUpperCase();
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 pl-16 lg:pl-6 pr-6 flex items-center justify-between shrink-0 shadow-sm z-10">
-      <form onSubmit={onSearch} className="relative w-64 lg:w-80">
+    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 pl-16 lg:pl-6 pr-6 flex items-center justify-between gap-4 shrink-0 shadow-sm z-10 min-w-0">
+      <form onSubmit={onSearch} className="relative flex-1 max-w-[320px] lg:max-w-[360px] min-w-0">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
           type="text"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Search Parcel Ref, Tracking #, Client or Recipient..."
-          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
+          placeholder="Search parcels..."
+          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white dark:focus:bg-slate-800 transition-all truncate"
         />
       </form>
 
