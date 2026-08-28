@@ -163,11 +163,11 @@ export default function Sidebar({
 function Brand({ role: _role }: BrandProps): React.JSX.Element {
   return (
     <div className="p-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
-      {/* User-provided AX artwork — PNG on white pill for contrast on dark sidebar */}
-      <div className="w-11 h-10 bg-white rounded-xl p-1.5 shadow-md ring-1 ring-white/10 flex items-center justify-center shrink-0">
+      {/* Pink AX artwork — exact user PNG (black AX + white chevrons on #E81B75) */}
+      <div className="w-11 h-10 rounded-xl overflow-hidden shadow-md ring-1 ring-pink-500/20 flex items-center justify-center shrink-0 bg-[#E81B75]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/icons/airship-mark.png"
+          src="/icons/airship-pink-mark.png"
           alt="Airship Express"
           width={44}
           height={28}

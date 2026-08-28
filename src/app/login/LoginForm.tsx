@@ -69,10 +69,10 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="flex items-center gap-3 mb-8">
-        <div className="bg-white p-2.5 rounded-2xl shadow-lg ring-1 ring-white/20 flex items-center justify-center w-14 h-14 shrink-0">
+        <div className="bg-[#E81B75] p-2.5 rounded-2xl shadow-lg ring-1 ring-pink-500/30 flex items-center justify-center w-14 h-14 shrink-0 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/icons/airship-mark.png"
+            src="/icons/airship-pink-mark.png"
             alt="Airship Express"
             width={56}
             height={32}

@@ -1,0 +1,16 @@
+<svg width="320" height="80" viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Airship Express pink logo">
+  <title>Airship Express</title>
+  <rect width="320" height="80" rx="12" fill="#E81B75"/>
+  <!-- Mark: AX black + white chevrons -->
+  <g>
+    <text x="18" y="38" font-family="'Inter','Arial Black',Arial,sans-serif" font-size="44" font-weight="900" letter-spacing="-3" fill="#0A0A0A">AX</text>
+    <g fill="#FFFFFF">
+      <path d="M 92 8 L 114 8 L 92 28 L 114 48 L 92 48 L 70 28 Z"/>
+      <path d="M 118 8 L 140 8 L 118 28 L 140 48 L 118 48 L 96 28 Z"/>
+      <path d="M 144 8 L 166 8 L 144 28 L 166 48 L 144 48 L 122 28 Z"/>
+    </g>
+  </g>
+  <!-- Wordmark in black -->
+  <text x="18" y="64" font-family="'Inter',Arial,sans-serif" font-size="20" font-weight="900" letter-spacing="6" fill="#0A0A0A">AIRSHIP</text>
+  <text x="18" y="76" font-family="'Inter',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="9" fill="#0A0A0A">EXPRESS</text>
+</svg>
