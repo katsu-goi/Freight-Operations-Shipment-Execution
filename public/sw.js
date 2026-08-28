@@ -13,13 +13,20 @@
  * outbox when connectivity returns (see src/lib/offline/outbox.ts).
  * ========================================================================== */
 
-const VERSION = "airship-v1";
+const VERSION = "airship-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const TILE_CACHE = `${VERSION}-tiles`;
 const MAX_TILES = 500;
 
-const PRECACHE_URLS = ["/", "/offline", "/icons/icon.svg", "/manifest.webmanifest"];
+const PRECACHE_URLS = [
+  "/",
+  "/offline",
+  "/icons/icon.svg",
+  "/icons/airship-icon.png",
+  "/icons/airship-pink-mark.png",
+  "/manifest.webmanifest",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
