@@ -1,0 +1,11 @@
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Airship Express mark for dark backgrounds">
+  <title>Airship Express — AX Mark (dark bg)</title>
+  <!-- AX base in white for dark sidebar -->
+  <text x="2" y="42" font-family="'Inter','Arial Black',Arial,sans-serif" font-size="48" font-weight="900" letter-spacing="-3" fill="#FFFFFF">AX</text>
+  <!-- Three pink chevrons — Airship magenta #E81B75 -->
+  <g fill="#E81B75">
+    <path d="M 86 6 L 106 6 L 86 25 L 106 44 L 86 44 L 66 25 Z"/>
+    <path d="M 111 6 L 131 6 L 111 25 L 131 44 L 111 44 L 91 25 Z"/>
+    <path d="M 136 6 L 156 6 L 136 25 L 156 44 L 136 44 L 116 25 Z"/>
+  </g>
+</svg>

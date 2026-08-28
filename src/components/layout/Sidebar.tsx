@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, ShieldCheck, Ship, X } from "lucide-react";
+import { Menu, ShieldCheck, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/types";
@@ -162,15 +162,26 @@ export default function Sidebar({
 
 function Brand({ role: _role }: BrandProps): React.JSX.Element {
   return (
-    <div className="p-5 border-b border-slate-800 flex items-center gap-3 shrink-0">
-      <div className="bg-gradient-to-tr from-pink-600 to-rose-500 p-2.5 rounded-xl shadow-lg shadow-pink-500/20 text-white ring-1 ring-white/10">
-        <Ship className="w-6 h-6 stroke-[2.5]" aria-hidden />
+    <div className="p-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
+      {/* New AX mark from user artwork — dark-bg variant for slate sidebar */}
+      <div className="w-[52px] h-10 flex items-center justify-center shrink-0 -ml-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/icons/airship-mark-dark.svg"
+          alt="Airship Express"
+          width={52}
+          height={30}
+          className="w-full h-full object-contain object-left drop-shadow-sm"
+          loading="eager"
+          decoding="async"
+        />
       </div>
-      <div className="min-w-0">
-        <h1 className="font-bold text-white text-[15px] tracking-wide leading-none">
-          Airship<span className="text-pink-500 font-black ml-1">Express</span>
+      <div className="min-w-0 flex flex-col justify-center">
+        <h1 className="font-black text-white text-[15px] tracking-wide leading-none flex items-baseline gap-1">
+          <span>AIRSHIP</span>
+          <span className="text-pink-500">EXPRESS</span>
         </h1>
-        <span className="mt-1 inline-block text-[10px] uppercase tracking-widest text-pink-300 font-semibold bg-pink-950/50 px-1.5 py-0.5 rounded border border-pink-900/50">
+        <span className="mt-1 inline-block text-[10px] uppercase tracking-widest text-pink-300 font-semibold bg-pink-950/50 px-1.5 py-0.5 rounded border border-pink-900/50 leading-none">
           Subsystem v3.1
         </span>
       </div>
