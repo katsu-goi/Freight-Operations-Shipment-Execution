@@ -27,6 +27,8 @@ export interface NavItem {
   /** Roles allowed to see this item. Empty = everyone authenticated. */
   roles: AppRole[];
   badge?: { text: string; kind: "ai" | "live" | "count" };
+  /** Visual variant — `cta` renders as a distinct primary button (Create Parcel). */
+  variant?: "default" | "cta";
 }
 
 /**
@@ -50,6 +52,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Create Parcel",
     icon: PackagePlus,
     roles: ["Admin", "Seller"],
+    variant: "cta",
   },
   { href: "/track", label: "Track Parcel", icon: Radar, roles: [] },
   { href: "/notifications", label: "Notifications", icon: Bell, roles: [] },
