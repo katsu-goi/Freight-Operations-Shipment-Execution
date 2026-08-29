@@ -1,0 +1,108 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F9A8D4"/>
+      <stop offset="1" stop-color="#E81B75"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Top AX logo -->
+  <g transform="translate(60,40)">
+    <text x="0" y="42" font-family="'Arial Black',Arial,sans-serif" font-size="48" font-weight="900" fill="#0A0A0A">AX</text>
+    <g fill="#E81B75">
+      <path d="M 86 6 L 106 6 L 86 25 L 106 44 L 86 44 L 66 25 Z"/>
+      <path d="M 111 6 L 131 6 L 111 25 L 131 44 L 111 44 L 91 25 Z"/>
+      <path d="M 136 6 L 156 6 L 136 25 L 156 44 L 136 44 L 116 25 Z"/>
+    </g>
+    <text x="0" y="70" font-family="Arial" font-size="14" font-weight="900" letter-spacing="3" fill="#0A0A0A">AIRSHIP</text>
+    <text x="0" y="84" font-family="Arial" font-size="9" font-weight="700" letter-spacing="5" fill="#0A0A0A">EXPRESS</text>
+  </g>
+  <!-- Top right badge FOR ONLINE SELLERS -->
+  <g transform="translate(1550,40)">
+    <circle cx="80" cy="80" r="75" fill="#E81B75" stroke="white" stroke-width="3" stroke-dasharray="8 4"/>
+    <circle cx="80" cy="80" r="68" fill="#E81B75"/>
+    <text x="80" y="65" font-family="Arial" font-size="11" font-weight="800" fill="white" text-anchor="middle">FOR</text>
+    <text x="80" y="82" font-family="Arial" font-size="14" font-weight="900" fill="white" text-anchor="middle">ONLINE</text>
+    <text x="80" y="99" font-family="Arial" font-size="13" font-weight="800" fill="white" text-anchor="middle">SELLERS</text>
+    <g transform="translate(60,105)"><text x="0" y="0" font-family="Arial" font-size="10" fill="white">📦</text></g>
+  </g>
+  <!-- Airplane left -->
+  <g transform="translate(30,140)" opacity="0.95">
+    <text x="0" y="0" font-family="Arial" font-size="60">✈️</text>
+    <path d="M 10 30 Q 80 20 140 10 Q 180 5 220 2" stroke="#0A0A0A" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+  </g>
+  <!-- Scooter right -->
+  <g transform="translate(1650,180)" opacity="0.95">
+    <text x="0" y="0" font-family="Arial" font-size="50">🛵</text>
+  </g>
+  <!-- SPEED headline -->
+  <text x="960" y="260" font-family="'Arial Black',Arial,sans-serif" font-size="160" font-weight="900" fill="#0A0A0A" text-anchor="middle" letter-spacing="-4">SPEED</text>
+  <text x="960" y="320" font-family="Arial,sans-serif" font-size="52" font-weight="800" fill="#E81B75" text-anchor="middle" letter-spacing="1">is the Future of Business</text>
+  <!-- Black bar -->
+  <rect x="460" y="345" width="1000" height="44" rx="22" fill="#0A0A0A"/>
+  <text x="960" y="373" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">Fast and reliable drop-off point for online sellers</text>
+  
+  <!-- Drop-off points 5 columns -->
+  <g transform="translate(160,430)">
+    <!-- Shopee orange -->
+    <rect x="0" y="0" width="310" height="380" rx="16" fill="#FF6B2E"/>
+    <rect x="0" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+    <text x="155" y="70" font-family="Arial" font-size="40" text-anchor="middle">🛍️</text>
+    <text x="155" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
+    <text x="155" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
+    <g transform="translate(60,200)"><text x="0" y="0" font-family="Arial" font-size="50">🙋‍♀️</text></g>
+    <!-- Gogo blue -->
+    <rect x="330" y="0" width="310" height="380" rx="16" fill="#0A84FF"/>
+    <rect x="330" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+    <text x="485" y="70" font-family="Arial" font-size="32" font-weight="900" fill="white" text-anchor="middle">GOGO</text>
+    <text x="485" y="95" font-family="Arial" font-size="14" font-weight="800" fill="white" text-anchor="middle">XPRESS</text>
+    <text x="485" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
+    <text x="485" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
+    <!-- Flash yellow -->
+    <rect x="660" y="0" width="310" height="380" rx="16" fill="#FFC107"/>
+    <rect x="660" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+    <text x="815" y="70" font-family="Arial" font-size="14" font-weight="900" fill="#0A0A0A" text-anchor="middle">FLASH</text>
+    <text x="815" y="90" font-family="Arial" font-size="10" font-weight="800" fill="#0A0A0A" text-anchor="middle">EXPRESS</text>
+    <text x="815" y="140" font-family="Arial" font-size="18" font-weight="900" fill="#0A0A0A" text-anchor="middle">DROP-OFF</text>
+    <text x="815" y="165" font-family="Arial" font-size="18" font-weight="900" fill="#0A0A0A" text-anchor="middle">POINT</text>
+    <text x="815" y="220" font-family="Arial" font-size="40" text-anchor="middle">👷</text>
+    <!-- TikTok black -->
+    <rect x="990" y="0" width="310" height="380" rx="16" fill="#0A0A0A"/>
+    <rect x="990" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+    <text x="1145" y="70" font-family="Arial" font-size="24" font-weight="900" fill="white" text-anchor="middle">TikTok Shop</text>
+    <text x="1145" y="145" font-family="Arial" font-size="16" font-weight="800" fill="#0A0A0A" text-anchor="middle">DROP-OFF</text>
+    <text x="1145" y="165" font-family="Arial" font-size="16" font-weight="800" fill="#0A0A0A" text-anchor="middle">POINT</text>
+    <rect x="1040" y="115" width="210" height="55" rx="8" fill="white" stroke="#E81B75" stroke-width="2"/>
+    <!-- Laz blue -->
+    <rect x="1320" y="0" width="310" height="380" rx="16" fill="#0B3D91"/>
+    <rect x="1320" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+    <text x="1475" y="75" font-family="Arial" font-size="16" font-weight="900" fill="white" text-anchor="middle">Laz</text>
+    <text x="1475" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
+    <text x="1475" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
+    <text x="1475" y="220" font-family="Arial" font-size="50" text-anchor="middle">🦁</text>
+  </g>
+  
+  <!-- Bottom convenience bar -->
+  <rect x="500" y="850" width="920" height="70" rx="35" fill="white"/>
+  <g transform="translate(540,885)">
+    <circle cx="25" cy="0" r="22" fill="#E81B75"/><text x="25" y="6" font-family="Arial" font-size="16" fill="white" text-anchor="middle">◷</text>
+    <text x="55" y="-8" font-family="Arial" font-size="12" font-weight="900" fill="#E81B75">CONVENIENT</text>
+    <text x="55" y="8" font-family="Arial" font-size="10" fill="#333" font-weight="600">Easy drop-off</text>
+    <text x="55" y="20" font-family="Arial" font-size="10" fill="#333">anytime</text>
+  </g>
+  <g transform="translate(820,885)">
+    <circle cx="25" cy="0" r="22" fill="#E81B75"/><text x="25" y="6" font-family="Arial" font-size="14" fill="white" text-anchor="middle">✓</text>
+    <text x="55" y="-8" font-family="Arial" font-size="12" font-weight="900" fill="#E81B75">RELIABLE</text>
+    <text x="55" y="8" font-family="Arial" font-size="10" fill="#333" font-weight="600">Safe and Secure</text>
+    <text x="55" y="20" font-family="Arial" font-size="10" fill="#333">handling</text>
+  </g>
+  <g transform="translate(1120,885)">
+    <circle cx="25" cy="0" r="22" fill="#E81B75"/><text x="25" y="6" font-family="Arial" font-size="14" fill="white" text-anchor="middle">⚡</text>
+    <text x="55" y="-8" font-family="Arial" font-size="12" font-weight="900" fill="#E81B75">FAST</text>
+    <text x="55" y="8" font-family="Arial" font-size="10" fill="#333" font-weight="600">Quick processing</text>
+    <text x="55" y="20" font-family="Arial" font-size="10" fill="#333">your parcel</text>
+  </g>
+  <!-- Footer pink bar -->
+  <rect x="0" y="1020" width="1920" height="60" fill="#E81B75"/>
+  <text x="960" y="1055" font-family="Arial" font-size="13" fill="white" text-anchor="middle">📍 352 Escolta St., Tomas Pinpin Binondo, Manila  •  airshipexpresss@gmail.com  •  0945 441 8789  •  (02)8911-1888</text>
+</svg>

@@ -20,20 +20,9 @@ export default function LoginPage() {
         <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.35)]" />
       </div>
 
-      {/* Content */}
+      {/* Content — card floats over poster, blended via backdrop-blur */}
       <div className="relative z-10 w-full max-w-md">
         <LoginForm />
-      </div>
-
-      {/* Bottom contact bar — subtle, matches poster footer */}
-      <div className="absolute bottom-0 inset-x-0 z-10 hidden lg:flex items-center justify-center gap-6 py-2.5 text-[10px] text-white/80 bg-[#E81B75]/90 backdrop-blur-sm border-t border-white/20">
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-white/80" /> 352 Escolta St., Tomas Pinpin Binondo, Manila
-        </span>
-        <span className="opacity-60">•</span>
-        <span>airshipexpresss@gmail.com</span>
-        <span className="opacity-60">•</span>
-        <span>0945 441 8789</span>
       </div>
     </div>
   );
