@@ -91,7 +91,7 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8">
+      <div className="bg-white/92 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-white/10 p-8">
         <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-6">
           {(["signin", "signup"] as const).map((m) => (
             <button
