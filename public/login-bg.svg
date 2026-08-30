@@ -4,6 +4,35 @@
       <stop offset="0" stop-color="#F9A8D4"/>
       <stop offset="1" stop-color="#E81B75"/>
     </linearGradient>
+    <linearGradient id="gradOrange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8C2F"/>
+      <stop offset="1" stop-color="#F55D0B"/>
+    </linearGradient>
+    <linearGradient id="gradBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A9BFF"/>
+      <stop offset="1" stop-color="#0A5DFF"/>
+    </linearGradient>
+    <linearGradient id="gradYellow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD23C"/>
+      <stop offset="1" stop-color="#FFB800"/>
+    </linearGradient>
+    <linearGradient id="gradDarkBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#0A245C"/>
+    </linearGradient>
+    <linearGradient id="lazHeart" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8A00"/>
+      <stop offset="0.5" stop-color="#FF3A75"/>
+      <stop offset="1" stop-color="#8A4FFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.18"/>
+    </filter>
+    <clipPath id="clipOrange"><rect x="0" y="0" width="310" height="380" rx="16"/></clipPath>
+    <clipPath id="clipBlue"><rect x="330" y="0" width="310" height="380" rx="16"/></clipPath>
+    <clipPath id="clipYellow"><rect x="660" y="0" width="310" height="380" rx="16"/></clipPath>
+    <clipPath id="clipBlack"><rect x="990" y="0" width="310" height="380" rx="16"/></clipPath>
+    <clipPath id="clipLaz"><rect x="1320" y="0" width="310" height="380" rx="16"/></clipPath>
   </defs>
   <rect width="1920" height="1080" fill="url(#bg)"/>
   <!-- Top AX logo -->
@@ -17,72 +46,429 @@
     <text x="0" y="70" font-family="Arial" font-size="14" font-weight="900" letter-spacing="3" fill="#0A0A0A">AIRSHIP</text>
     <text x="0" y="84" font-family="Arial" font-size="9" font-weight="700" letter-spacing="5" fill="#0A0A0A">EXPRESS</text>
   </g>
-  <!-- Top right badge FOR ONLINE SELLERS -->
   <g transform="translate(1550,40)">
     <circle cx="80" cy="80" r="75" fill="#E81B75" stroke="white" stroke-width="3" stroke-dasharray="8 4"/>
     <circle cx="80" cy="80" r="68" fill="#E81B75"/>
     <text x="80" y="65" font-family="Arial" font-size="11" font-weight="800" fill="white" text-anchor="middle">FOR</text>
     <text x="80" y="82" font-family="Arial" font-size="14" font-weight="900" fill="white" text-anchor="middle">ONLINE</text>
     <text x="80" y="99" font-family="Arial" font-size="13" font-weight="800" fill="white" text-anchor="middle">SELLERS</text>
-    <g transform="translate(60,105)"><text x="0" y="0" font-family="Arial" font-size="10" fill="white">📦</text></g>
+    <g transform="translate(62,108)">
+      <path d="M12 2 L14.5 8 L21 8 L15.5 12 L17 18.5 L12 14.5 L7 18.5 L8.5 12 L3 8 L9.5 8 Z" fill="white" opacity="0.95"/>
+    </g>
   </g>
-  <!-- Airplane left -->
   <g transform="translate(30,140)" opacity="0.95">
     <text x="0" y="0" font-family="Arial" font-size="60">✈️</text>
     <path d="M 10 30 Q 80 20 140 10 Q 180 5 220 2" stroke="#0A0A0A" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
   </g>
-  <!-- Scooter right -->
   <g transform="translate(1650,180)" opacity="0.95">
     <text x="0" y="0" font-family="Arial" font-size="50">🛵</text>
   </g>
-  <!-- SPEED headline -->
   <text x="960" y="260" font-family="'Arial Black',Arial,sans-serif" font-size="160" font-weight="900" fill="#0A0A0A" text-anchor="middle" letter-spacing="-4">SPEED</text>
   <text x="960" y="320" font-family="Arial,sans-serif" font-size="52" font-weight="800" fill="#E81B75" text-anchor="middle" letter-spacing="1">is the Future of Business</text>
-  <!-- Black bar -->
   <rect x="460" y="345" width="1000" height="44" rx="22" fill="#0A0A0A"/>
   <text x="960" y="373" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">Fast and reliable drop-off point for online sellers</text>
   
-  <!-- Drop-off points 5 columns -->
-  <g transform="translate(160,430)">
-    <!-- Shopee orange -->
-    <rect x="0" y="0" width="310" height="380" rx="16" fill="#FF6B2E"/>
-    <rect x="0" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
-    <text x="155" y="70" font-family="Arial" font-size="40" text-anchor="middle">🛍️</text>
-    <text x="155" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
-    <text x="155" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
-    <g transform="translate(60,200)"><text x="0" y="0" font-family="Arial" font-size="50">🙋‍♀️</text></g>
-    <!-- Gogo blue -->
-    <rect x="330" y="0" width="310" height="380" rx="16" fill="#0A84FF"/>
-    <rect x="330" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
-    <text x="485" y="70" font-family="Arial" font-size="32" font-weight="900" fill="white" text-anchor="middle">GOGO</text>
-    <text x="485" y="95" font-family="Arial" font-size="14" font-weight="800" fill="white" text-anchor="middle">XPRESS</text>
-    <text x="485" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
-    <text x="485" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
-    <!-- Flash yellow -->
-    <rect x="660" y="0" width="310" height="380" rx="16" fill="#FFC107"/>
-    <rect x="660" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
-    <text x="815" y="70" font-family="Arial" font-size="14" font-weight="900" fill="#0A0A0A" text-anchor="middle">FLASH</text>
-    <text x="815" y="90" font-family="Arial" font-size="10" font-weight="800" fill="#0A0A0A" text-anchor="middle">EXPRESS</text>
-    <text x="815" y="140" font-family="Arial" font-size="18" font-weight="900" fill="#0A0A0A" text-anchor="middle">DROP-OFF</text>
-    <text x="815" y="165" font-family="Arial" font-size="18" font-weight="900" fill="#0A0A0A" text-anchor="middle">POINT</text>
-    <text x="815" y="220" font-family="Arial" font-size="40" text-anchor="middle">👷</text>
-    <!-- TikTok black -->
-    <rect x="990" y="0" width="310" height="380" rx="16" fill="#0A0A0A"/>
-    <rect x="990" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
-    <text x="1145" y="70" font-family="Arial" font-size="24" font-weight="900" fill="white" text-anchor="middle">TikTok Shop</text>
-    <text x="1145" y="145" font-family="Arial" font-size="16" font-weight="800" fill="#0A0A0A" text-anchor="middle">DROP-OFF</text>
-    <text x="1145" y="165" font-family="Arial" font-size="16" font-weight="800" fill="#0A0A0A" text-anchor="middle">POINT</text>
-    <rect x="1040" y="115" width="210" height="55" rx="8" fill="white" stroke="#E81B75" stroke-width="2"/>
-    <!-- Laz blue -->
-    <rect x="1320" y="0" width="310" height="380" rx="16" fill="#0B3D91"/>
-    <rect x="1320" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
-    <text x="1475" y="75" font-family="Arial" font-size="16" font-weight="900" fill="white" text-anchor="middle">Laz</text>
-    <text x="1475" y="140" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">DROP-OFF</text>
-    <text x="1475" y="165" font-family="Arial" font-size="18" font-weight="900" fill="white" text-anchor="middle">POINT</text>
-    <text x="1475" y="220" font-family="Arial" font-size="50" text-anchor="middle">🦁</text>
+  <!-- Drop-off points 5 columns — HIGH FIDELITY -->
+  <g transform="translate(160,430)" filter="url(#shadow)">
+    <!-- ========== Column 1: Orange / Shopee ========== -->
+    <g>
+      <rect x="0" y="0" width="310" height="380" rx="16" fill="url(#gradOrange)"/>
+      <rect x="0" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+      <!-- faint city silhouette at bottom -->
+      <g opacity="0.18" clip-path="url(#clipOrange)">
+        <path d="M 0 300 L 0 270 L 22 270 L 22 250 L 45 250 L 45 275 L 68 275 L 68 240 L 95 240 L 95 260 L 115 260 L 115 230 L 145 230 L 145 265 L 170 265 L 170 245 L 200 245 L 200 275 L 230 275 L 230 255 L 260 255 L 260 285 L 285 285 L 285 260 L 310 260 L 310 380 L 0 380 Z" fill="#7A2B00"/>
+        <!-- windows -->
+        <g fill="#FFD8B8" opacity="0.35">
+          <rect x="8" y="285" width="6" height="8" rx="1"/><rect x="16" y="285" width="6" height="8" rx="1"/>
+          <rect x="74" y="250" width="5" height="7" rx="1"/><rect x="82" y="250" width="5" height="7" rx="1"/>
+          <rect x="123" y="242" width="6" height="8" rx="1"/><rect x="131" y="242" width="6" height="8" rx="1"/>
+          <rect x="180" y="257" width="5" height="6" rx="1"/><rect x="188" y="257" width="5" height="6" rx="1"/>
+        </g>
+      </g>
+      <!-- Shopee S bag logo — high fidelity white bag with S -->
+      <g transform="translate(155,58)">
+        <!-- bag body -->
+        <rect x="-34" y="-30" width="68" height="58" rx="12" fill="white" stroke="#FF6B2E" stroke-width="1.5"/>
+        <!-- bag handle -->
+        <path d="M -18 -30 C -18 -44 18 -44 18 -30" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <path d="M -18 -30 C -18 -44 18 -44 18 -30" fill="none" stroke="#FF6B2E" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- S letter -->
+        <text x="0" y="16" font-family="'Arial Black', Arial" font-size="34" font-weight="900" fill="#FF6B2E" text-anchor="middle">S</text>
+        <!-- highlight -->
+        <ellipse cx="-12" cy="-12" rx="10" ry="7" fill="white" opacity="0.18"/>
+      </g>
+      <text x="155" y="138" font-family="Arial" font-size="17" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.5">DROP-OFF</text>
+      <text x="155" y="160" font-family="Arial" font-size="17" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.5">POINT</text>
+      <!-- Monkey mascot — rich illustration — scaled up to match second image blueprint — positioned left as in blueprint -->
+      <g transform="translate(122,252) scale(1.42)">
+        <!-- shadow -->
+        <ellipse cx="0" cy="78" rx="78" ry="14" fill="black" opacity="0.14"/>
+        <!-- legs / body base -->
+        <ellipse cx="0" cy="52" rx="38" ry="28" fill="#8D4A2A"/>
+        <!-- pink outfit -->
+        <path d="M -28 38 L -30 72 L 30 72 L 28 38 Z" fill="#FF7EB8" stroke="#7A2B00" stroke-width="1.5" rx="8"/>
+        <rect x="-22" y="48" width="44" height="18" rx="6" fill="#FF6B9E" opacity="0.9"/>
+        <!-- arms holding bag -->
+        <g>
+          <ellipse cx="-32" cy="48" rx="14" ry="16" fill="#A56A3A"/>
+          <ellipse cx="32" cy="48" rx="14" ry="16" fill="#A56A3A"/>
+          <!-- small orange bags in hands -->
+          <rect x="-48" y="46" width="22" height="18" rx="4" fill="#FF6B2E" stroke="white" stroke-width="1"/>
+          <text x="-37" y="59" font-family="Arial" font-size="8" font-weight="900" fill="white" text-anchor="middle">S</text>
+          <rect x="26" y="46" width="22" height="18" rx="4" fill="#FF6B2E" stroke="white" stroke-width="1"/>
+          <text x="37" y="59" font-family="Arial" font-size="8" font-weight="900" fill="white" text-anchor="middle">S</text>
+          <!-- hands -->
+          <circle cx="-38" cy="36" r="9" fill="#D9A07A"/>
+          <circle cx="38" cy="36" r="9" fill="#D9A07A"/>
+        </g>
+        <!-- head -->
+        <circle cx="0" cy="12" r="38" fill="#A56A3A" stroke="#7A2B00" stroke-width="1.5"/>
+        <!-- face light -->
+        <ellipse cx="0" cy="18" rx="26" ry="22" fill="#F5D0B0"/>
+        <!-- muzzle -->
+        <ellipse cx="0" cy="30" rx="14" ry="10" fill="#FFD8B8"/>
+        <!-- eyes — big cute -->
+        <circle cx="-12" cy="10" r="9" fill="white"/>
+        <circle cx="12" cy="10" r="9" fill="white"/>
+        <circle cx="-12" cy="11.5" r="5.5" fill="#1A1A1A"/>
+        <circle cx="12" cy="11.5" r="5.5" fill="#1A1A1A"/>
+        <circle cx="-10.5" cy="9" r="2.2" fill="white"/>
+        <circle cx="13.5" cy="9" r="2.2" fill="white"/>
+        <!-- eye highlight closed wink? keep both open like second image -->
+        <!-- nose -->
+        <ellipse cx="0" cy="22" rx="4" ry="2.5" fill="#8D4A2A"/>
+        <!-- mouth — sweet smile like in second image -->
+        <path d="M -8 30 Q 0 38 8 30" fill="none" stroke="#7A2B00" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M -6 32 Q 0 35 6 32" fill="#7A2B00" opacity="0.85"/>
+        <!-- ears -->
+        <ellipse cx="-30" cy="6" rx="11" ry="12" fill="#A56A3A" stroke="#7A2B00" stroke-width="1.2"/>
+        <ellipse cx="30" cy="6" rx="11" ry="12" fill="#A56A3A" stroke="#7A2B00" stroke-width="1.2"/>
+        <ellipse cx="-30" cy="6" rx="5" ry="6" fill="#D9A07A"/>
+        <ellipse cx="30" cy="6" rx="5" ry="6" fill="#D9A07A"/>
+        <!-- pink flower on right ear — as in second image -->
+        <g transform="translate(26,-14)">
+          <circle cx="0" cy="0" r="10" fill="white" stroke="#E81B75" stroke-width="1"/>
+          <circle cx="0" cy="-7" r="5.5" fill="#FF7EB8"/><circle cx="6.5" cy="-2" r="5.5" fill="#FF7EB8"/><circle cx="4" cy="6" r="5.5" fill="#FF7EB8"/><circle cx="-4" cy="6" r="5.5" fill="#FF7EB8"/><circle cx="-6.5" cy="-2" r="5.5" fill="#FF7EB8"/>
+          <circle cx="0" cy="0" r="4.2" fill="#FFD93D" stroke="white" stroke-width="1"/>
+        </g>
+        <!-- hair tuft -->
+        <path d="M -18 -18 Q -10 -26 0 -24 Q 10 -26 18 -18 Q 10 -12 0 -14 Q -10 -12 -18 -18" fill="#8D4A2A"/>
+        <!-- cheek blush -->
+        <ellipse cx="-20" cy="22" rx="5" ry="3" fill="#FF8FA0" opacity="0.45"/>
+        <ellipse cx="20" cy="22" rx="5" ry="3" fill="#FF8FA0" opacity="0.45"/>
+      </g>
+    </g>
+    <!-- ========== Column 2: Blue / GOGO XPRESS ========== -->
+    <g>
+      <rect x="330" y="0" width="310" height="380" rx="16" fill="url(#gradBlue)"/>
+      <rect x="330" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+      <g opacity="0.16" clip-path="url(#clipBlue)">
+        <path d="M330 320 Q 420 260 485 300 T 640 315 L640 380 L330 380 Z" fill="#0A3D7A"/>
+        <path d="M330 340 L 360 330 L 375 345 L 400 335 L 425 350 L 450 338 L 475 352 L 500 340 L 530 355 L 560 345 L 590 358 L 640 340 L640 380 L330 380 Z" fill="white" opacity="0.5"/>
+      </g>
+      <!-- GOGO XPRESS shield logo — high fidelity -->
+      <g transform="translate(485,62)">
+        <!-- shield outer -->
+        <path d="M -44 -28 L 44 -28 L 38 8 C 38 8 24 26 0 36 C -24 26 -38 8 -38 8 Z" fill="white" stroke="#002B7A" stroke-width="2"/>
+        <!-- shield inner blue -->
+        <path d="M -39 -23 L 39 -23 L 34 6 C 34 6 21 22 0 31 C -21 22 -34 6 -34 6 Z" fill="#0A5DFF"/>
+        <!-- white highlight top -->
+        <path d="M -39 -23 L 39 -23 L 37 -15 L -37 -15 Z" fill="white" opacity="0.95"/>
+        <!-- GOGO text -->
+        <text x="0" y="2" font-family="'Arial Black',Arial" font-size="19" font-weight="900" fill="#0A2A6B" text-anchor="middle" letter-spacing="0.8" stroke="white" stroke-width="0.6">GOGO</text>
+        <text x="0" y="18" font-family="Arial" font-size="11" font-weight="900" fill="white" text-anchor="middle" letter-spacing="2.2">XPRESS</text>
+        <!-- small orange pin icon inside? -->
+        <g transform="translate(0,-10)">
+          <path d="M0 -6 C 3 -6 5 -3 3 0 L 0 4 L -3 0 C -5 -3 -3 -6 0 -6 Z" fill="#FF7A00" stroke="white" stroke-width="0.8"/>
+          <circle cx="0" cy="-1.5" r="1.6" fill="white"/>
+        </g>
+      </g>
+      <text x="485" y="138" font-family="Arial" font-size="16.5" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.4">DROP-OFF</text>
+      <text x="485" y="159" font-family="Arial" font-size="16.5" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.4">POINT</text>
+      <!-- Isometric cityscape on floating smartphone — exactly as in second image — enlarged -->
+      <g transform="translate(485,272) scale(1.32)">
+        <!-- drop shadow -->
+        <ellipse cx="0" cy="68" rx="92" ry="18" fill="black" opacity="0.18"/>
+        <!-- white circular glow behind phone — as in second image -->
+        <ellipse cx="2" cy="8" rx="84" ry="54" fill="white" opacity="0.92"/>
+        <!-- phone body — angled -->
+        <g transform="rotate(-8)">
+          <rect x="-88" y="-48" width="176" height="96" rx="18" fill="white" stroke="#0A2A6B" stroke-width="2.5"/>
+          <rect x="-84" y="-44" width="168" height="88" rx="14" fill="#F0F7FF"/>
+          <!-- isometric city blocks -->
+          <g transform="translate(-62,-18)">
+            <!-- green hills base -->
+            <path d="M 0 42 L 38 22 L 78 32 L 125 12 L 140 22 L 140 48 L 0 48 Z" fill="#2E8B57" opacity="0.92"/>
+            <path d="M 0 42 L 38 22 L 38 48 L 0 48 Z" fill="#1F6B3A"/>
+            <path d="M 38 22 L 78 32 L 78 48 L 38 48 Z" fill="#3AA76A"/>
+            <!-- buildings -->
+            <g>
+              <!-- small green -->
+              <path d="M 10 26 L 24 18 L 24 34 L 10 42 Z" fill="#3DD68C" stroke="white" stroke-width="0.6"/>
+              <path d="M 10 26 L 24 18 L 34 23 L 20 31 Z" fill="#7BE0A8"/>
+              <path d="M 20 31 L 34 23 L 34 39 L 20 47 Z" fill="#1FA86B"/>
+              <rect x="14" y="30" width="3" height="5" fill="white" opacity="0.75"/><rect x="18.5" y="28.5" width="3" height="5" fill="white" opacity="0.75"/>
+              <!-- tall orange -->
+              <path d="M 32 24 L 48 16 L 48 28 L 32 36 Z" fill="#FF8C42" stroke="white" stroke-width="0.6"/>
+              <path d="M 32 24 L 48 16 L 60 22 L 44 30 Z" fill="#FFB07A"/>
+              <path d="M 44 30 L 60 22 L 60 34 L 44 42 Z" fill="#D65A00"/>
+              <rect x="36" y="28" width="3" height="6" fill="white" opacity="0.8"/>
+              <!-- blue tall -->
+              <path d="M 58 18 L 74 10 L 74 24 L 58 32 Z" fill="#2A9BFF" stroke="white" stroke-width="0.6"/>
+              <path d="M 58 18 L 74 10 L 86 16 L 70 24 Z" fill="#7AC0FF"/>
+              <path d="M 70 24 L 86 16 L 86 30 L 70 38 Z" fill="#0A5DFF"/>
+              <rect x="62" y="22" width="3" height="5" fill="white" opacity="0.8"/>
+              <!-- yellow small -->
+              <path d="M 84 22 L 96 16 L 96 28 L 84 34 Z" fill="#FFD23C" stroke="white" stroke-width="0.6"/>
+              <path d="M 84 22 L 96 16 L 106 21 L 94 27 Z" fill="#FFEB8A"/>
+              <path d="M 94 27 L 106 21 L 106 33 L 94 39 Z" fill="#D9A600"/>
+            </g>
+            <!-- trees -->
+            <g opacity="0.95">
+              <circle cx="28" cy="44" r="5" fill="#0A7A3A"/><circle cx="28" cy="42" r="3.5" fill="#3DD68C"/>
+              <circle cx="68" cy="38" r="4.5" fill="#0A7A3A"/><circle cx="68" cy="36" r="3" fill="#3DD68C"/>
+              <circle cx="92" cy="42" r="4" fill="#0A7A3A"/>
+            </g>
+            <!-- roads -->
+            <path d="M 14 42 L 44 27 L 48 29 L 18 44 Z" fill="white" opacity="0.92"/>
+            <path d="M 44 27 L 74 12 L 78 14 L 48 29 Z" fill="white" opacity="0.92"/>
+            <circle cx="46" cy="28" r="1.6" fill="#FF3B30"/>
+          </g>
+          <!-- phone button / highlight -->
+          <circle cx="78" cy="18" r="6" fill="#0A5DFF" stroke="white" stroke-width="1.2"/>
+          <circle cx="78" cy="18" r="2.2" fill="white"/>
+          <!-- screen glare -->
+          <path d="M -84 -44 L -30 -44 L -58 -18 L -84 -18 Z" fill="white" opacity="0.14"/>
+        </g>
+      </g>
+    </g>
+    <!-- ========== Column 3: Yellow / FLASH ========== -->
+    <g>
+      <rect x="660" y="0" width="310" height="380" rx="16" fill="url(#gradYellow)"/>
+      <rect x="660" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+      <g opacity="0.15" clip-path="url(#clipYellow)">
+        <path d="M660 285 L 688 255 L 715 275 L 740 250 L 770 270 L 800 245 L 830 265 L 860 240 L 895 260 L 920 235 L 970 260 L970 380 L660 380 Z" fill="#7A4A00"/>
+        <g fill="#FFF2B2" opacity="0.4">
+          <rect x="676" y="270" width="7" height="10" rx="1"/><rect x="686" y="270" width="7" height="10" rx="1"/>
+          <rect x="756" y="260" width="6" height="9" rx="1"/><rect x="766" y="260" width="6" height="9" rx="1"/>
+          <rect x="842" y="252" width="7" height="10" rx="1"/><rect x="852" y="252" width="7" height="10" rx="1"/>
+        </g>
+      </g>
+      <!-- FLASH angular logo — high fidelity -->
+      <g transform="translate(815,60)">
+        <rect x="-52" y="-30" width="104" height="56" rx="12" fill="#FFE55A" stroke="#1A1A1A" stroke-width="2.2"/>
+        <!-- highlight top -->
+        <rect x="-52" y="-30" width="104" height="18" rx="12" fill="white" opacity="0.45"/>
+        <rect x="-52" y="-18" width="104" height="14" fill="white" opacity="0.25"/>
+        <!-- FLASH text angular italic -->
+        <text x="0" y="6" font-family="'Arial Black',Arial" font-size="20" font-weight="900" fill="#1A1A1A" text-anchor="middle" font-style="italic" letter-spacing="-0.5">FLA<tspan fill="#E81B75">SH</tspan></text>
+        <text x="0" y="16" font-family="Arial" font-size="7.5" font-weight="900" fill="#1A1A1A" text-anchor="middle" letter-spacing="1.8">EXPRESS</text>
+        <!-- lightning badge small -->
+        <g transform="translate(28,-12)">
+          <path d="M 0 -8 L 5 -0.5 L 2 -0.5 L 4 7 L -1 0.5 L 1 0.5 Z" fill="#1A1A0A" stroke="white" stroke-width="0.8"/>
+        </g>
+      </g>
+      <text x="815" y="138" font-family="Arial" font-size="16.5" font-weight="900" fill="#1A1A1A" text-anchor="middle" letter-spacing="0.3">DROP-OFF</text>
+      <text x="815" y="159" font-family="Arial" font-size="16.5" font-weight="900" fill="#1A1A1A" text-anchor="middle" letter-spacing="0.3">POINT</text>
+      <!-- Cartoon boy — rich illustration exactly as second image — scaled up and centered -->
+      <g transform="translate(815,248) scale(1.38)">
+        <ellipse cx="0" cy="78" rx="62" ry="10" fill="black" opacity="0.12"/>
+        <!-- legs -->
+        <rect x="-22" y="56" width="18" height="22" rx="5" fill="#FFD93D" stroke="#1A1A1A" stroke-width="1.2"/>
+        <rect x="4" y="56" width="18" height="22" rx="5" fill="#FFD93D" stroke="#1A1A1A" stroke-width="1.2"/>
+        <rect x="-22" y="72" width="18" height="8" rx="3" fill="white" stroke="#1A1A1A" stroke-width="1"/>
+        <rect x="4" y="72" width="18" height="8" rx="3" fill="white" stroke="#1A1A1A" stroke-width="1"/>
+        <!-- torso — yellow uniform -->
+        <rect x="-28" y="22" width="56" height="38" rx="10" fill="#FFD23C" stroke="#1A1A1A" stroke-width="1.5"/>
+        <!-- collar -->
+        <path d="M -10 22 L 0 32 L 10 22" fill="white" stroke="#1A1A1A" stroke-width="1"/>
+        <!-- buttons -->
+        <circle cx="0" cy="38" r="3" fill="#1A1A1A"/><circle cx="0" cy="50" r="3" fill="#1A1A1A"/>
+        <!-- FLASH chest badge -->
+        <rect x="-16" y="28" width="32" height="12" rx="3" fill="#1A1A1A"/>
+        <text x="0" y="37" font-family="Arial" font-size="7" font-weight="900" fill="#FFD23C" text-anchor="middle">FLASH</text>
+        <!-- arms -->
+        <ellipse cx="-36" cy="38" rx="11" ry="16" fill="#FFD93D" stroke="#1A1A1A" stroke-width="1.2"/>
+        <ellipse cx="36" cy="38" rx="11" ry="16" fill="#FFD93D" stroke="#1A1A1A" stroke-width="1.2"/>
+        <!-- hands holding packages -->
+        <g>
+          <rect x="-58" y="34" width="28" height="22" rx="4" fill="white" stroke="#1A1A1A" stroke-width="1.2"/>
+          <rect x="-58" y="34" width="8" height="22" rx="2" fill="#FFD23C"/>
+          <text x="-42" y="48" font-family="Arial" font-size="6.5" font-weight="900" fill="#1A1A1A" text-anchor="middle">FLA</text>
+          <rect x="30" y="34" width="28" height="22" rx="4" fill="white" stroke="#1A1A1A" stroke-width="1.2"/>
+          <rect x="50" y="34" width="8" height="22" rx="2" fill="#FFD23C"/>
+          <text x="42" y="48" font-family="Arial" font-size="6.5" font-weight="900" fill="#1A1A1A" text-anchor="middle">FLA</text>
+          <circle cx="-42" cy="58" r="7" fill="#F5C0A0" stroke="#1A1A1A" stroke-width="1"/>
+          <circle cx="42" cy="58" r="7" fill="#F5C0A0" stroke="#1A1A1A" stroke-width="1"/>
+        </g>
+        <!-- head -->
+        <ellipse cx="0" cy="6" rx="34" ry="32" fill="#F5C0A0" stroke="#1A1A1A" stroke-width="1.5"/>
+        <!-- cap — yellow FLASH cap as in second image -->
+        <path d="M -34 -2 L -28 -22 L 28 -22 L 34 -2 L 32 4 L -32 4 Z" fill="#FFD23C" stroke="#1A1A1A" stroke-width="1.4"/>
+        <path d="M -34 -2 L 34 -2 L 20 8 L -20 8 Z" fill="#1A1A1A"/>
+        <rect x="-14" y="-18" width="28" height="10" rx="2" fill="#1A1A1A"/>
+        <text x="0" y="-10" font-family="Arial" font-size="6" font-weight="900" fill="#FFD23C" text-anchor="middle">FLASH</text>
+        <!-- bill highlight -->
+        <path d="M -30 -4 L 30 -4 L 28 0 L -28 0 Z" fill="white" opacity="0.35"/>
+        <!-- eyes — big and cheerful -->
+        <ellipse cx="-11" cy="8" rx="7" ry="8" fill="white" stroke="#1A1A1A" stroke-width="0.9"/>
+        <ellipse cx="11" cy="8" rx="7" ry="8" fill="white" stroke="#1A1A1A" stroke-width="0.9"/>
+        <circle cx="-11" cy="9.5" r="4.2" fill="#1A1A1A"/>
+        <circle cx="11" cy="9.5" r="4.2" fill="#1A1A1A"/>
+        <circle cx="-9.5" cy="7" r="1.7" fill="white"/><circle cx="12.5" cy="7" r="1.7" fill="white"/>
+        <!-- eyebrows -->
+        <path d="M -18 0 Q -11 -3 -4 0" fill="none" stroke="#1A1A1A" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M 4 0 Q 11 -3 18 0" fill="none" stroke="#1A1A1A" stroke-width="1.4" stroke-linecap="round"/>
+        <!-- nose -->
+        <path d="M -2 15 L 0 18 L 2 15" fill="none" stroke="#8D4A2A" stroke-width="1" stroke-linecap="round"/>
+        <!-- big smile — as in second image -->
+        <path d="M -10 20 Q 0 28 10 20" fill="white" stroke="#1A1A1A" stroke-width="1.2"/>
+        <path d="M -8 20 Q 0 26 8 20" fill="#FF8FA0" opacity="0.5"/>
+        <!-- blush -->
+        <ellipse cx="-20" cy="16" rx="5" ry="2.5" fill="#FF8FA0" opacity="0.45"/>
+        <ellipse cx="20" cy="16" rx="5" ry="2.5" fill="#FF8FA0" opacity="0.45"/>
+        <!-- ears -->
+        <ellipse cx="-32" cy="6" rx="7" ry="9" fill="#F5C0A0" stroke="#1A1A1A" stroke-width="1"/>
+        <ellipse cx="32" cy="6" rx="7" ry="9" fill="#F5C0A0" stroke="#1A1A1A" stroke-width="1"/>
+      </g>
+    </g>
+    <!-- ========== Column 4: Black / TikTok Shop ========== -->
+    <g>
+      <rect x="990" y="0" width="310" height="380" rx="16" fill="#0A0A0A"/>
+      <rect x="990" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+      <!-- geometric line patterns — multi-colored as in second image -->
+      <g clip-path="url(#clipBlack)" opacity="1">
+        <!-- top small pink diamond -->
+        <g transform="translate(1025,26)">
+          <rect x="-7" y="-7" width="14" height="14" fill="#E81B75" transform="rotate(45)"/>
+        </g>
+        <!-- cyan X -->
+        <g transform="translate(1280,28)" stroke="#00F2EA" stroke-width="2.2">
+          <path d="M -7 -7 L 7 7 M 7 -7 L -7 7"/>
+        </g>
+        <!-- pink X small -->
+        <g transform="translate(1265,78)" stroke="#FF3B7A" stroke-width="2">
+          <path d="M -6 -6 L 6 6 M 6 -6 L -6 6"/>
+        </g>
+        <!-- cyan X lower -->
+        <g transform="translate(1028,120)" stroke="#00F2EA" stroke-width="2">
+          <path d="M -6 -6 L 6 6 M 6 -6 L -6 6"/>
+        </g>
+        <!-- blue X -->
+        <g transform="translate(1282,142)" stroke="#00D0FF" stroke-width="2">
+          <path d="M -6 -6 L 6 6 M 6 -6 L -6 6"/>
+        </g>
+        <!-- pink dots -->
+        <circle cx="1228" cy="178" r="3" fill="#FF3B7A"/>
+        <circle cx="1052" cy="208" r="2.5" fill="#FF3B7A"/>
+        <circle cx="1286" cy="238" r="2.5" fill="#FF3B7A"/>
+        <!-- cyan diamonds scattered -->
+        <g fill="none" stroke="#00F2EA" stroke-width="1.6">
+          <rect x="1038" y="172" width="10" height="10" transform="rotate(45 1043 177)"/>
+          <rect x="1272" y="188" width="12" height="12" transform="rotate(45 1278 194)"/>
+          <rect x="1022" y="258" width="8" height="8" transform="rotate(45 1026 262)"/>
+        </g>
+        <!-- scribble waves -->
+        <path d="M 1288 198 L 1282 208 L 1288 218 L 1282 228 L 1288 238" fill="none" stroke="white" stroke-width="1.5" opacity="0.85" stroke-linecap="round"/>
+        <path d="M 1032 278 L 1038 288 L 1032 298 L 1038 308" fill="none" stroke="white" stroke-width="1.4" opacity="0.8"/>
+        <path d="M 1286 298 L 1280 308 L 1286 318 L 1280 328" fill="none" stroke="white" stroke-width="1.4" opacity="0.8"/>
+        <!-- large cyan triangle outline — as in second image -->
+        <path d="M 1048 338 L 1098 252 L 1152 338 Z" fill="none" stroke="#00F2EA" stroke-width="3"/>
+        <path d="M 1062 322 L 1098 262 L 1136 322 Z" fill="none" stroke="#00F2EA" stroke-width="1.6" opacity="0.85"/>
+        <!-- pink small triangle -->
+        <path d="M 1222 268 L 1242 238 L 1262 268 Z" fill="none" stroke="#FF3B7A" stroke-width="1.6"/>
+        <!-- white dotted line top -->
+        <g stroke="white" stroke-width="1.4" opacity="0.35">
+          <path d="M 1012 52 L 1040 52" stroke-dasharray="3 4"/><path d="M 1240 52 L 1270 52" stroke-dasharray="3 4"/>
+        </g>
+      </g>
+      <!-- TikTok Shop logo — high fidelity at top -->
+      <g transform="translate(1145,58)">
+        <!-- musical note with cyan/pink offsets like TikTok -->
+        <g transform="translate(-22,-16)">
+          <path d="M 10 2 L 10 18 C 10 21.5 7.5 23 4.5 23 C 2 23 0 21 0 18 C 0 14.5 2.5 12 6 13.5 L 6 4 L 18 2 L 18 14 C 18 17 15.5 19 12.5 19 C 10 19 8 17 8 14 C 8 10.5 10.5 8 14 9.5 L 14 2 Z" fill="white"/>
+          <path d="M 10 2 L 10 18 C 10 21.5 7.5 23 4.5 23 C 2 23 0 21 0 18 C 0 14.5 2.5 12 6 13.5 L 6 4 L 18 2 L 18 14 C 18 17 15.5 19 12.5 19 C 10 19 8 17 8 14 C 8 10.5 10.5 8 14 9.5 L 14 2 Z" fill="none" stroke="#00F2EA" stroke-width="0.7" transform="translate(-1.5,0)" opacity="0.9"/>
+          <path d="M 10 2 L 10 18 C 10 21.5 7.5 23 4.5 23 C 2 23 0 21 0 18 C 0 14.5 2.5 12 6 13.5 L 6 4 L 18 2 L 18 14 C 18 17 15.5 19 12.5 19 C 10 19 8 17 8 14 C 8 10.5 10.5 8 14 9.5 L 14 2 Z" fill="none" stroke="#FF0050" stroke-width="0.7" transform="translate(1.5,0)" opacity="0.9"/>
+        </g>
+        <text x="12" y="6" font-family="Arial" font-size="22" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-0.5">TikTok Shop</text>
+      </g>
+      <!-- white rectangle with DROP-OFF POINT — as in second image with cyan/pink shadow border -->
+      <g transform="translate(1145,168)">
+        <!-- shadow layers -->
+        <rect x="-108" y="-34" width="216" height="68" rx="8" fill="#00F2EA" opacity="0.95" transform="translate(3,3)"/>
+        <rect x="-108" y="-34" width="216" height="68" rx="8" fill="#FF0050" opacity="0.95" transform="translate(-3,-2)"/>
+        <rect x="-108" y="-34" width="216" height="68" rx="8" fill="white" stroke="#0A0A0A" stroke-width="1.2"/>
+        <text x="0" y="-6" font-family="Arial" font-size="15" font-weight="900" fill="#0A0A0A" text-anchor="middle" letter-spacing="0.3">DROP-OFF</text>
+        <text x="0" y="16" font-family="Arial" font-size="15" font-weight="900" fill="#0A0A0A" text-anchor="middle" letter-spacing="0.3">POINT</text>
+      </g>
+    </g>
+    <!-- ========== Column 5: Dark Blue / Laz ========== -->
+    <g>
+      <rect x="1320" y="0" width="310" height="380" rx="16" fill="url(#gradDarkBlue)"/>
+      <rect x="1320" y="0" width="310" height="380" rx="16" fill="none" stroke="#E81B75" stroke-width="4"/>
+      <!-- subtle vignette -->
+      <ellipse cx="1475" cy="190" rx="130" ry="110" fill="white" opacity="0.04"/>
+      <!-- Laz 3D heart icon — high fidelity -->
+      <g transform="translate(1475,68)">
+        <rect x="-44" y="-28" width="88" height="56" rx="14" fill="white" opacity="0.08"/>
+        <rect x="-44" y="-28" width="88" height="56" rx="14" fill="none" stroke="white" stroke-width="1" opacity="0.14"/>
+        <!-- heart shadow -->
+        <path d="M 0 18 C -12 9 -24 -2 -16 -14 C -10 -22 0 -18 0 -18 C 0 -18 10 -22 16 -14 C 24 -2 12 9 0 18 Z" fill="black" opacity="0.22" transform="translate(2,2)"/>
+        <!-- heart gradient -->
+        <path d="M 0 16 C -12 7 -24 -4 -16 -16 C -10 -24 0 -20 0 -20 C 0 -20 10 -24 16 -16 C 24 -4 12 7 0 16 Z" fill="url(#lazHeart)" stroke="white" stroke-width="1.2"/>
+        <!-- highlight -->
+        <path d="M -14 -14 C -11 -18 -6 -20 -2 -19 C -5 -15 -10 -11 -14 -8 C -17 -11 -16 -14 -14 -14 Z" fill="white" opacity="0.45"/>
+        <text x="0.5" y="2" font-family="'Arial Black',Arial" font-size="16" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.3">Laz</text>
+      </g>
+      <text x="1475" y="138" font-family="Arial" font-size="16.5" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.3">DROP-OFF</text>
+      <text x="1475" y="159" font-family="Arial" font-size="16.5" font-weight="900" fill="white" text-anchor="middle" letter-spacing="0.3">POINT</text>
+      <!-- Lion-head mascot with rainbow mane — exactly as second image -->
+      <g transform="translate(1475,262)">
+        <ellipse cx="0" cy="66" rx="70" ry="12" fill="black" opacity="0.16"/>
+        <!-- rainbow mane — 10 petals around -->
+        <g>
+          <ellipse cx="0" cy="-44" rx="22" ry="26" fill="#00BFFF" stroke="white" stroke-width="1" transform="rotate(0 0 0)"/>
+          <ellipse cx="28" cy="-34" rx="22" ry="26" fill="#FF3B30" stroke="white" stroke-width="1" transform="rotate(36)"/>
+          <ellipse cx="44" cy="-10" rx="22" ry="26" fill="#FF9500" stroke="white" stroke-width="1"/>
+          <ellipse cx="44" cy="18" rx="22" ry="26" fill="#FFD60A" stroke="white" stroke-width="1"/>
+          <ellipse cx="28" cy="40" rx="22" ry="26" fill="#4CD964" stroke="white" stroke-width="1"/>
+          <ellipse cx="0" cy="48" rx="22" ry="26" fill="#5AC8FA" stroke="white" stroke-width="1"/>
+          <ellipse cx="-28" cy="40" rx="22" ry="26" fill="#5856D6" stroke="white" stroke-width="1"/>
+          <ellipse cx="-44" cy="18" rx="22" ry="26" fill="#FF2D55" stroke="white" stroke-width="1"/>
+          <ellipse cx="-44" cy="-10" rx="22" ry="26" fill="#FFCC00" stroke="white" stroke-width="1"/>
+          <ellipse cx="-28" cy="-34" rx="22" ry="26" fill="#007AFF" stroke="white" stroke-width="1"/>
+        </g>
+        <!-- white face base -->
+        <circle cx="0" cy="12" r="44" fill="white" stroke="#E0E0E0" stroke-width="1.5"/>
+        <!-- ears — rainbow tips -->
+        <ellipse cx="-30" cy="-12" rx="14" ry="16" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+        <ellipse cx="30" cy="-12" rx="14" ry="16" fill="white" stroke="#E0E0E0" stroke-width="1"/>
+        <!-- inner ear -->
+        <ellipse cx="-30" cy="-12" rx="6" ry="7" fill="#FFB8D0"/>
+        <ellipse cx="30" cy="-12" rx="6" ry="7" fill="#FFB8D0"/>
+        <!-- cheeks blush -->
+        <ellipse cx="-24" cy="18" rx="9" ry="6" fill="#FFB8D0" opacity="0.5"/>
+        <ellipse cx="24" cy="18" rx="9" ry="6" fill="#FFB8D0" opacity="0.5"/>
+        <!-- eyes — cute closed happy like second image -->
+        <path d="M -16 2 Q -8 -4 0 2 Q 8 -4 16 2" fill="none" stroke="#1A1A1A" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="-10" cy="4" r="3.5" fill="#1A1A1A"/><circle cx="10" cy="4" r="3.5" fill="#1A1A1A"/>
+        <circle cx="-9" cy="2.5" r="1.4" fill="white"/><circle cx="11" cy="2.5" r="1.4" fill="white"/>
+        <!-- nose heart -->
+        <path d="M 0 14 C -4 11 -7 8 -5 5 C -3 3 0 5 0 5 C 0 5 3 3 5 5 C 7 8 4 11 0 14 Z" fill="#FF3B30" stroke="#1A1A1A" stroke-width="0.8"/>
+        <!-- big open mouth — as in second image -->
+        <ellipse cx="0" cy="28" rx="14" ry="12" fill="#1A1A1A"/>
+        <ellipse cx="0" cy="30" rx="9" ry="7" fill="#FF8FA0"/>
+        <ellipse cx="0" cy="34" rx="5" ry="3" fill="#FF3B30"/>
+        <path d="M -9 28 Q 0 24 9 28" fill="white" opacity="0.95"/>
+        <!-- tongue -->
+        <path d="M 0 32 Q -4 36 0 38 Q 4 36 0 32" fill="#E81B75" opacity="0.85"/>
+        <!-- whisker dots -->
+        <circle cx="-14" cy="24" r="1.2" fill="#1A1A1A" opacity="0.35"/><circle cx="-18" cy="20" r="1.2" fill="#1A1A1A" opacity="0.35"/>
+        <circle cx="14" cy="24" r="1.2" fill="#1A1A1A" opacity="0.35"/><circle cx="18" cy="20" r="1.2" fill="#1A1A1A" opacity="0.35"/>
+      </g>
+    </g>
   </g>
   
-  <!-- Bottom convenience bar -->
   <rect x="500" y="850" width="920" height="70" rx="35" fill="white"/>
   <g transform="translate(540,885)">
     <circle cx="25" cy="0" r="22" fill="#E81B75"/><text x="25" y="6" font-family="Arial" font-size="16" fill="white" text-anchor="middle">◷</text>
@@ -102,7 +488,6 @@
     <text x="55" y="8" font-family="Arial" font-size="10" fill="#333" font-weight="600">Quick processing</text>
     <text x="55" y="20" font-family="Arial" font-size="10" fill="#333">your parcel</text>
   </g>
-  <!-- Footer pink bar -->
   <rect x="0" y="1020" width="1920" height="60" fill="#E81B75"/>
   <text x="960" y="1055" font-family="Arial" font-size="13" fill="white" text-anchor="middle">📍 352 Escolta St., Tomas Pinpin Binondo, Manila  •  airshipexpresss@gmail.com  •  0945 441 8789  •  (02)8911-1888</text>
 </svg>

@@ -107,73 +107,97 @@ export async function quickLogin(role: AppRole): Promise<AuthState> {
     };
   }
 
-  // Create the user if missing; confirm the email so sign-in works immediately.
-  const { error: createError } = await admin.auth.admin.createUser({
-    email: demo.email,
-    password: DEMO_PASSWORD,
-    email_confirm: true,
-    user_metadata: { full_name: demo.fullName, role },
-  });
-
-  // "already registered" is expected on repeat clicks — ignore it.
-  if (
-    createError &&
-    !/already|exists|registered/i.test(createError.message)
-  ) {
-    return { error: createError.message };
-  }
-
-  // Ensure the profile row exists and carries the correct role (the signup
-  // trigger sets it on creation; this keeps it correct on repeat logins).
-  const { data: userList } = await admin.auth.admin.listUsers();
-  const authUser = userList?.users.find((u) => u.email === demo.email);
-  if (authUser) {
-    await admin.auth.admin.updateUserById(authUser.id, {
+  try {
+    // Create the user if missing; confirm the email so sign-in works immediately.
+    const { error: createError } = await admin.auth.admin.createUser({
+      email: demo.email,
       password: DEMO_PASSWORD,
       email_confirm: true,
-      ban_duration: "none",
       user_metadata: { full_name: demo.fullName, role },
     });
 
-    // Seller demo accounts need a linked sellers business record.
-    let sellerId: string | null = null;
-    if (role === "Seller") {
-      const { data: seller } = await admin
-        .from("sellers")
-        .upsert(
-          {
-            reference: "SELL-DEMO-0001",
-            name: demo.fullName,
-            email: demo.email,
-            is_active: true,
-          },
-          { onConflict: "reference" },
-        )
-        .select("id")
-        .maybeSingle();
-      sellerId = seller?.id ?? null;
+    // "already registered" is expected on repeat clicks — ignore it.
+    if (
+      createError &&
+      !/already|exists|registered/i.test(createError.message)
+    ) {
+      return { error: createError.message };
     }
 
-    await admin.from("profiles").upsert(
-      {
-        id: authUser.id,
-        email: demo.email,
-        full_name: demo.fullName,
-        role,
-        is_active: true,
-        seller_id: sellerId,
-      },
-      { onConflict: "id" },
-    );
+    // Ensure the profile row exists and carries the correct role (the signup
+    // trigger sets it on creation; this keeps it correct on repeat logins).
+    const { data: userList } = await admin.auth.admin.listUsers();
+    const authUser = userList?.users.find((u) => u.email === demo.email);
+    if (authUser) {
+      await admin.auth.admin.updateUserById(authUser.id, {
+        password: DEMO_PASSWORD,
+        email_confirm: true,
+        ban_duration: "none",
+        user_metadata: { full_name: demo.fullName, role },
+      });
+
+      // Seller demo accounts need a linked sellers business record.
+      let sellerId: string | null = null;
+      if (role === "Seller") {
+        const { data: seller } = await admin
+          .from("sellers")
+          .upsert(
+            {
+              reference: "SELL-DEMO-0001",
+              name: demo.fullName,
+              email: demo.email,
+              is_active: true,
+            },
+            { onConflict: "reference" },
+          )
+          .select("id")
+          .maybeSingle();
+        sellerId = seller?.id ?? null;
+      }
+
+      await admin.from("profiles").upsert(
+        {
+          id: authUser.id,
+          email: demo.email,
+          full_name: demo.fullName,
+          role,
+          is_active: true,
+          seller_id: sellerId,
+        },
+        { onConflict: "id" },
+      );
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: demo.email,
+      password: DEMO_PASSWORD,
+    });
+    if (error) return { error: error.message };
+
+    revalidatePath("/", "layout");
+    redirect("/dashboard");
+  } catch (e: unknown) {
+    // Next.js redirect() throws a NEXT_REDIRECT error — must rethrow it.
+    if (
+      e !== null &&
+      typeof e === "object" &&
+      "digest" in e &&
+      typeof (e as { digest: unknown }).digest === "string" &&
+      (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+    ) {
+      throw e;
+    }
+    const msg = e instanceof Error ? e.message : String(e);
+    // Network failure when Supabase is down surfaces as "Failed to fetch".
+    if (/failed to fetch|fetch failed|ECONNREFUSED|network/i.test(msg)) {
+      return {
+        error:
+          "Cannot reach Supabase at " +
+          (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "127.0.0.1:54321") +
+          ". Is Docker + `supabase start` running? Try: start Docker Desktop, then run `npx supabase start` and `npm run dev`.",
+      };
+    }
+    return { error: msg || "Quick login failed. Check Supabase is running." };
   }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: demo.email,
-    password: DEMO_PASSWORD,
-  });
-  if (error) return { error: error.message };
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
 }
