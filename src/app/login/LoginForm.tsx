@@ -44,7 +44,7 @@ function SubmitButton({ mode }: { mode: "signin" | "signup" }) {
   );
 }
 
-export default function LoginForm() {
+export default function LoginForm({ compact = false }: { compact?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const action = mode === "signin" ? signIn : signUp;
   const [state, formAction] = useActionState<AuthState, FormData>(action, {});
@@ -68,46 +68,48 @@ export default function LoginForm() {
   return (
     <div className="w-full">
       {/* Glass card — Hirna style: frosted, centered, blended */}
-      <div className="bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-        {/* Header inside card — like Hirna */}
-        <div className="px-8 pt-8 pb-6 text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center p-2 mb-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/icons/airship-pink-mark.png"
-              alt="Airship Express"
-              width={48}
-              height={28}
-              className="w-full h-full object-contain"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="w-6 h-6 rounded-lg bg-[#E81B75] flex items-center justify-center">
+      <div className={`${compact ? "bg-transparent backdrop-blur-0 rounded-[16px] overflow-hidden border-0" : "bg-white/10 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden"}`}>
+        {/* Header inside card — like Hirna — hidden in compact 5-col panel to match image_1 */}
+        {!compact && (
+          <div className="px-8 pt-8 pb-6 text-center">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center p-2 mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/icons/airship-pink-mark.png"
-                alt=""
-                width={20}
-                height={12}
-                className="w-4 h-4 object-contain brightness-0 invert"
-                aria-hidden
+                alt="Airship Express"
+                width={48}
+                height={28}
+                className="w-full h-full object-contain"
+                loading="eager"
+                decoding="async"
               />
-            </span>
-            <span className="text-xs font-bold tracking-widest text-white/90">Hirna Portal</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="w-6 h-6 rounded-lg bg-[#E81B75] flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/icons/airship-pink-mark.png"
+                  alt=""
+                  width={20}
+                  height={12}
+                  className="w-4 h-4 object-contain brightness-0 invert"
+                  aria-hidden
+                />
+              </span>
+              <span className="text-xs font-bold tracking-widest text-white/90">Hirna Portal</span>
+            </div>
+            {/* Actual Airship title — keep brand but Hirna layout */}
+            <h1 className="text-xl font-bold text-white tracking-tight">Welcome back</h1>
+            <p className="mt-1 text-xs text-white/70">Sign in to your account to continue.</p>
+            <div className="mt-2 flex items-center justify-center gap-1.5">
+              <span className="text-[11px] font-black tracking-widest text-white">AIRSHIP</span>
+              <span className="text-[11px] font-black tracking-widest text-[#E81B75]">EXPRESS</span>
+              <span className="text-[10px] text-white/60 ml-1">Shipment Execution</span>
+            </div>
           </div>
-          {/* Actual Airship title — keep brand but Hirna layout */}
-          <h1 className="text-xl font-bold text-white tracking-tight">Welcome back</h1>
-          <p className="mt-1 text-xs text-white/70">Sign in to your account to continue.</p>
-          <div className="mt-2 flex items-center justify-center gap-1.5">
-            <span className="text-[11px] font-black tracking-widest text-white">AIRSHIP</span>
-            <span className="text-[11px] font-black tracking-widest text-[#E81B75]">EXPRESS</span>
-            <span className="text-[10px] text-white/60 ml-1">Shipment Execution</span>
-          </div>
-        </div>
+        )}
 
-        <div className="px-8 pb-8">
+        <div className={compact ? "px-4 py-4" : "px-8 pb-8"}>
           <div className="flex gap-1 p-1 bg-white/10 rounded-xl mb-6 backdrop-blur">
             {(["signin", "signup"] as const).map((m) => (
               <button
@@ -208,10 +210,10 @@ export default function LoginForm() {
             <SubmitButton mode={mode} />
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-3.5 h-3.5 text-[#E81B75]" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+          <div className={`${compact ? "mt-3 pt-3" : "mt-6 pt-6"} border-t border-white/10`}>
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-3 h-3 text-[#E81B75]" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">
                 Quick login (demo)
               </span>
             </div>
@@ -242,21 +244,25 @@ export default function LoginForm() {
             </div>
 
             {quickError && (
-              <p className="mt-3 text-xs text-white bg-red-500/90 border border-red-400 rounded-lg px-3 py-2">
+              <p className="mt-2 text-xs text-white bg-red-500/90 border border-red-400 rounded-lg px-3 py-2">
                 {quickError}
               </p>
             )}
-            <p className="mt-3 text-[10px] text-white/60 leading-snug text-center">
-              One click provisions a confirmed demo account for that role. Shared password:{" "}
-              <span className="font-mono text-white/80">demo123456</span>.
-            </p>
+            {!compact && (
+              <p className="mt-3 text-[10px] text-white/60 leading-snug text-center">
+                One click provisions a confirmed demo account for that role. Shared password:{" "}
+                <span className="font-mono text-white/80">demo123456</span>.
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      <p className="text-center text-xs text-white/70 mt-4 drop-shadow">
-        Role-based access · Admin · Seller · Customer
-      </p>
+      {!compact && (
+        <p className="text-center text-xs text-white/70 mt-4 drop-shadow">
+          Role-based access · Admin · Seller · Customer
+        </p>
+      )}
     </div>
   );
 }
