@@ -40,7 +40,7 @@ export default async function CustomersPage({
           />
         ) : (
           <>
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block table-scroll">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">

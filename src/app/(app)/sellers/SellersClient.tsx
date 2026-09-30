@@ -16,6 +16,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import ActionMenu, { type ActionMenuItem } from "@/components/ui/ActionMenu";
 import Modal from "@/components/ui/Modal";
+import TableScroll from "@/components/ui/TableScroll";
 import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/utils";
 import {
@@ -198,8 +199,8 @@ export default function SellersClient({ sellers }: { sellers: SellerAdminRow[] }
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs min-w-[52rem]">
+            <TableScroll minWidth="52rem">
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
                     <th className="px-5 py-3 font-bold">Seller</th>
@@ -255,7 +256,7 @@ export default function SellersClient({ sellers }: { sellers: SellerAdminRow[] }
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
 
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-800">

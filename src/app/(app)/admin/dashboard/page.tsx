@@ -26,8 +26,8 @@ import type { TrackingLog } from "@/types";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  // Enforce Admin role route guard
-  const profile = await requireRole(["Admin"]);
+  // Enforce Admin route guard (SuperAdmin inherits admin privileges)
+  const profile = await requireRole(["Admin", "SuperAdmin"]);
 
   const [{ shipments, batches, handovers }, recentLogs] = await Promise.all([
     getHubDashboard(),

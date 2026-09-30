@@ -65,7 +65,7 @@ export default async function BookingPage({
         </p>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[11px] text-slate-500 dark:text-slate-400">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-[11px] text-slate-500 dark:text-slate-400">
         <p>
           <strong className="text-slate-700 dark:text-slate-200">Intake</strong> —{" "}
           {rows.filter((r) => r.status === "Intake").length} ready for manifesting

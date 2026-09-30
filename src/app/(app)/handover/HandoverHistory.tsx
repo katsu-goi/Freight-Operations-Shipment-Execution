@@ -3,7 +3,7 @@ import type { Handover } from "@/types";
 
 export default function HandoverHistory({ handovers }: { handovers: Handover[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="table-scroll">
       <table className="w-full text-xs">
         <thead className="text-[10px] uppercase tracking-wider text-slate-400">
           <tr className="border-b border-slate-100 dark:border-slate-800">

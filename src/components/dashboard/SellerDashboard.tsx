@@ -51,14 +51,14 @@ export default function SellerDashboard({
           <div className="text-xs font-bold uppercase tracking-wider text-pink-400 mb-1 flex items-center gap-2">
             <Package className="w-4 h-4" /> Seller Dashboard
           </div>
-          <h2 className="text-2xl font-black tracking-tight">
+          <h2 className="fluid-display font-black tracking-tight break-words">
             Welcome back{sellerName ? `, ${sellerName}` : ""}
           </h2>
           <p className="text-slate-300 text-xs mt-1">
             Register parcels and follow them across the delivery network.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Link
             href="/parcels/new"
             className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-pink-600/30 flex items-center space-x-2 transition-all active:scale-95"
@@ -77,7 +77,7 @@ export default function SellerDashboard({
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         <KpiCard label="My Parcels" value={parcels.length} icon={Package} tone="pink" />
         <KpiCard label="Pending" value={pending} icon={PackageSearch} tone="blue" />
         <KpiCard label="In Transit" value={inTransit} icon={Truck} tone="amber" />

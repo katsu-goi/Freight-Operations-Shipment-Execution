@@ -163,6 +163,10 @@ export const parcelCreateSchema = z.object({
   destination: z.string().trim().min(2, "Destination is required").max(200),
   origin: z.string().trim().min(1).max(200).default("Branch Hub"),
   platform: z.enum(DELIVERY_PLATFORMS),
+  /** Pickup or Drop-off — the seller must choose one (server-enforced). */
+  deliveryMethod: z.enum(["Pickup", "Drop-off"], {
+    message: "Please select Pickup or Drop-off",
+  }),
   serviceType: z.string().trim().max(40).default("Standard"),
   description: z.string().trim().max(500).optional().default(""),
   dimensions: z.string().trim().max(60).optional().default(""),
@@ -208,7 +212,13 @@ export const parcelEditSchema = z.object({
 const passwordRule = z
   .string()
   .min(8, "Password must be at least 8 characters")
-  .max(72);
+  .max(50)
+  .regex(/[a-z]/, "Must contain at least one lowercase letter")
+  .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+  .regex(/[0-9]/, "Must contain at least one number")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "Must contain at least one special character");
+
+export { passwordRule };
 
 /** Create a seller with a login account. Password handled by Supabase Auth. */
 export const sellerAccountSchema = sellerSchema.extend({
@@ -261,4 +271,116 @@ export const notificationReadSchema = z.object({
 
 export const passwordChangeSchema = z.object({
   password: passwordRule,
+});
+
+/** Sign-in validation: email format + non-empty password only.
+ *  No complexity rules here — those are register-only (signUpSchema). */
+export const signInSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  password: z.string().min(1, "Enter your password"),
+});
+
+/** Self-registration sign-up schema — SELLER ONLY.
+ *  Public registration can never claim Admin/Staff roles: the role is forced
+ *  to Seller server-side and is not an accepted input field. */
+export const sellerNameRule = z
+  .string()
+  .trim()
+  .min(2, "Name is required")
+  .max(50, "Name must be at most 50 characters")
+  .regex(
+    /^[A-Za-z][A-Za-z\s.'-]*$/,
+    "Name may only contain letters, spaces, hyphens, apostrophes and periods",
+  );
+
+/** Philippine mobile number: exactly 11 digits starting with 09. */
+export const contactNumberRule = z
+  .string()
+  .trim()
+  .regex(/^09\d{9}$/, "Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX)");
+
+export const signUpSchema = z
+  .object({
+    email: z.string().trim().email("Enter a valid email address"),
+    password: passwordRule,
+    confirmPassword: z.string(),
+    fullName: sellerNameRule,
+    address: z.string().trim().min(4, "Address is required").max(300),
+    companyName: z.string().trim().min(2, "Company name is required").max(200),
+    contactNumber: contactNumberRule,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+/** Email OTP request / verification (passwordless login, ~90s expiry). */
+export const otpRequestSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+});
+
+export const otpVerifySchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  token: z.string().trim().min(6, "Enter the 6-digit code").max(12),
+});
+
+/** Six-digit numeric OTP code (registration + password reset). */
+export const otpCodeRule = z
+  .string()
+  .trim()
+  .regex(/^\d{6}$/, "Enter the 6-digit code sent to your email");
+
+/** Forgot-password: request a reset OTP for a registered email. */
+export const passwordResetRequestSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+});
+
+/** Forgot-password: verify the OTP (attempt-limited, single use). */
+export const passwordResetVerifySchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  token: otpCodeRule,
+});
+
+/** Forgot-password: set a new strong password with a verified OTP. */
+export const passwordResetConfirmSchema = z
+  .object({
+    email: z.string().trim().email("Enter a valid email address"),
+    token: otpCodeRule,
+    newPassword: passwordRule,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+/** Reporting filters — all optional; server clamps ranges. */
+export const reportFilterSchema = z.object({
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")).default(""),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")).default(""),
+  status: z.string().trim().max(40).optional().default(""),
+  platform: z.string().trim().max(60).optional().default(""),
+  search: z.string().trim().max(120).optional().default(""),
+  format: z.enum(["csv", "pdf"]).optional().default("csv"),
+});
+export type ReportFilterInput = z.infer<typeof reportFilterSchema>;
+
+/** AI training example submitted from operations ("Train your AI"). */
+export const aiTrainingExampleSchema = z.object({
+  kind: z.enum(["routing", "bol_parse"]),
+  input: z.string().trim().min(10, "Provide the original input").max(20_000),
+  expectedOutput: z.string().trim().min(2, "Provide the corrected output").max(20_000),
+  notes: z.string().trim().max(1000).optional().default(""),
+});
+export type AiTrainingExampleInput = z.infer<typeof aiTrainingExampleSchema>;
+
+/** SuperAdmin user management — assign any canonical role. */
+export const userRoleUpdateSchema = z.object({
+  userId: z.string().uuid(),
+  role: z.enum(["SuperAdmin", "Admin", "Seller", "Customer", "Citizen"]),
+});
+
+export const userActiveToggleSchema = z.object({
+  userId: z.string().uuid(),
+  isActive: z.boolean(),
 });

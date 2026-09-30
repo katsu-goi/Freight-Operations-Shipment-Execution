@@ -48,7 +48,7 @@ export default function Pagination({
           <Link
             href={hrefFor(page - 1)}
             aria-label="Previous page"
-            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="touch-target p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </Link>
@@ -58,7 +58,7 @@ export default function Pagination({
             key={p}
             href={hrefFor(p)}
             aria-current={p === page ? "page" : undefined}
-            className={`min-w-8 text-center px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`min-w-10 min-h-10 inline-flex items-center justify-center text-center px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
               p === page
                 ? "bg-pink-600 text-white shadow-md shadow-pink-600/30"
                 : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -71,7 +71,7 @@ export default function Pagination({
           <Link
             href={hrefFor(page + 1)}
             aria-label="Next page"
-            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="touch-target p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </Link>

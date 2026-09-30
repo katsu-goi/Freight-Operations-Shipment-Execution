@@ -22,9 +22,12 @@ export {
   can,
   roleTier,
   isAdminRole,
+  isSuperAdminRole,
   isStaffRole,
   isSellerRole,
   isCustomerRole,
+  isCitizenRole,
+  isPublicUserRole,
   type Permission,
 } from "@/lib/rbac";
 

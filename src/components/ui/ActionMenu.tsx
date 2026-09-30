@@ -37,7 +37,7 @@ export default function ActionMenu({ items }: { items: ActionMenuItem[] }) {
         onClick={() => setOpen((o) => !o)}
         aria-label="Row actions"
         aria-expanded={open}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-all"
+        className="touch-target p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-all"
       >
         <MoreVertical className="w-4 h-4" />
       </button>
@@ -45,7 +45,7 @@ export default function ActionMenu({ items }: { items: ActionMenuItem[] }) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-1 w-44 origin-top-right rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1 animate-[toast-in_.12s_ease-out]"
+          className="absolute right-0 z-40 mt-1 w-48 max-w-[min(12rem,calc(100vw-2rem))] origin-top-right rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1 animate-[toast-in_.12s_ease-out]"
         >
           {items.map((item) => (
             <button

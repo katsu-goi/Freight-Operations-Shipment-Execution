@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { recommendRoutes, aiEnabled } from "@/lib/ai";
+import { getActiveExamples, buildFewShotPrefix } from "@/lib/ai-training";
 import {
   requireUser,
   validate,
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
     const input = validate(routingRequestSchema, body);
 
     try {
-      const routes = await recommendRoutes(input);
+      const examples = await getActiveExamples("routing");
+      const routes = await recommendRoutes(input, buildFewShotPrefix(examples));
       return jsonOk({ routes });
     } catch (e) {
       throw new ApiError(502, e instanceof Error ? e.message : "Routing failed");

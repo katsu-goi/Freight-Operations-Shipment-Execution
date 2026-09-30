@@ -81,7 +81,7 @@ export default function Sidebar({
         aria-label="Open navigation"
         aria-expanded={mobileOpen}
         aria-controls="mobile-sidebar"
-        className="lg:hidden fixed top-4 left-4 z-30 p-2.5 rounded-xl bg-slate-900 text-white shadow-lg ring-1 ring-slate-800 hover:bg-slate-800 transition-colors"
+        className="lg:hidden fixed z-30 touch-target p-2.5 rounded-xl bg-slate-900 text-white shadow-lg ring-1 ring-slate-800 hover:bg-slate-800 transition-colors left-[max(1rem,env(safe-area-inset-left))] top-[max(1rem,env(safe-area-inset-top))]"
       >
         <Menu className="w-5 h-5" aria-hidden />
       </button>
@@ -89,7 +89,7 @@ export default function Sidebar({
       {/* Desktop — persistent, sticky full-height */}
       <aside
         aria-label="Primary navigation"
-        className="hidden lg:flex w-72 bg-slate-900 text-slate-300 flex-col shrink-0 shadow-2xl z-20 h-screen sticky top-0 border-r border-slate-800"
+        className="hidden lg:flex w-72 bg-slate-900 text-slate-300 flex-col shrink-0 shadow-2xl z-20 app-shell sticky top-0 border-r border-slate-800"
       >
         <Brand role={role} />
         <RoleBadge role={role} />

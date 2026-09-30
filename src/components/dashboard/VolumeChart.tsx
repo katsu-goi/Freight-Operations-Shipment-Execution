@@ -46,11 +46,11 @@ export default function VolumeChart({ data }: { data: IntakeRow[] }) {
   const platforms = DELIVERY_PLATFORMS.filter((p) => p in data[0]);
 
   return (
-    <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-          <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} allowDecimals={false} />
+    <div className="h-56 sm:h-64 w-full min-w-0 max-w-full">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <BarChart data={data} margin={{ top: 10, right: 4, left: -12, bottom: 0 }}>
+          <XAxis dataKey="month" stroke="#94a3b8" fontSize={10} tickLine={false} interval="preserveStartEnd" />
+          <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} allowDecimals={false} width={32} />
           <Tooltip
             contentStyle={{
               backgroundColor: dark ? "#1e293b" : "#0f172a",
@@ -60,7 +60,7 @@ export default function VolumeChart({ data }: { data: IntakeRow[] }) {
               fontSize: "12px",
             }}
           />
-          <Legend wrapperStyle={{ fontSize: "11px" }} />
+          <Legend wrapperStyle={{ fontSize: "10px" }} layout="horizontal" verticalAlign="bottom" />
           {platforms.map((p, i) => (
             <Bar key={p} name={p} dataKey={p} fill={COLORS[i % COLORS.length]} radius={[3, 3, 0, 0]} />
           ))}

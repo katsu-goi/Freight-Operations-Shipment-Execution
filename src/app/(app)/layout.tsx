@@ -5,6 +5,7 @@ import { getUnreadCount } from "@/lib/repos/notifications";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import ConnectivityGuard from "@/components/pwa/ConnectivityGuard";
+import SessionTimeoutGuard from "@/components/auth/SessionTimeoutGuard";
 
 export default async function AppLayout({
   children,
@@ -34,6 +35,7 @@ export default async function AppLayout({
         <Header profile={profile} aiEnabled={aiEnabled()} unreadCount={unreadNotifications} />
         <main className="flex-1 overflow-y-auto p-6 scroll-thin">{children}</main>
         <ConnectivityGuard />
+        <SessionTimeoutGuard />
       </div>
     </div>
   );

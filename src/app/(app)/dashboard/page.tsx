@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Activity,
   Plus,
@@ -9,7 +10,7 @@ import {
   ArrowRight,
   Boxes,
 } from "lucide-react";
-import { requireProfile, isStaff, isSellerRole, isCustomerRole } from "@/lib/auth";
+import { requireProfile, isStaff, isSellerRole, isCustomerRole, isCitizenRole, isAdminRole } from "@/lib/auth";
 import { getHubDashboard, getShipments } from "@/lib/queries";import { computeHubStats, monthlyIntakeVolume } from "@/lib/stats";
 import { formatNumber } from "@/lib/utils";
 import KpiCard from "@/components/ui/KpiCard";
@@ -27,14 +28,19 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const profile = await requireProfile();
 
+  // ---- Redirect Admin/SuperAdmin to dedicated /admin/dashboard ----
+  if (isAdminRole(profile.role)) {
+    redirect("/admin/dashboard");
+  }
+
   // ---- Seller view: their own parcels only ----
   if (isSellerRole(profile.role)) {
     const parcels = await getShipments();
     return <SellerDashboard parcels={parcels} sellerName={null} />;
   }
 
-  // ---- Customer view: assigned parcels, deliberately simple ----
-  if (isCustomerRole(profile.role)) {
+  // ---- Customer/Citizen view: assigned parcels, deliberately simple ----
+  if (isCustomerRole(profile.role) || isCitizenRole(profile.role)) {
     const parcels = await getShipments();
     return <CustomerDashboard parcels={parcels} />;
   }

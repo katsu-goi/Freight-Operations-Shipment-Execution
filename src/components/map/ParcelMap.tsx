@@ -33,6 +33,7 @@ export default function ParcelMap({
   useEffect(() => {
     let cancelled = false;
     let channel: any = null;
+    let resizeObserver: ResizeObserver | null = null;
 
     (async () => {
       const L = await import("leaflet");
@@ -47,6 +48,11 @@ export default function ParcelMap({
         scrollWheelZoom: false,
       });
       mapRef.current = map;
+
+      resizeObserver = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      resizeObserver.observe(containerRef.current);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
@@ -98,6 +104,7 @@ export default function ParcelMap({
 
     return () => {
       cancelled = true;
+      resizeObserver?.disconnect();
       mapRef.current?.remove?.();
       mapRef.current = null;
       markerRef.current = null;
@@ -106,7 +113,12 @@ export default function ParcelMap({
 
   return (
     <div className="relative">
-      <div ref={containerRef} className="h-72 w-full rounded-xl z-0" role="application" aria-label="Live parcel map" />
+      <div
+        ref={containerRef}
+        className="h-52 sm:h-64 md:h-72 w-full max-w-full rounded-xl z-0 min-h-[13rem]"
+        role="application"
+        aria-label="Live parcel map"
+      />
       {lat === null && lng === null && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <p className="bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs font-semibold text-slate-500">

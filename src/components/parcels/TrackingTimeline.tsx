@@ -33,6 +33,12 @@ export default function TrackingTimeline({
     if (e.status) eventByStatus.set(e.status, e); // chronological → last wins
   }
 
+  // Operational hub events (Booked / Intake / Batched / Handed Over) live
+  // outside the canonical timeline — render them as dated history rows so
+  // the seller sees every recorded step with actor timestamp + note.
+  const workflowSet = new Set<string>(PARCEL_WORKFLOW);
+  const extraEvents = events.filter((e) => e.status && !workflowSet.has(e.status));
+
   const steps = PARCEL_WORKFLOW.map((status) => ({
     status,
     event: eventByStatus.get(status) ?? null,
@@ -121,6 +127,40 @@ export default function TrackingTimeline({
           </div>
         );
       })}
+
+      {extraEvents.length > 0 && (
+        <div className="mt-2 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <p className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800/60">
+            Hub processing steps
+          </p>
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            {extraEvents.map((e) => (
+              <li key={e.id} className="px-4 py-2.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                    {e.status}
+                  </span>
+                  <StatusBadge status={e.status ?? ""} />
+                </div>
+                <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  {formatDateTime(e.created_at)}
+                </p>
+                {e.location && (
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {e.location}
+                  </p>
+                )}
+                {e.message && (
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                    {e.message}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {exception && (
         <div

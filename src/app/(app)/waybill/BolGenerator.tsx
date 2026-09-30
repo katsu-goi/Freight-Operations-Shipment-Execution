@@ -166,7 +166,7 @@ export default function BolGenerator({
 
         {/* BoL fields */}
         <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={label}>BoL type</label>
               <select className={field} value={form.bolType} onChange={(e) => set("bolType", e.target.value as BolType)}>
@@ -190,7 +190,7 @@ export default function BolGenerator({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className={label}>Shipper</label><input className={field} value={form.shipperName} onChange={(e) => set("shipperName", e.target.value)} /></div>
             <div><label className={label}>Consignee</label><input className={field} value={form.consigneeName} onChange={(e) => set("consigneeName", e.target.value)} /></div>
             <div><label className={label}>Notify party</label><input className={field} value={form.notifyParty} onChange={(e) => set("notifyParty", e.target.value)} /></div>

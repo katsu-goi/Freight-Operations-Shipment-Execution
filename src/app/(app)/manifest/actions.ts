@@ -15,7 +15,8 @@ function newReference() {
 
 /**
  * Create a courier manifest (batch) for a platform and attach parcels to it.
- * Parcels flip from Intake → Batched. Batches go Draft → Ready → Handed Over.
+ * Parcels flip from the Received/Booked stages → Batched (= Manifested).
+ * Batches go Draft → Ready → Handed Over.
  */
 export async function createBatch(
   input: unknown,
@@ -26,17 +27,28 @@ export async function createBatch(
 
     const { data: parcels, error: parcelsError } = await supabase
       .from("shipments")
-      .select("id, weight_kg, platform, status, reference")
+      .select("id, weight_kg, platform, status, reference, tracking_number")
       .in("id", form.parcelIds);
 
     if (parcelsError) return fail(parcelsError.message);
     if (!parcels?.length) return fail("No matching parcels to batch");
 
+    // Manifestable = received at the hub (pickup / drop-off / intake) or
+    // booked. Registered parcels must be received or booked first; parcels
+    // already handed over or further downstream cannot move back.
+    const MANIFESTABLE = [
+      "Pickup Scheduled",
+      "Picked Up",
+      "Dropped Off",
+      "Intake",
+      "At Origin Hub",
+      "Booked",
+    ];
     const wrongPlatform = parcels.filter((p) => p.platform !== form.platform);
-    const alreadyBatched = parcels.filter((p) => p.status !== "Intake");
-    if (wrongPlatform.length || alreadyBatched.length) {
+    const notReady = parcels.filter((p) => !MANIFESTABLE.includes(p.status));
+    if (wrongPlatform.length || notReady.length) {
       return fail(
-        `${wrongPlatform.length} parcel(s) belong to another platform and ${alreadyBatched.length} are not at Intake.`,
+        `${wrongPlatform.length} parcel(s) belong to another platform and ${notReady.length} are not received/booked yet (register → receive → book before manifesting).`,
       );
     }
 
@@ -68,9 +80,21 @@ export async function createBatch(
 
     const { error: updateError } = await supabase
       .from("shipments")
-      .update({ status: "Batched" })
+      .update({ status: "Batched", manifested_at: new Date().toISOString() })
       .in("id", form.parcelIds);
     if (updateError) return fail(updateError.message);
+
+    // Each manifesting step is recorded on the parcel tracking history.
+    await supabase.from("shipment_tracking_logs").insert(
+      parcels.map((p) => ({
+        shipment_id: p.id,
+        event_type: "status",
+        level: "info",
+        message: `Parcel added to manifest ${reference}`,
+        status: "Batched",
+        created_by: profile.id,
+      })),
+    );
 
     serverLog.info("manifest.createBatch", { reference: batch.reference, count: items.length });
     revalidatePath("/manifest");

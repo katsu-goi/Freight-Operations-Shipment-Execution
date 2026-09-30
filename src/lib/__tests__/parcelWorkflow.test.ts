@@ -3,6 +3,7 @@ import {
   PARCEL_WORKFLOW,
   SETTABLE_STATUSES,
   PARCEL_EXCEPTION_STATUSES,
+  PARCEL_OPERATIONAL_STATUSES,
   workflowIndex,
   parcelProgress,
   isParcelActive,
@@ -18,7 +19,7 @@ describe("parcel workflow", () => {
   });
 
   it("every settable status is a known status and exceptions are separate", () => {
-    const all = new Set([...PARCEL_WORKFLOW, ...PARCEL_EXCEPTION_STATUSES]);
+    const all = new Set([...PARCEL_WORKFLOW, ...PARCEL_OPERATIONAL_STATUSES, ...PARCEL_EXCEPTION_STATUSES]);
     for (const s of SETTABLE_STATUSES) {
       expect(all.has(s)).toBe(true);
     }

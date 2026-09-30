@@ -230,8 +230,10 @@ secure_password_change = false
 max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
-# Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Number of seconds before the email OTP expires.
+# Core requirement: 1–2 minute window → 90s. Applies to both local
+# (Inbucket http://127.0.0.1:54324) and cloud (Supabase mailer / custom SMTP).
+otp_expiry = 90
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -269,11 +271,14 @@ max_frequency = "5s"
 # 4152127777 = "123456"
 
 # Configure logged in session timeouts.
-# [auth.sessions]
-# Force log out after the specified duration.
-# timebox = "24h"
-# Force log out if the user has been inactive longer than the specified duration.
-# inactivity_timeout = "8h"
+# Core requirement: automatic logout after inactivity. Server-side floor is
+# 15m here; the client SessionTimeoutGuard mirrors it (see
+# src/components/auth/SessionTimeoutGuard.tsx) with a 1-minute warning.
+# For production parity set the same values in the Supabase Dashboard:
+# Authentication → Sessions → Inactivity timeout.
+[auth.sessions]
+timebox = "24h"
+inactivity_timeout = "15m"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
 # [auth.hook.before_user_created]

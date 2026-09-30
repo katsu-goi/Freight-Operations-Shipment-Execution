@@ -106,7 +106,7 @@ export default async function ParcelsPage({
         ) : (
           <>
             {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block table-scroll">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
@@ -115,6 +115,7 @@ export default async function ParcelsPage({
                       <th className="px-5 py-3 font-bold">Recipient</th>
                     )}
                     {staff && <th className="px-5 py-3 font-bold">Seller</th>}
+                    {staff && <th className="px-5 py-3 font-bold">Method</th>}
                     <th className="px-5 py-3 font-bold">Destination</th>
                     <th className="px-5 py-3 font-bold">Status</th>
                     <th className="px-5 py-3 font-bold">Current Location</th>
@@ -152,6 +153,18 @@ export default async function ParcelsPage({
                         <td className="px-5 py-3 text-slate-600 dark:text-slate-300">
                           {p.sellerName ?? (
                             <span className="text-slate-400">Walk-in</span>
+                          )}
+                        </td>
+                      )}
+                      {staff && (
+                        <td className="px-5 py-3 text-slate-600 dark:text-slate-300">
+                          {p.delivery_method ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                              {p.delivery_method.toUpperCase()}
+                            </span>
+                          ) : (
+                            // Legacy parcel from before Pickup/Drop-off was mandatory.
+                            <span className="text-slate-400 italic">Not specified</span>
                           )}
                         </td>
                       )}

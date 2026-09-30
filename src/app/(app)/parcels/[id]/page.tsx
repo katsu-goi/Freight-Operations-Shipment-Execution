@@ -63,7 +63,7 @@ export default async function ParcelDetailPage({
       />
 
       {/* Current position banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-pink-950 rounded-2xl p-5 text-white shadow-lg flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-pink-950 rounded-2xl p-4 sm:p-5 text-white shadow-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-white/10 shrink-0">
             <Package className="w-5 h-5 text-pink-400" />
@@ -111,6 +111,11 @@ export default async function ParcelDetailPage({
             <dl className="space-y-3 text-xs">
               <Detail icon={User} label="Recipient" value={parcel.consignee ?? "—"} sub={parcel.recipient_phone} />
               <Detail icon={Building2} label="Seller" value={parcel.sellerName ?? "Walk-in"} sub={parcel.sellerReference ?? undefined} />
+              <Detail
+                icon={Package}
+                label="Delivery Method"
+                value={parcel.delivery_method ? parcel.delivery_method.toUpperCase() : "Not specified"}
+              />
               <Detail icon={MapPin} label="Route" value={`${parcel.origin} → ${parcel.destination}`} />
               <Detail
                 icon={CalendarClock}
@@ -148,6 +153,7 @@ export default async function ParcelDetailPage({
               parcelId={parcel.id}
               currentStatus={parcel.status}
               currentHubId={parcel.current_hub_id}
+              deliveryMethod={parcel.delivery_method}
               hubs={hubs.map((h) => ({ id: h.id, name: h.name }))}
             />
           )}

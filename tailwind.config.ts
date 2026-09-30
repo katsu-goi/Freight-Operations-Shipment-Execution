@@ -13,10 +13,14 @@ const config: Config = {
         mono: ["ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
-        // Palette from subsystem spec
+        // Clean light-mode palette — #F8FAFC neutral canvas
         base: {
           white: "#FFFFFF",
-          off: "#F9FAFB",
+          off: "#F8FAFC",
+          muted: "#F1F5F9",
+        },
+        canvas: {
+          DEFAULT: "#F8FAFC",
         },
         accent: {
           pink: "#EC4899",

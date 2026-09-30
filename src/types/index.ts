@@ -25,8 +25,14 @@ export type CarrierBatchItem =
   Database["public"]["Tables"]["carrier_batch_items"]["Row"];
 export type Handover = Database["public"]["Tables"]["handovers"]["Row"];
 export type Hub = Database["public"]["Tables"]["hubs"]["Row"];
+export type AiTrainingExample =
+  Database["public"]["Tables"]["ai_training_examples"]["Row"];
+export type AiTrainingJob =
+  Database["public"]["Tables"]["ai_training_jobs"]["Row"];
 export type AppNotification =
   Database["public"]["Tables"]["notifications"]["Row"];
+export type EmailVerificationCode =
+  Database["public"]["Tables"]["email_verification_codes"]["Row"];
 
 export type {
   AppRole,

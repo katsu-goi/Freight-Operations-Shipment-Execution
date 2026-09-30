@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useRef } from "react";
+import { useState, useActionState, useRef, useEffect, type RefObject } from "react";
 import {
   Loader2,
   Mail,
@@ -8,46 +8,737 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ArrowLeft,
   User,
+  Building2,
+  MapPin,
+  Phone,
   ShieldAlert,
   ShieldCheck,
   Package,
+  KeyRound,
 } from "lucide-react";
-import { signIn, signUp, type AuthState } from "./actions";
-import type { AppRole } from "@/types";
+import {
+  authenticate,
+  requestSellerOtp,
+  verifySellerOtpAndRegister,
+  requestPasswordResetOtp,
+  resetPasswordWithOtp,
+  type AuthState,
+} from "./actions";
 
-const REGISTER_ROLES: { role: AppRole; label: string; desc: string }[] = [
-  { role: "Seller", label: "Seller Account", desc: "For online merchants dropping off parcels" },
-  { role: "Customer", label: "Customer Account", desc: "For parcel recipients tracking deliveries" },
-  { role: "Admin", label: "Admin Account", desc: "Full hub & operational privileges" },
-];
+type Mode = "signin" | "signup" | "forgot";
 
-function SubmitButton({ mode, pending }: { mode: "signin" | "signup"; pending: boolean }) {
+const FAIL_KEY = "ax-login-fails";
+const MAX_FAILS_BEFORE_HINT = 3;
+// Security note: this counter is UI-ONLY (reveals the Forgot Password
+// prompt after 3 failed attempts). localStorage is not a security boundary —
+// it can be cleared — so actual brute-force protection comes server-side
+// from Supabase Auth rate limits (sign_in_sign_ups / token_verifications per
+// IP in supabase/config.toml) plus generic "Invalid email or password."
+// errors. Deliberately NO per-account lockout: a lockout table would let an
+// attacker deny service to other sellers by failing their logins on purpose.
+
+import { isValidSellerName, isValidContactNumber, passwordChecks } from "@/lib/sellerValidation";
+
+function PasswordChecklist({ password }: { password: string }) {
+  const checks = passwordChecks(password);
+  return (
+    <ul className="mt-2 space-y-1 rounded-xl bg-white/5 border border-white/10 p-3">
+      {checks.map((c) => (
+        <li
+          key={c.label}
+          className={`flex items-center gap-2 text-[12px] font-medium ${
+            c.ok ? "text-emerald-300" : "text-white/50"
+          }`}
+        >
+          <span
+            className={`inline-flex w-4 h-4 items-center justify-center rounded-full text-[10px] font-black ${
+              c.ok ? "bg-emerald-500/25 text-emerald-300" : "bg-white/10 text-white/40"
+            }`}
+          >
+            {c.ok ? "✓" : "·"}
+          </span>
+          {c.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SubmitButton({ label, pending }: { label: string; pending: boolean }) {
   return (
     <button
       type="submit"
       disabled={pending}
-      className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1E3A8A] via-[#1E40A0] to-[#0A245C] hover:from-[#162C6E] hover:to-[#081C48] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 px-6 rounded-full text-sm shadow-[0_6px_20px_rgba(30,58,138,0.35)] hover:shadow-[0_8px_25px_rgba(30,58,138,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer select-none"
+      className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-[#E81B75] hover:bg-[#CB1664] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold shadow-lg shadow-pink-950/30 transition-colors cursor-pointer select-none"
     >
       {pending ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin text-white" />
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span>Authenticating...</span>
         </>
       ) : (
         <>
-          <span>{mode === "signin" ? "Sign in to Dashboard" : "Create Account"}</span>
-          <ArrowRight className="w-4 h-4 text-pink-300" />
+          <span>{label}</span>
+          <ArrowRight className="w-4 h-4 text-white/70" />
         </>
       )}
     </button>
   );
 }
 
+function StateAlert({ state }: { state: AuthState }) {
+  return (
+    <>
+      {state.error && (
+        <div className="text-[13px] text-rose-100 bg-rose-500/15 border border-rose-300/25 rounded-xl p-3 flex items-start gap-2">
+          <ShieldAlert className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+          <span>{state.error}</span>
+        </div>
+      )}
+      {state.message && (
+        <div className="text-[13px] text-emerald-100 bg-emerald-500/15 border border-emerald-300/25 rounded-xl p-3 flex items-start gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+          <span>{state.message}</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+interface FormStyling {
+  inputCls: string;
+  labelCls: string;
+}
+
+// ---------------------------------------------------------------------------
+// Sign in (+ failed-attempt tracking → forgot-password prompt after 3 fails)
+// ---------------------------------------------------------------------------
+
+function SignInForm({
+  showPw,
+  onTogglePw,
+  emailRef,
+  pwRef,
+  styling,
+  onForgot,
+}: { styling: FormStyling } & {
+  showPw: boolean;
+  onTogglePw: () => void;
+  emailRef: RefObject<HTMLInputElement | null>;
+  pwRef: RefObject<HTMLInputElement | null>;
+  onForgot: () => void;
+}) {
+  const { inputCls, labelCls } = styling;
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(authenticate, {});
+  const [fails, setFails] = useState(0);
+
+  useEffect(() => {
+    try {
+      setFails(Number(window.localStorage.getItem(FAIL_KEY) ?? 0) || 0);
+    } catch {
+      setFails(0);
+    }
+  }, []);
+
+  const lastError = state.error;
+  useEffect(() => {
+    if (!lastError) return;
+    setFails((prev) => {
+      const next = prev + 1;
+      try {
+        window.localStorage.setItem(FAIL_KEY, String(next));
+      } catch {
+        /* offline-safe */
+      }
+      return next;
+    });
+  }, [lastError]);
+
+  return (
+    <form action={formAction} className="mt-5 space-y-4">
+      <div>
+        <label className={labelCls}>Email</label>
+        <div className="relative">
+          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            ref={emailRef}
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            defaultValue="admin@virshipexpress.com"
+            className={inputCls}
+            placeholder="you@company.com"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Password</label>
+        <div className="relative">
+          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            ref={pwRef}
+            name="password"
+            type={showPw ? "text" : "password"}
+            required
+            autoComplete="current-password"
+            defaultValue="demo123456"
+            className={`${inputCls} pr-10`}
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            onClick={onTogglePw}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/40 hover:text-white transition cursor-pointer"
+            aria-label={showPw ? "Hide password" : "Show password"}
+          >
+            {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-0.5">
+        <label className="flex items-center gap-2 text-[13px] font-normal text-white/65 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            defaultChecked
+            className="rounded border-white/20 bg-white/10 text-[#E81B75] focus:ring-[#E81B75] w-3.5 h-3.5"
+          />
+          <span>Remember me</span>
+        </label>
+        <button
+          type="button"
+          onClick={onForgot}
+          className="text-[13px] font-semibold text-pink-300 hover:text-pink-200 hover:underline transition cursor-pointer"
+        >
+          Forgot Password?
+        </button>
+      </div>
+
+      <StateAlert state={state} />
+
+      {fails >= MAX_FAILS_BEFORE_HINT && (
+        <div className="rounded-xl border border-amber-300/40 bg-amber-500/15 p-3 flex items-start gap-2">
+          <KeyRound className="w-4 h-4 text-amber-200 shrink-0 mt-0.5" />
+          <p className="text-[13px] text-amber-100">
+            Forgot your password?{" "}
+            <button
+              type="button"
+              onClick={onForgot}
+              className="font-bold underline hover:text-white transition cursor-pointer"
+            >
+              Reset it here
+            </button>{" "}
+            with a code sent to your email.
+          </p>
+        </div>
+      )}
+
+      <div className="pt-1">
+        <SubmitButton label="Sign in" pending={pending} />
+      </div>
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Seller-only registration (details → email OTP → verified account)
+// ---------------------------------------------------------------------------
+
+interface SellerDraft {
+  fullName: string;
+  companyName: string;
+  address: string;
+  contactNumber: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const EMPTY_DRAFT: SellerDraft = {
+  fullName: "",
+  companyName: "",
+  address: "",
+  contactNumber: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
+function SellerSignupForm({ styling, showPw, onTogglePw }: { styling: FormStyling } & { showPw: boolean; onTogglePw: () => void }) {
+  const { inputCls, labelCls } = styling;
+  const [draft, setDraft] = useState<SellerDraft>(EMPTY_DRAFT);
+  const [step, setStep] = useState<"details" | "otp">("details");
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const [reqState, reqAction, reqPending] = useActionState<AuthState, FormData>(requestSellerOtp, {});
+  const [verState, verAction, verPending] = useActionState<AuthState, FormData>(verifySellerOtpAndRegister, {});
+
+  // Advance to the OTP step once the code was accepted for sending.
+  const sentMessage = reqState.message;
+  useEffect(() => {
+    if (sentMessage) {
+      setStep("otp");
+      setClientError(null);
+    }
+  }, [sentMessage]);
+
+  const set = (k: keyof SellerDraft) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setDraft((d) => ({ ...d, [k]: e.target.value }));
+
+  function hiddenFields() {
+    return (
+      <>
+        <input type="hidden" name="fullName" value={draft.fullName} />
+        <input type="hidden" name="companyName" value={draft.companyName} />
+        <input type="hidden" name="address" value={draft.address} />
+        <input type="hidden" name="contactNumber" value={draft.contactNumber} />
+        <input type="hidden" name="email" value={draft.email} />
+        <input type="hidden" name="password" value={draft.password} />
+        <input type="hidden" name="confirmPassword" value={draft.confirmPassword} />
+      </>
+    );
+  }
+
+  function validateDetails(): string | null {
+    if (!isValidSellerName(draft.fullName))
+      return "Name must be 2–50 characters and contain letters only (spaces, hyphens, apostrophes and periods allowed).";
+    if (draft.companyName.trim().length < 2 || draft.companyName.trim().length > 200)
+      return "Company name is required (2–200 characters).";
+    if (draft.address.trim().length < 4 || draft.address.trim().length > 300)
+      return "Address is required (4–300 characters).";
+    if (!isValidContactNumber(draft.contactNumber))
+      return "Contact number must be exactly 11 digits starting with 09 (e.g. 09XXXXXXXXX).";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim()))
+      return "Enter a valid email address.";
+    const checks = passwordChecks(draft.password);
+    if (checks.some((c) => !c.ok))
+      return "Password does not meet all strength requirements below.";
+    if (draft.password !== draft.confirmPassword) return "Passwords don't match.";
+    return null;
+  }
+
+  if (step === "otp") {
+    return (
+      <div className="mt-5 space-y-4">
+        <div className="rounded-xl border border-white/15 bg-white/5 p-3 text-[13px] text-white/70">
+          Code sent to <span className="font-bold text-white">{draft.email}</span> — it
+          expires in 10 minutes.
+          <button
+            type="button"
+            onClick={() => setStep("details")}
+            className="ml-2 font-semibold text-pink-300 hover:underline cursor-pointer"
+          >
+            Edit details
+          </button>
+        </div>
+
+        <form
+          action={verAction}
+          className="space-y-3"
+          onSubmit={(e) => {
+            const code = String(new FormData(e.currentTarget).get("token") ?? "");
+            if (!/^\d{6}$/.test(code.trim())) {
+              e.preventDefault();
+              setClientError("Enter the 6-digit code sent to your email.");
+            }
+          }}
+        >
+          {hiddenFields()}
+          <div>
+            <label className={labelCls}>6-digit verification code</label>
+            <input
+              name="token"
+              required
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              className="w-full h-11 bg-white/10 border border-white/15 rounded-xl px-3.5 text-sm font-mono tracking-[0.3em] text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition text-center"
+              placeholder="••••••"
+            />
+          </div>
+          {(clientError || verState.error) && (
+            <div className="text-[13px] text-rose-100 bg-rose-500/15 border border-rose-300/25 rounded-xl p-3 flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+              <span>{clientError ?? verState.error}</span>
+            </div>
+          )}
+          {verState.message && (
+            <div className="text-[13px] text-emerald-100 bg-emerald-500/15 border border-emerald-300/25 rounded-xl p-3 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+              <span>{verState.message}</span>
+            </div>
+          )}
+          <SubmitButton label="Verify & Create Account" pending={verPending} />
+        </form>
+
+        <form action={reqAction} onSubmit={() => setClientError(null)}>
+          {hiddenFields()}
+          <button
+            type="submit"
+            disabled={reqPending}
+            className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-white/15 hover:bg-white/20 disabled:opacity-60 text-white text-sm font-semibold border border-white/20 transition cursor-pointer"
+          >
+            {reqPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+              </>
+            ) : (
+              "Resend code"
+            )}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      action={reqAction}
+      className="mt-5 space-y-4"
+      onSubmit={(e) => {
+        const problem = validateDetails();
+        if (problem) {
+          e.preventDefault();
+          setClientError(problem);
+        } else {
+          setClientError(null);
+        }
+      }}
+    >
+      <p className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-[12px] text-white/70">
+        Public registration creates a <span className="font-bold text-white">Seller account</span> only.
+        Admin accounts are provisioned separately by administrators.
+      </p>
+
+      <div>
+        <label className={labelCls}>Full name (max 50 characters, letters only)</label>
+        <div className="relative">
+          <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="fullName"
+            required
+            autoComplete="name"
+            maxLength={50}
+            value={draft.fullName}
+            onChange={set("fullName")}
+            className={inputCls}
+            placeholder="Daniella Sophia Amora"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Company name</label>
+        <div className="relative">
+          <Building2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="companyName"
+            required
+            maxLength={200}
+            value={draft.companyName}
+            onChange={set("companyName")}
+            className={inputCls}
+            placeholder="Amora Online Shop"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Address</label>
+        <div className="relative">
+          <MapPin className="w-4 h-4 absolute left-3.5 top-3.5 text-white/40" />
+          <textarea
+            name="address"
+            required
+            rows={2}
+            maxLength={300}
+            value={draft.address}
+            onChange={set("address")}
+            className="w-full min-h-11 bg-white/10 border border-white/15 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-medium text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition"
+            placeholder="House / Street, Barangay, City, Province"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Contact number (11 digits, e.g. 09XXXXXXXXX)</label>
+        <div className="relative">
+          <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="contactNumber"
+            required
+            inputMode="numeric"
+            maxLength={11}
+            value={draft.contactNumber}
+            onChange={set("contactNumber")}
+            className="w-full h-11 bg-white/10 border border-white/15 rounded-xl pl-10 pr-3.5 text-sm font-mono tracking-wider text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition"
+            placeholder="09XXXXXXXXX"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Email</label>
+        <div className="relative">
+          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={draft.email}
+            onChange={set("email")}
+            className={inputCls}
+            placeholder="you@company.com"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Password</label>
+        <div className="relative">
+          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="password"
+            type={showPw ? "text" : "password"}
+            required
+            autoComplete="new-password"
+            value={draft.password}
+            onChange={set("password")}
+            className={`${inputCls} pr-10`}
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            onClick={onTogglePw}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/40 hover:text-white transition cursor-pointer"
+            aria-label={showPw ? "Hide password" : "Show password"}
+          >
+            {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+        <PasswordChecklist password={draft.password} />
+      </div>
+
+      <div>
+        <label className={labelCls}>Confirm password</label>
+        <div className="relative">
+          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            name="confirmPassword"
+            type={showPw ? "text" : "password"}
+            required
+            autoComplete="new-password"
+            value={draft.confirmPassword}
+            onChange={set("confirmPassword")}
+            className={inputCls}
+            placeholder="••••••••"
+          />
+        </div>
+      </div>
+
+      {(clientError || reqState.error) && (
+        <div className="text-[13px] text-rose-100 bg-rose-500/15 border border-rose-300/25 rounded-xl p-3 flex items-start gap-2">
+          <ShieldAlert className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+          <span>{clientError ?? reqState.error}</span>
+        </div>
+      )}
+      {reqState.message && (
+        <div className="text-[13px] text-emerald-100 bg-emerald-500/15 border border-emerald-300/25 rounded-xl p-3 flex items-start gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+          <span>{reqState.message}</span>
+        </div>
+      )}
+
+      <div className="pt-1">
+        <SubmitButton label="Send verification code" pending={reqPending} />
+      </div>
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Forgot password (email → OTP → new strong password)
+// ---------------------------------------------------------------------------
+
+function ForgotPasswordForm({ styling, onBack }: { styling: FormStyling } & { onBack: () => void }) {
+  const { inputCls, labelCls } = styling;
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const [reqState, reqAction, reqPending] = useActionState<AuthState, FormData>(requestPasswordResetOtp, {});
+  const [rstState, rstAction, rstPending] = useActionState<AuthState, FormData>(resetPasswordWithOtp, {});
+
+  const sentMessage = reqState.message;
+  useEffect(() => {
+    if (sentMessage) {
+      setCodeSent(true);
+      setClientError(null);
+    }
+  }, [sentMessage]);
+
+  return (
+    <div className="mt-5 space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-white/60 hover:text-white transition cursor-pointer"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
+      </button>
+
+      <form action={reqAction} className="space-y-3">
+        <div>
+          <label className={labelCls}>Registered email</label>
+          <div className="relative">
+            <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <input
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputCls}
+              placeholder="you@company.com"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          disabled={reqPending}
+          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-white/15 hover:bg-white/20 disabled:opacity-60 text-white text-sm font-semibold border border-white/20 transition cursor-pointer"
+        >
+          {reqPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Sending code...
+            </>
+          ) : (
+            <>{codeSent ? "Resend code (expires in 10 min)" : "Send verification code"}</>
+          )}
+        </button>
+        {reqState.error && (
+          <div className="text-[13px] text-rose-100 bg-rose-500/15 border border-rose-300/25 rounded-xl p-3 flex items-start gap-2">
+            <ShieldAlert className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+            <span>{reqState.error}</span>
+          </div>
+        )}
+        {reqState.message && (
+          <div className="text-[13px] text-emerald-100 bg-emerald-500/15 border border-emerald-300/25 rounded-xl p-3 flex items-start gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+            <span>{reqState.message}</span>
+          </div>
+        )}
+      </form>
+
+      {codeSent && (
+        <form
+          action={rstAction}
+          className="space-y-3"
+          onSubmit={(e) => {
+            const fd = new FormData(e.currentTarget);
+            const code = String(fd.get("token") ?? "");
+            const np = String(fd.get("newPassword") ?? "");
+            const cp = String(fd.get("confirmPassword") ?? "");
+            if (!/^\d{6}$/.test(code.trim())) {
+              e.preventDefault();
+              setClientError("Enter the 6-digit code sent to your email.");
+              return;
+            }
+            if (passwordChecks(np).some((c) => !c.ok)) {
+              e.preventDefault();
+              setClientError("New password does not meet all strength requirements below.");
+              return;
+            }
+            if (np !== cp) {
+              e.preventDefault();
+              setClientError("Passwords don't match.");
+              return;
+            }
+            setClientError(null);
+          }}
+        >
+          <input type="hidden" name="email" value={email} />
+          <div>
+            <label className={labelCls}>6-digit code (expires in 10 minutes)</label>
+            <input
+              name="token"
+              required
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              className="w-full h-11 bg-white/10 border border-white/15 rounded-xl px-3.5 text-sm font-mono tracking-[0.3em] text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition text-center"
+              placeholder="••••••"
+            />
+          </div>
+          <div>
+            <label className={labelCls}>New password</label>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+              <input
+                name="newPassword"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className={inputCls}
+                placeholder="••••••••"
+              />
+            </div>
+            <PasswordChecklist password={newPassword} />
+          </div>
+          <div>
+            <label className={labelCls}>Confirm new password</label>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+              <input
+                name="confirmPassword"
+                type="password"
+                required
+                autoComplete="new-password"
+                className={inputCls}
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          {(clientError || rstState.error) && (
+            <div className="text-[13px] text-rose-100 bg-rose-500/15 border border-rose-300/25 rounded-xl p-3 flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+              <span>{clientError ?? rstState.error}</span>
+            </div>
+          )}
+          {rstState.message && (
+            <div className="text-[13px] text-emerald-100 bg-emerald-500/15 border border-emerald-300/25 rounded-xl p-3 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
+              <span>{rstState.message}</span>
+            </div>
+          )}
+          <SubmitButton label="Verify & Change Password" pending={rstPending} />
+          <p className="text-center text-[12px] text-white/50">
+            Password successfully changed?{" "}
+            <button
+              type="button"
+              onClick={onBack}
+              className="font-bold text-pink-300 hover:underline cursor-pointer"
+            >
+              Sign in
+            </button>
+          </p>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export default function LoginForm({ compact = false }: { compact?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const action = mode === "signin" ? signIn : signUp;
-  const [state, formAction, isActionPending] = useActionState<AuthState, FormData>(action, {});
+  const [mode, setMode] = useState<Mode>("signin");
   const [showPw, setShowPw] = useState(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -58,240 +749,139 @@ export default function LoginForm({ compact = false }: { compact?: boolean }) {
     if (pwRef.current) pwRef.current.value = pass;
   };
 
+  const inputCls =
+    "w-full h-11 bg-white/10 border border-white/15 rounded-xl pl-10 pr-3.5 text-sm font-medium text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition shadow-none";
+  const labelCls = "block text-[13px] font-medium text-white/75 mb-1.5";
+  const styling = { inputCls, labelCls };
+
   return (
-    <div className={`w-full ${compact ? "p-5" : "px-6 sm:px-8 pt-6 sm:pt-7 pb-6"}`}>
-      <div className="backdrop-blur-2xl bg-white/90 dark:bg-slate-900/90 border border-white/60 dark:border-slate-700/60 shadow-[0_24px_64px_rgba(0,0,0,0.3)] rounded-3xl overflow-hidden">
+    <div className="w-full rounded-2xl border border-white/20 bg-white/[0.08] backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.15)] overflow-hidden">
+      {/* Top glass highlight */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+
+      <div className={compact ? "p-5" : "p-6 sm:p-7"}>
         {/* Brand Header */}
         <div className="text-center">
-          <div className="mx-auto flex justify-center items-center gap-2 mb-2">
+          <div className="mx-auto flex justify-center items-center gap-2 mb-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/icons/airship-pink-mark.png"
               alt="Airship Express"
-              width={48}
-              height={30}
-              className="w-12 h-7 object-contain drop-shadow-sm"
+              width={32}
+              height={20}
+              className="w-8 h-5 object-contain"
             />
             <div className="text-left leading-none">
               <div className="flex items-baseline gap-1">
-                <span className="text-[13px] font-black tracking-tight text-slate-900 dark:text-white">
+                <span className="text-[15px] font-bold tracking-tight text-white">
                   AIRSHIP
                 </span>
-                <span className="text-[13px] font-black tracking-tight text-[#E81B75]">
+                <span className="text-[11px] font-bold tracking-tight text-pink-300">
                   EXPRESS
                 </span>
               </div>
-              <span className="text-[8px] tracking-[0.22em] font-bold text-slate-500 dark:text-slate-400">
-                COURIER HUB
-              </span>
             </div>
           </div>
 
-          <h2 className="text-[22px] sm:text-[24px] font-black text-slate-900 dark:text-white tracking-tight">
-            Welcome back
+          <h2 className="text-[20px] font-semibold text-white tracking-tight leading-tight">
+            {mode === "signup" ? "Create seller account" : mode === "forgot" ? "Reset password" : "Welcome back"}
           </h2>
-          <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-            Sign in to your account to continue.
+          <p className="mt-1 text-[13px] font-normal text-white/60">
+            {mode === "signup"
+              ? "Register as a seller — email verification required."
+              : mode === "forgot"
+                ? "Verify your email, then choose a new password."
+                : "Sign in to continue to your hub."}
           </p>
         </div>
 
-        {/* Mode Switcher (Sign In vs Register) */}
-        <div className="mt-4 flex gap-1 p-1 bg-slate-100/90 dark:bg-slate-800/90 rounded-full border border-slate-200/80 dark:border-slate-700/80">
-          {(["signin", "signup"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={`flex-1 text-xs font-bold py-2 rounded-full transition-all duration-200 cursor-pointer ${
-                mode === m
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-200/50 dark:border-slate-600"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-            }`}
-            >
-              {m === "signin" ? "Sign In" : "Register"}
-            </button>
-          ))}
-        </div>
+        {/* Mode Switcher — Sign In / Register only (seller-only registration) */}
+        {mode !== "forgot" && (
+          <div className="mt-5 flex gap-1 p-1 bg-white/10 rounded-full border border-white/10">
+            {([
+              { id: "signin", label: "Sign In" },
+              { id: "signup", label: "Register" },
+            ] as const).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMode(m.id)}
+                className={`flex-1 h-9 text-[13px] font-semibold rounded-full transition-all duration-200 cursor-pointer ${
+                  mode === m.id
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Quick Demo Login Chips (Admin vs Seller) */}
+        {/* Quick Demo Accounts */}
         {mode === "signin" && (
-          <div className="mt-3.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
-            <div className="flex items-center justify-between mb-1.5 px-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Quick Test Accounts
+          <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center justify-between mb-2 px-0.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
+                Quick test accounts
               </span>
-              <span className="text-[10px] font-medium text-slate-400">Tap to auto-fill</span>
+              <span className="text-[11px] font-normal text-white/40">Tap to fill</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setCredentials("admin@virshipexpress.com", "demo123456")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/50 border border-pink-200/80 dark:border-pink-800/50 text-left transition-colors group cursor-pointer"
+                className="flex items-center gap-2 px-2.5 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#E81B75] shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold text-slate-900 dark:text-pink-200 leading-tight truncate">
+                <ShieldCheck className="w-4 h-4 text-pink-300 shrink-0" />
+                <div className="min-w-0 flex-1 leading-tight">
+                  <p className="text-xs font-semibold text-white truncate">
                     Admin Demo
                   </p>
-                  <p className="text-[9px] text-[#E81B75] font-medium leading-none">Full access</p>
+                  <p className="text-[11px] text-white/50 font-normal">Full access</p>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setCredentials("seller@virshipexpress.com", "demo123456")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-800/50 text-left transition-colors group cursor-pointer"
+                className="flex items-center gap-2 px-2.5 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
               >
-                <Package className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold text-slate-900 dark:text-blue-200 leading-tight truncate">
+                <Package className="w-4 h-4 text-blue-300 shrink-0" />
+                <div className="min-w-0 flex-1 leading-tight">
+                  <p className="text-xs font-semibold text-white truncate">
                     Seller Demo
                   </p>
-                  <p className="text-[9px] text-blue-600 dark:text-blue-400 font-medium leading-none">Seller portal</p>
+                  <p className="text-[11px] text-white/50 font-normal">Seller portal</p>
                 </div>
               </button>
             </div>
           </div>
         )}
 
-        <form action={formAction} className="mt-4 space-y-3.5">
-          {mode === "signup" && (
-            <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-                <input
-                  name="fullName"
-                  required
-                  autoComplete="name"
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E81B75] focus:border-[#E81B75] transition shadow-sm"
-                  placeholder="Daniella Sophia Amora"
-                />
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-              Email / Corporate ID
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input
-                ref={emailRef}
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                defaultValue="admin@virshipexpress.com"
-                className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E81B75] focus-border-[#E81B75] transition shadow-sm"
-                placeholder="admin@virshipexpress.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                Password
-              </label>
-            </div>
-            <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input
-                ref={pwRef}
-                name="password"
-                type={showPw ? "text" : "password"}
-                required
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                defaultValue="demo123456"
-                className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E81B75] focus:border-[#E81B75] transition shadow-sm"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPw((v) => !v)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
-                aria-label={showPw ? "Hide password" : "Show password"}
-              >
-                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {mode === "signin" && (
-            <div className="flex items-center justify-between pt-0.5">
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="rounded border-slate-300 dark:border-slate-600 text-[#E81B75] focus:ring-[#E81B75] w-3.5 h-3.5"
-                />
-                <span>Remember me</span>
-              </label>
-            </div>
-          )}
-
-          {mode === "signup" && (
-            <>
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-                  Account Role
-                </label>
-                <select
-                  name="role"
-                  defaultValue="Seller"
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#E81B75] focus:border-[#E81B75] transition shadow-sm cursor-pointer"
-                >
-                  {REGISTER_ROLES.map(({ role, label }) => (
-                    <option key={role} value={role}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-                  <input
-                    name="confirmPassword"
-                    type={showPw ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    defaultValue="demo123456"
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E81B75] focus:border-[#E81B75] transition shadow-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {state.error && (
-            <div className="text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 rounded-xl p-3 flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-              <span>{state.error}</span>
-            </div>
-          )}
-
-          {state.message && (
-            <div className="text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/60 rounded-xl p-3 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>{state.message}</span>
-            </div>
-          )}
-
-          <div className="pt-2">
-            <SubmitButton mode={mode} pending={isActionPending} />
-          </div>
-        </form>
+        {/* Key remount clears stale errors when switching modes */}
+        {mode === "forgot" ? (
+          <ForgotPasswordForm key="forgot" styling={styling} onBack={() => setMode("signin")} />
+        ) : mode === "signup" ? (
+          <SellerSignupForm
+            key="signup"
+            styling={styling}
+            showPw={showPw}
+            onTogglePw={() => setShowPw((v) => !v)}
+          />
+        ) : (
+          <SignInForm
+            key="signin"
+            styling={styling}
+            showPw={showPw}
+            onTogglePw={() => setShowPw((v) => !v)}
+            emailRef={emailRef}
+            pwRef={pwRef}
+            onForgot={() => setMode("forgot")}
+          />
+        )}
       </div>
     </div>
   );
 }
+

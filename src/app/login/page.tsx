@@ -1,6 +1,12 @@
 import LoginForm from "./LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | undefined>>;
+}) {
+  const sp = searchParams ? await searchParams : {};
+  const timedOut = sp.timeout === "1";
   return (
     <div
       className="min-h-screen w-full flex flex-col justify-between relative bg-cover bg-center bg-no-repeat selection:bg-[#E81B75] selection:text-white"
@@ -91,6 +97,14 @@ export default function LoginPage() {
       {/* Center Area: Floating glassmorphic modal with vertical breathing room */}
       <main className="relative z-10 flex-1 flex items-center justify-center px-3 sm:px-6 py-4 sm:py-8 w-full">
         <div className="w-full max-w-[430px] my-auto">
+          {timedOut && (
+            <div
+              role="alert"
+              className="mb-3 rounded-2xl border border-amber-300/50 bg-amber-500/15 px-4 py-3 text-xs font-semibold text-amber-100 backdrop-blur-md"
+            >
+              Session expired due to inactivity. Please sign in again.
+            </div>
+          )}
           <div className="w-full rounded-[28px] border border-white/50 dark:border-slate-700/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl shadow-[0_24px_70px_rgba(0,0,0,0.45),0_6px_20px_rgba(0,0,0,0.2)] overflow-hidden transition-all duration-300">
             <LoginForm />
           </div>

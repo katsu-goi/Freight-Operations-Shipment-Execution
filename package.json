@@ -5,11 +5,23 @@
   "description": "Freight Operations & Shipment Execution Subsystem",
   "scripts": {
     "dev": "next dev -p 3001",
+    "dev:local": "node scripts/switch-env.js local && next dev -p 3001",
+    "dev:cloud": "node scripts/switch-env.js cloud && next dev -p 3001",
+    "env:local": "node scripts/switch-env.js local",
+    "env:cloud": "node scripts/switch-env.js cloud",
+    "env:cloud:init": "node scripts/switch-env.js cloud:init",
+    "env:status": "node scripts/switch-env.js status",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:pull": "supabase db pull",
+    "gen:types": "supabase gen types typescript --local > src/types/database.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

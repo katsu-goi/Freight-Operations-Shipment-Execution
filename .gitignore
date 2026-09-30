@@ -24,6 +24,9 @@ yarn-error.log*
 .env
 .env.local
 .env*.local
+# dual-env key stores (real secrets, never commit)
+.env.cloud
+.env.localhost
 
 # typescript
 *.tsbuildinfo

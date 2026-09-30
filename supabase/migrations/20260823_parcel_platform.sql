@@ -15,8 +15,9 @@
 -- ---------------------------------------------------------------------------
 -- 1) Roles
 -- ---------------------------------------------------------------------------
-alter type public.app_role add value if not exists 'Seller';
-alter type public.app_role add value if not exists 'Customer';
+-- Seller + Customer enum values moved to 20260822_add_seller_enum.sql
+-- to avoid "unsafe use of new value" in same transaction as RLS policies.
+-- (Postgres requires enum ADD VALUE to be committed before use.)
 
 -- ---------------------------------------------------------------------------
 -- 2) Parcel lifecycle statuses (additive; legacy values stay valid)

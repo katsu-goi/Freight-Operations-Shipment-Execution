@@ -98,6 +98,16 @@ export default async function TrackPage({
                 </div>
               </div>
             </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/15 font-bold text-pink-200">
+                Delivery Method: {parcel.delivery_method ? parcel.delivery_method.toUpperCase() : "Not specified"}
+              </span>
+              {parcel.platform && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/15 font-semibold text-slate-200">
+                  {parcel.platform}
+                </span>
+              )}
+            </div>
             {parcel.expected_delivery_date && (
               <p className="mt-4 text-xs text-slate-300">
                 Expected delivery:{" "}

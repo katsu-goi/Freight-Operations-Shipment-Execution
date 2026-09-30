@@ -74,14 +74,14 @@ begin
        created_at, updated_at)
     values
       ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
-       'seller@freightos.demo', v_pass, now(), '', '', '', '',
+       'seller@virshipexpress.com', v_pass, now(), '', '', '', '',
        '{"provider":"email","providers":["email"]}',
        '{"role":"Seller","full_name":"Amora, Daniella Sophia P."}',
        now(), now());
   end if;
 
 -- ---- provision profiles (the signup trigger demotes self-claimed roles,
-     so demo roles are set explicitly here for development purposes) ----
+--      so demo roles are set explicitly here for development purposes) ----
 
   insert into public.profiles (id, full_name, email, role, org_name)
   select id, 'Sol, Emmanuel M.', email, 'Admin', 'Airship Express Ops'

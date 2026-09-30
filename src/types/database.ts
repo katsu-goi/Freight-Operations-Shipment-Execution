@@ -4,7 +4,7 @@
  * changes (or regenerate with `supabase gen types typescript`).
  */
 
-export type AppRole = "Admin" | "Seller" | "Customer";
+export type AppRole = "SuperAdmin" | "Admin" | "Seller" | "Customer" | "Citizen";
 export type TransportMode = "Ocean" | "Air" | "Road" | "Rail";
 export type DeliveryPlatform =
   | "J&T Express"
@@ -219,6 +219,11 @@ export interface Database {
           service_type: string;
           cod_amount: number;
           cancel_reason: string | null;
+          delivery_method: string | null;
+          received_at: string | null;
+          booked_at: string | null;
+          manifested_at: string | null;
+          handover_at: string | null;
           archived_at: string | null;
           client_id: string | null;
           carrier_id: string | null;
@@ -262,6 +267,11 @@ export interface Database {
           service_type?: string;
           cod_amount?: number;
           cancel_reason?: string | null;
+          delivery_method?: string | null;
+          received_at?: string | null;
+          booked_at?: string | null;
+          manifested_at?: string | null;
+          handover_at?: string | null;
           archived_at?: string | null;
           client_id?: string | null;
           carrier_id?: string | null;
@@ -841,6 +851,34 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      email_verification_codes: {
+        Row: {
+          id: string;
+          email: string;
+          purpose: "seller_registration" | "password_reset";
+          code_hash: string;
+          attempts: number;
+          max_attempts: number;
+          expires_at: string;
+          consumed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          purpose: "seller_registration" | "password_reset";
+          code_hash: string;
+          attempts?: number;
+          max_attempts?: number;
+          expires_at: string;
+          consumed_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["email_verification_codes"]["Insert"]
+        >;
+        Relationships: [];
+      };
       webhook_events: {
         Row: {
           id: number;
@@ -857,6 +895,57 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      ai_training_examples: {
+        Row: {
+          id: string;
+          kind: "routing" | "bol_parse";
+          input: string;
+          expected_output: string;
+          notes: string;
+          is_active: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind: "routing" | "bol_parse";
+          input: string;
+          expected_output: string;
+          notes?: string;
+          is_active?: boolean;
+          created_by?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["ai_training_examples"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      ai_training_jobs: {
+        Row: {
+          id: string;
+          status: "Queued" | "Running" | "Completed" | "Failed";
+          example_count: number;
+          model_hint: string;
+          summary: string;
+          created_by: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          status?: "Queued" | "Running" | "Completed" | "Failed";
+          example_count?: number;
+          model_hint?: string;
+          summary?: string;
+          created_by?: string | null;
+          completed_at?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["ai_training_jobs"]["Insert"]
+        >;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -865,6 +954,8 @@ export interface Database {
       current_role: { Args: Record<string, never>; Returns: AppRole | null };
       is_staff: { Args: Record<string, never>; Returns: boolean };
       is_ops: { Args: Record<string, never>; Returns: boolean };
+      is_superadmin: { Args: Record<string, never>; Returns: boolean };
+      is_admin_or_above: { Args: Record<string, never>; Returns: boolean };
       can_approve_load_plans: {
         Args: Record<string, never>;
         Returns: boolean;

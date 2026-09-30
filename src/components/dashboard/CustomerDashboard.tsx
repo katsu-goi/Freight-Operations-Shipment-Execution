@@ -26,8 +26,8 @@ export default function CustomerDashboard({ parcels }: { parcels: Shipment[] }) 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Hero / track CTA */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-pink-950 p-8 rounded-2xl text-white shadow-xl">
-        <h2 className="text-2xl font-black tracking-tight">My Parcels</h2>
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-pink-950 p-5 sm:p-8 rounded-2xl text-white shadow-xl">
+        <h2 className="fluid-display font-black tracking-tight">My Parcels</h2>
         <p className="text-slate-300 text-xs mt-1">
           Track deliveries assigned to your account in real time.
         </p>
@@ -40,7 +40,7 @@ export default function CustomerDashboard({ parcels }: { parcels: Shipment[] }) 
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Total" value={parcels.length} icon={Package} tone="pink" />
         <KpiCard label="On the Way" value={active.length} icon={Truck} tone="amber" />
         <KpiCard label="Delivered" value={delivered.length} icon={CheckCircle2} tone="emerald" />

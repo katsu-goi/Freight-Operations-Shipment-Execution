@@ -22,13 +22,15 @@ export default function KpiCard({
   } as const;
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-pink-300 dark:hover:border-pink-800 transition-all">
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+    <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-pink-300 dark:hover:border-pink-800 transition-all min-w-0">
+      <div className="flex justify-between items-start gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
             {label}
           </p>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">{value}</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 mt-1 tabular-nums">
+            {value}
+          </h3>
         </div>
         <div
           className={cn(

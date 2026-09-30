@@ -37,6 +37,11 @@ export default function ParcelForm({
   function onSubmit(form: HTMLFormElement) {
     setError(null);
     const formData = new FormData(form);
+    const deliveryMethod = String(formData.get("deliveryMethod") ?? "");
+    if (deliveryMethod !== "Pickup" && deliveryMethod !== "Drop-off") {
+      setError("Please select a delivery method: Pickup or Drop-off.");
+      return;
+    }
     const payload = {
       sellerId: isSeller ? undefined : String(formData.get("sellerId") ?? "") || undefined,
       customerEmail: String(formData.get("customerEmail") ?? ""),
@@ -45,6 +50,7 @@ export default function ParcelForm({
       destination: String(formData.get("destination") ?? ""),
       origin: String(formData.get("origin") ?? "Branch Hub"),
       platform: String(formData.get("platform") ?? ""),
+      deliveryMethod,
       serviceType: String(formData.get("serviceType") ?? "Standard"),
       description: String(formData.get("description") ?? ""),
       dimensions: String(formData.get("dimensions") ?? ""),
@@ -210,6 +216,22 @@ export default function ParcelForm({
             <option>Express</option>
           </select>
         </div>
+
+        <fieldset className="sm:col-span-2">
+          <legend className={labelCls}>Delivery Method *</legend>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer transition-all has-checked:border-pink-500 has-checked:bg-pink-50 dark:has-checked:bg-pink-950/40 has-checked:text-pink-700 dark:has-checked:text-pink-300">
+              <input type="radio" name="deliveryMethod" value="Pickup" required className="accent-pink-600 w-4 h-4" />
+              Pickup
+              <span className="font-normal text-slate-400">— rider collects</span>
+            </label>
+            <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer transition-all has-checked:border-pink-500 has-checked:bg-pink-50 dark:has-checked:bg-pink-950/40 has-checked:text-pink-700 dark:has-checked:text-pink-300">
+              <input type="radio" name="deliveryMethod" value="Drop-off" required className="accent-pink-600 w-4 h-4" />
+              Drop-off
+              <span className="font-normal text-slate-400">— at the center</span>
+            </label>
+          </div>
+        </fieldset>
 
         <div>
           <label className={labelCls} htmlFor="expectedDeliveryDate">

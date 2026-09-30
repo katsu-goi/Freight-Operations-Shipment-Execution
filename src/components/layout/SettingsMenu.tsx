@@ -124,7 +124,7 @@ export default function SettingsMenu({ role }: { role: AppRole }) {
           setOpen((v) => !v);
         }}
         className={cn(
-          "p-2 rounded-lg text-slate-500 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1",
+          "touch-target p-2 rounded-lg text-slate-500 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1",
           open
             ? "text-pink-600 bg-pink-50 dark:bg-pink-950/40"
             : "hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-950/40",
@@ -143,7 +143,7 @@ export default function SettingsMenu({ role }: { role: AppRole }) {
         aria-label="Settings"
         aria-hidden={!open}
         className={cn(
-          "absolute right-0 top-full mt-2 w-56 rounded-xl border p-1.5 z-50",
+          "absolute right-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border p-1.5 z-50",
           "bg-white dark:bg-slate-900",
           "border-slate-200 dark:border-slate-700",
           "shadow-xl shadow-slate-900/10 dark:shadow-black/40",

@@ -42,7 +42,7 @@ export default function ParcelFilters({ basePath }: { basePath: string }) {
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2 px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-      <div className="relative flex-1 min-w-[12rem]">
+      <div className="relative flex-1 min-w-0 w-full">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
           value={term}
@@ -60,7 +60,7 @@ export default function ParcelFilters({ basePath }: { basePath: string }) {
               setTerm("");
               push({ q: undefined });
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            className="touch-target absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
           >
             <X className="w-3.5 h-3.5" />
           </button>

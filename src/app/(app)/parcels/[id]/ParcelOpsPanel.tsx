@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw, Loader2, MapPin } from "lucide-react";
-import { SETTABLE_STATUSES } from "@/lib/parcelWorkflow";
+import { allowedNextStatuses, transitionError } from "@/lib/parcelWorkflow";
 import { updateParcelStatus, updateParcelLocation } from "../actions";
 import { enqueueOfflineAction } from "@/lib/offline/outbox";
 import type { Hub } from "@/types";
@@ -14,18 +14,23 @@ const inputCls =
 
 /**
  * Staff-only operations panel: change parcel status (atomic RPC writes the
- * tracking event + notifications) or move the parcel between hubs.
- * Render is gated server-side; the actions re-check permissions.
+ * tracking event + notifications and enforces the workflow order) or move
+ * the parcel between hubs. Render is gated server-side; the actions
+ * re-check permissions. The status dropdown only offers valid next steps —
+ * required workflow stages cannot be skipped.
  */
 export default function ParcelOpsPanel({
   parcelId,
   currentStatus,
   currentHubId,
+  deliveryMethod,
   hubs,
 }: {
   parcelId: string;
   currentStatus: string;
   currentHubId: string | null;
+  /** Pickup or Drop-off, chosen by the seller at registration. */
+  deliveryMethod: string | null;
   hubs: Pick<Hub, "id" | "name">[];
 }) {
   const router = useRouter();
@@ -33,11 +38,21 @@ export default function ParcelOpsPanel({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const nextStatuses = allowedNextStatuses(currentStatus);
+  const options = [...new Set([currentStatus, ...nextStatuses])];
+
   function onStatusSubmit(formData: FormData) {
     setError(null);
+    const status = String(formData.get("status") ?? "");
+    const problem = transitionError(currentStatus, status);
+    // Same-status location/note updates are allowed; anything else blocked.
+    if (problem && status !== currentStatus) {
+      setError(problem);
+      return;
+    }
     const command = {
       parcelId,
-      status: String(formData.get("status") ?? ""),
+      status,
       hubId: String(formData.get("hubId") ?? ""),
       location: String(formData.get("location") ?? ""),
       description: String(formData.get("description") ?? ""),
@@ -86,18 +101,30 @@ export default function ParcelOpsPanel({
         Operations
       </h3>
 
+      {/* NULL = legacy parcel registered before Pickup/Drop-off became mandatory. */}
+      <p className="text-[11px] text-slate-500 dark:text-slate-400 -mt-3">
+        Delivery Method:{" "}
+        <span className="font-bold text-slate-700 dark:text-slate-200">
+          {deliveryMethod ? deliveryMethod.toUpperCase() : "Not specified"}
+        </span>
+      </p>
+
       <form onSubmit={(e) => { e.preventDefault(); onStatusSubmit(new FormData(e.currentTarget)); }} className="space-y-3">
         <div>
           <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1" htmlFor="ops-status">
             Update Status <span className="text-slate-400 normal-case">(currently {currentStatus})</span>
           </label>
           <select id="ops-status" name="status" defaultValue={currentStatus} className={inputCls} required>
-            {[...new Set([currentStatus, ...SETTABLE_STATUSES])].map((s) => (
+            {options.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
           </select>
+          <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+            Workflow order is enforced: Registered → Received → Booked → Manifested → Handed Over →
+            In Transit → Delivered. Required steps cannot be skipped.
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>

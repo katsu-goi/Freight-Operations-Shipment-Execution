@@ -141,6 +141,7 @@ async function complete(
 
 export async function recommendRoutes(
   req: RoutingRequest,
+  fewShotPrefix = "",
 ): Promise<RouteRecommendation[]> {
   const system =
     "You are an expert Philippine domestic freight-forwarding routing engine. " +
@@ -148,7 +149,8 @@ export async function recommendRoutes(
     "Costs must be in Philippine pesos (₱). Return ONLY JSON of the shape " +
     '{"routes":[{routeName,carrierName,transitTimeDays,estimatedCostPHP,co2ReductionPercent,riskScore,keyAdvantage}]}. ' +
     "riskScore is one of Low, Medium, High. Provide exactly 3 diverse routes " +
-    "(fastest, most economical, greenest). Do not suggest international routes.";
+    "(fastest, most economical, greenest). Do not suggest international routes." +
+    fewShotPrefix;
 
   const user = `Plan domestic Philippine freight routing for:
 - Origin: ${sanitize(req.origin)}
@@ -178,13 +180,14 @@ export async function recommendRoutes(
   }));
 }
 
-export async function parseBillOfLading(text: string): Promise<ParsedBillOfLading> {
+export async function parseBillOfLading(text: string, fewShotPrefix = ""): Promise<ParsedBillOfLading> {
   const system =
     "You extract structured data from unstructured Bill of Lading / shipping " +
     "advice text. Return ONLY a JSON object with keys: billOfLadingNumber, " +
     "shipperName, consigneeName, containerNumber, totalWeightKg (number), " +
     "totalVolumeCbm (number), goodsDescription. Use empty string or 0 when a " +
-    "field is absent.";
+    "field is absent." +
+    fewShotPrefix;
 
   const isParsed = (v: unknown): boolean =>
     typeof v === "object" && v !== null && "billOfLadingNumber" in (v as object);

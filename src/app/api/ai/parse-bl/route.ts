@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseBillOfLading, aiEnabled } from "@/lib/ai";
+import { getActiveExamples, buildFewShotPrefix } from "@/lib/ai-training";
 import {
   requireUser,
   validate,
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
     const input = validate(bolParseSchema, body);
 
     try {
-      const parsed = await parseBillOfLading(input.text);
+      const examples = await getActiveExamples("bol_parse");
+      const parsed = await parseBillOfLading(input.text, buildFewShotPrefix(examples));
       return jsonOk({ parsed });
     } catch (e) {
       throw new ApiError(502, e instanceof Error ? e.message : "Parsing failed");

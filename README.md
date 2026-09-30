@@ -17,6 +17,7 @@ tracking multimodal freight — built on **Next.js (App Router)**, **Supabase
 4. [Prerequisites](#prerequisites)
 5. [Setup](#setup)
 6. [Environment variables](#environment-variables)
+7. [Production email (OTP via Resend)](#production-email-otp-via-resend)
 7. [Database schema & RBAC](#database-schema--rbac)
 8. [Running the app](#running-the-app)
 9. [Roles & permissions](#roles--permissions)
@@ -102,10 +103,37 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Then open <http://localhost:3000> and register your first user from the **Register**
-tab. Self-registration is limited to the **Client** and **Carrier** roles; privileged
-roles (**Admin / Dispatcher / Planner**) must be provisioned by an administrator
-(see `ALLOW_QUICK_LOGIN` for enabling the one-click demo accounts in production).
+Then open <http://localhost:3001> (dev script uses `-p 3001`) and use the glass card:
+* **Sign in** — with any existing `auth.users` account (see Demo accounts below).
+* **Register** — creates a **Customer** account only. The form shows a helper: “Creates a Customer account — Sellers / Admins are invited by HR/IT (Contact HR → `airshipexpresss@gmail.com`).” Any `role` other than `Customer` is forced to `Customer` on the server (`src/app/login/actions.ts:59`) and the DB trigger `handle_new_user()` demotes privileged self-claims.
+
+Privileged roles (**Admin**, **Seller**) must be provisioned by an administrator via Supabase Dashboard, `seed.sql`, or the Sellers admin table — not self-registration.
+
+---
+
+## Auth & demo accounts
+
+**How Users Sign In Now (Quick Login Removed from UI).** The frosted glass card at `/login` (`src/app/login/LoginForm.tsx:35`) has only **Sign in** / **Register** — the 3 demo buttons were removed (`src/app/login/LoginForm.tsx:212-253` deleted). Server code `quickLogin` (`src/app/login/actions.ts:90`, `DEMO_USERS`, `demo123456`) still exists but is unused unless you call it programmatically.
+
+**Sign in:** `src/app/login/actions.ts:35` `supabase.auth.signInWithPassword` → `revalidatePath + redirect("/dashboard")`. Only accounts that exist in Supabase `auth.users` can sign in — random creds return `Invalid login credentials`.
+
+**Register:** `src/app/login/actions.ts:50` `supabase.auth.signUp({email,password, options:{data:{full_name,role}}})` → DB trigger `handle_new_user()` `supabase/migrations/0001_initial_schema.sql:560` creates `public.profiles(id,email,full_name,role)` (role forced to `Customer` if you tamper — `SELF_SIGNUP_ROLES=["Customer"]` `src/app/login/actions.ts:19` + demotion in trigger). `src/lib/auth.ts:35` `requireProfile()` then gates every page by `profiles.role`. A newly registered user **is persisted** in `auth.users` + `profiles` and gets the **Customer** dashboard (`src/app/(app)/dashboard/page.tsx:37`). Check email confirmation below.
+
+**Demo accounts (seeded DB, no UI):** `supabase/seed.sql:13` inserts on `supabase db reset` (local) or run manually in SQL Editor:
+
+| Role | Email | Name | Password |
+|------|-------|------|----------|
+| Admin | `admin@freightos.demo` | Sol, Emmanuel M. | `demo123456` |
+| Seller | `seller@freightos.demo` | Amora, Daniella Sophia P. | `demo123456` |
+| Customer | `customer@freightos.demo` | Reyes, Miguel A. | `demo123456` |
+
+The seller is linked to `sellers` `SELL-DEMO-0001`. You can also invoke `quickLogin(role)` programmatically if `ALLOW_QUICK_LOGIN=true` (`src/app/login/actions.ts:22` — `true` in dev via `.env.local:6`, `false` in prod via `.env.local.example:10`) with `SUPABASE_SERVICE_ROLE_KEY`.
+
+**Create Admin/Seller manually:** Supabase Dashboard → Auth → Create user → set `user_metadata: {role:"Admin", full_name:"..."}` → insert `profiles` row, or run `seed.sql` snippet with your email. Sellers additionally need `sellers` row + `profiles.seller_id`.
+
+**Email confirmation:** Local Supabase (`127.0.0.1:54321` `.env.local:2`) has it **off** → `Register` → instant `Sign in`. Hosted Supabase defaults **on** → user must click email link before sign-in works (message in `src/app/login/actions.ts:69`).
+
+**Contact HR:** The card footer `Contact HR Department` now `mailto:airshipexpresss@gmail.com` `src/app/login/LoginForm.tsx:182` for Seller/Admin invites.
 
 ---
 
@@ -123,10 +151,48 @@ Copy `.env.local.example` to `.env.local` and set:
 | `GEMINI_API_KEY`                | ⭘        | Fallback AI provider if Groq is not set            |
 | `GROQ_MODEL`                    | ⭘        | Override (default `llama-3.3-70b-versatile`)        |
 | `GEMINI_MODEL`                  | ⭘        | Override (default `gemini-2.0-flash`)              |
+| `RESEND_API_KEY`                | Prod ⭘   | Resend API key — Seller Registration + Forgot Password OTP (server-only, never `NEXT_PUBLIC_`) |
+| `OTP_FROM_EMAIL`                | Prod ⭘   | Verified sender address, e.g. `noreply@yourdomain.com` (server-only) |
+| `OTP_FROM_NAME`                 | ⭘        | Sender display name (default `Airship Express`)    |
 
 > `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS — keep it server-side only, never expose it
 > to the client. AI features are optional: with no key set, AI buttons report that no
 > provider is configured and the rest of the app works normally.
+> OTP email works without configuration in local dev (codes print to the server
+> terminal), but production REQUIRES `RESEND_API_KEY` + `OTP_FROM_EMAIL` — see
+> [Production email (OTP via Resend)](#production-email-otp-via-resend).
+
+---
+
+## Production email (OTP via Resend)
+
+Seller Registration and Forgot Password both verify the seller's inbox with a
+6-digit OTP (10-minute expiry, 5 attempts, 60-second resend cooldown, SHA-256
+hashed storage). Delivery is implemented once in `sendOtpEmail()`
+(`src/lib/otp.ts`, server-side only) via the Resend API — no new dependency,
+plain `fetch`.
+
+1. **Create / configure the provider.** Sign up at https://resend.com and create
+   an API key (API Keys → Create API Key). No code changes needed.
+2. **Verify the sender/domain.** In Resend go to Domains → Add Domain and follow
+   the DNS steps, then use e.g. `noreply@yourdomain.com` as `OTP_FROM_EMAIL`.
+   For a quick smoke test you may use Resend's sandbox sender
+   `onboarding@resend.dev`, but it can only email the Resend account owner —
+   a verified domain is required for real sellers.
+3. **Add the environment variables** (server-side only, never commit secrets):
+   `RESEND_API_KEY=`, `OTP_FROM_EMAIL=`, optionally `OTP_FROM_NAME=`.
+   See `.env.cloud.example`. Never use a `NEXT_PUBLIC_` variable for the key.
+4. **Restart / redeploy** the Next.js app so the new env vars load
+   (`npm run env:cloud` copies them into `.env.local` when switching).
+5. **Test Seller Registration OTP:** open Register → fill the seller form →
+   Send verification code → check the inbox → wrong code shows attempts left →
+   correct code creates the account and signs the seller in. If Resend fails,
+   no account is created and a safe error is shown (the unsent code is
+   invalidated server-side).
+6. **Test Forgot Password OTP:** fail sign-in 3 times → Forgot Password →
+   enter the registered email → enter the code → set a strong new password →
+   sign in with it. The message shown is identical whether or not the email
+   exists, so accounts cannot be enumerated.
 
 ---
 
@@ -168,16 +234,13 @@ update these types to keep the typed Supabase client accurate.
 
 ## Roles & permissions
 
-| Role         | Sees                                                             | Can manage                          |
-| ------------ | --------------------------------------------------------------- | ----------------------------------- |
-| **Admin**    | Everything, plus the Schema page                                | All records                         |
-| **Dispatcher** | All operational modules                                       | Booking, consolidation, BoL, tracking |
-| **Carrier**  | Dashboard, tracking for their assigned loads                    | Location/status updates on own loads |
-| **Client**   | Dashboard, tracking, and POs for their own shipments            | Read-only                           |
+| Role | Sees | Can do |
+|------|------|--------|
+| **Admin** | Everything — Hub KPIs, pickup/manifest/handover, parcels, sellers, customers, tracking, waybill | Full ops: intake → manifest → handover, approve load plans, manage users/sellers (`src/lib/auth.ts:28` `isStaff`) |
+| **Seller** | Own parcels only (`src/app/(app)/dashboard/page.tsx:31` `SellerDashboard`), pickup scheduling (`src/app/(app)/pickup`), parcel create | Send parcels, schedule pickups, view own shipments (linked via `profiles.seller_id` → `sellers`) |
+| **Customer** | Assigned parcels only (`src/app/(app)/dashboard/page.tsx:37` `CustomerDashboard`), live tracking of own deliveries | Register self via `/login` → becomes `Customer` (`src/app/login/actions.ts:19`), read-only tracking |
 
-Navigation items in the sidebar are filtered by role (see
-[`src/lib/nav.ts`](src/lib/nav.ts)), and RLS enforces the same boundaries at the
-database level.
+Self-registration is `Customer`-only; `Seller`/`Admin` must be provisioned (seed `supabase/seed.sql:13` or `admin.auth.admin.createUser` + `profiles` upsert). Navigation is filtered by role (`src/lib/nav.ts`) and RLS (`current_role()` `supabase/migrations/0001:252`) enforces the same at DB level.
 
 ---
 
