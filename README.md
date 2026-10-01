@@ -104,36 +104,57 @@ npm run dev
 ```
 
 Then open <http://localhost:3001> (dev script uses `-p 3001`) and use the glass card:
-* **Sign in** — with any existing `auth.users` account (see Demo accounts below).
-* **Register** — creates a **Customer** account only. The form shows a helper: “Creates a Customer account — Sellers / Admins are invited by HR/IT (Contact HR → `airshipexpresss@gmail.com`).” Any `role` other than `Customer` is forced to `Customer` on the server (`src/app/login/actions.ts:59`) and the DB trigger `handle_new_user()` demotes privileged self-claims.
+* **Sign in** — normal Supabase email/password sign-in. Failures return a generic
+  "Invalid email or password." After 3 failed attempts a Forgot Password prompt
+  appears. Role-based landing: Admin → `/admin/dashboard`, Seller →
+  `/seller/dashboard`.
+* **Register** — creates a **Seller** account only, verified by email OTP:
+  fill the seller form → receive a 6-digit code → verify → the account
+  (auth user + `sellers` row + `profiles` link) is created and the seller is
+  signed in. No role can be selected; Admin accounts are provisioned
+  separately (see below).
 
-Privileged roles (**Admin**, **Seller**) must be provisioned by an administrator via Supabase Dashboard, `seed.sql`, or the Sellers admin table — not self-registration.
+There are no demo/one-click login shortcuts: the login page has no
+credential-filling buttons and no bypass code exists in `src/` — every sign-in
+goes through `supabase.auth.signInWithPassword`.
 
 ---
 
 ## Auth & demo accounts
 
-**How Users Sign In Now (Quick Login Removed from UI).** The frosted glass card at `/login` (`src/app/login/LoginForm.tsx:35`) has only **Sign in** / **Register** — the 3 demo buttons were removed (`src/app/login/LoginForm.tsx:212-253` deleted). Server code `quickLogin` (`src/app/login/actions.ts:90`, `DEMO_USERS`, `demo123456`) still exists but is unused unless you call it programmatically.
+**Sign in:** `src/app/login/actions.ts` `supabase.auth.signInWithPassword` →
+role-based redirect. Only accounts that exist in Supabase `auth.users` can
+sign in; errors are generic so accounts cannot be enumerated.
 
-**Sign in:** `src/app/login/actions.ts:35` `supabase.auth.signInWithPassword` → `revalidatePath + redirect("/dashboard")`. Only accounts that exist in Supabase `auth.users` can sign in — random creds return `Invalid login credentials`.
+**Register (Seller + OTP):** `requestSellerOtp` validates the seller form and
+issues a hashed, single-use 6-digit code (10-minute expiry, 5 attempts);
+`verifySellerOtpAndRegister` verifies it, then creates the auth user (role
+forced to `Seller`), the `sellers` business record, and the linked `profiles`
+row. `requireProfile()` (`src/lib/auth.ts`) gates every page by
+`profiles.role`. Delivery uses Resend in production and the server terminal in
+local dev — see [Production email (OTP via Resend)](#production-email-otp-via-resend).
 
-**Register:** `src/app/login/actions.ts:50` `supabase.auth.signUp({email,password, options:{data:{full_name,role}}})` → DB trigger `handle_new_user()` `supabase/migrations/0001_initial_schema.sql:560` creates `public.profiles(id,email,full_name,role)` (role forced to `Customer` if you tamper — `SELF_SIGNUP_ROLES=["Customer"]` `src/app/login/actions.ts:19` + demotion in trigger). `src/lib/auth.ts:35` `requireProfile()` then gates every page by `profiles.role`. A newly registered user **is persisted** in `auth.users` + `profiles` and gets the **Customer** dashboard (`src/app/(app)/dashboard/page.tsx:37`). Check email confirmation below.
+**Forgot Password (OTP):** `requestPasswordResetOtp` → code →
+`resetPasswordWithOtp` sets a new strong password. Request messages are
+identical whether or not the email exists.
 
-**Demo accounts (seeded DB, no UI):** `supabase/seed.sql:13` inserts on `supabase db reset` (local) or run manually in SQL Editor:
+**Seeded accounts (local dev):** `supabase/seed.sql` provisions demo Admin,
+Seller (linked to `sellers` `SELL-DEMO-0001`), and Customer accounts on
+`supabase db reset`, or run it manually in the SQL Editor:
 
-| Role | Email | Name | Password |
-|------|-------|------|----------|
-| Admin | `admin@freightos.demo` | Sol, Emmanuel M. | `demo123456` |
-| Seller | `seller@freightos.demo` | Amora, Daniella Sophia P. | `demo123456` |
-| Customer | `customer@freightos.demo` | Reyes, Miguel A. | `demo123456` |
+| Role | Email | Name |
+|------|-------|------|
+| Admin | `admin@virshipexpress.com` / `admin@freightos.demo` | Admin Sol, Emmanuel M. / Sol, Emmanuel M. |
+| Seller | `seller@virshipexpress.com` / `seller@freightos.demo` | Amora, Daniella Sophia P. |
+| Customer | `customer@freightos.demo` | Reyes, Miguel A. |
 
-The seller is linked to `sellers` `SELL-DEMO-0001`. You can also invoke `quickLogin(role)` programmatically if `ALLOW_QUICK_LOGIN=true` (`src/app/login/actions.ts:22` — `true` in dev via `.env.local:6`, `false` in prod via `.env.local.example:10`) with `SUPABASE_SERVICE_ROLE_KEY`.
+Sign into these with the normal Sign In form (see the seed file for the local
+development password; never use it outside local dev).
 
-**Create Admin/Seller manually:** Supabase Dashboard → Auth → Create user → set `user_metadata: {role:"Admin", full_name:"..."}` → insert `profiles` row, or run `seed.sql` snippet with your email. Sellers additionally need `sellers` row + `profiles.seller_id`.
-
-**Email confirmation:** Local Supabase (`127.0.0.1:54321` `.env.local:2`) has it **off** → `Register` → instant `Sign in`. Hosted Supabase defaults **on** → user must click email link before sign-in works (message in `src/app/login/actions.ts:69`).
-
-**Contact HR:** The card footer `Contact HR Department` now `mailto:airshipexpresss@gmail.com` `src/app/login/LoginForm.tsx:182` for Seller/Admin invites.
+**Create Admin/Seller manually:** Supabase Dashboard → Auth → Create user →
+insert the `profiles` row with the right role. Sellers additionally need a
+`sellers` row + `profiles.seller_id` (or use the admin Sellers table, which
+provisions the login account automatically).
 
 ---
 
@@ -146,7 +167,6 @@ Copy `.env.local.example` to `.env.local` and set:
 | `NEXT_PUBLIC_SUPABASE_URL`      | ✅       | Supabase project URL                               |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅       | Public anon/publishable key (safe for the browser) |
 | `SUPABASE_SERVICE_ROLE_KEY`     | ⚙️       | Server-only key for trusted admin/seed operations  |
-| `ALLOW_QUICK_LOGIN`             | ⭘        | Enable one-click demo accounts in production       |
 | `GROQ_API_KEY`                  | ⭘        | Enables AI routing & BoL parsing (preferred)       |
 | `GEMINI_API_KEY`                | ⭘        | Fallback AI provider if Groq is not set            |
 | `GROQ_MODEL`                    | ⭘        | Override (default `llama-3.3-70b-versatile`)        |

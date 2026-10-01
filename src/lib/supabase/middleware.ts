@@ -11,11 +11,17 @@ const PUBLIC_ROUTES = [
   "/manifest.webmanifest",
   "/sw.js",
   "/icons",
+  // Customer tracking links (/t/<token>) — read-only, token-validated
+  // server-side; grants no session and no access to protected routes.
+  "/t",
 ];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_ROUTES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
+
+/** Exported for unit tests (route-visibility contract). */
+export { isPublicPath };
 
 function isApiRoute(pathname: string): boolean {
   return pathname.startsWith("/api/");

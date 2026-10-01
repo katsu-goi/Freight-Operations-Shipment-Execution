@@ -2,8 +2,10 @@
 -- Core requirements: expanded RBAC (SuperAdmin / Admin / Seller / Customer /
 -- Citizen), AI training store, and tightened staff helpers.
 --
--- * SuperAdmin + Citizen enum values (Postgres enums append-only; IF NOT
---   EXISTS keeps this idempotent across local + cloud).
+-- * SuperAdmin + Citizen enum values are added in the EARLIER, committed
+--   migration 20260919_add_superadmin_citizen_enum (Postgres forbids using a
+--   newly added enum value in the same transaction — SQLSTATE 55P04 — so the
+--   ADD VALUE must commit before this file's functions reference the values).
 -- * is_staff()/is_ops() now cover SuperAdmin as a privilege superset of Admin.
 -- * New helpers: is_superadmin(), is_admin_or_above().
 -- * New tables: ai_training_examples (few-shot "Train your AI" store),
@@ -13,24 +15,9 @@
 -- * Reporting/export needs no new table (computed from shipments live).
 -- =============================================================================
 
-do $$
-begin
-  if not exists (
-    select 1 from pg_enum e join pg_type t on t.oid = e.enumtypid
-    where t.typname = 'app_role' and e.enumlabel = 'SuperAdmin'
-  ) then
-    alter type public.app_role add value 'SuperAdmin';
-  end if;
-  if not exists (
-    select 1 from pg_enum e join pg_type t on t.oid = e.enumtypid
-    where t.typname = 'app_role' and e.enumlabel = 'Citizen'
-  ) then
-    alter type public.app_role add value 'Citizen';
-  end if;
-end $$;
-
 -- ---------------------------------------------------------------------------
 -- RBAC helpers: SuperAdmin inherits every Admin power
+-- (Enum values already committed by 20260919 — safe to reference here.)
 -- ---------------------------------------------------------------------------
 create or replace function public.is_superadmin()
 returns boolean

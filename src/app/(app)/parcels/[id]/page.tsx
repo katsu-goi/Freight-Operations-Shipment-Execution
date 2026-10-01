@@ -22,6 +22,7 @@ import ParcelMapLazy from "@/components/map/ParcelMapLazy";
 import ShareLocationButton from "@/components/map/ShareLocationButton";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
 import ParcelOpsPanel from "./ParcelOpsPanel";
+import TrackingLinkCard from "./TrackingLinkCard";
 
 export const dynamic = "force-dynamic";
 
@@ -156,6 +157,11 @@ export default async function ParcelDetailPage({
               deliveryMethod={parcel.delivery_method}
               hubs={hubs.map((h) => ({ id: h.id, name: h.name }))}
             />
+          )}
+
+          {/* RLS guarantees a Seller only ever sees their own parcels. */}
+          {profile.role === "Seller" && (
+            <TrackingLinkCard parcelId={parcel.id} />
           )}
         </div>
 

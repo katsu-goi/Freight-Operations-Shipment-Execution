@@ -879,6 +879,40 @@ export interface Database {
         >;
         Relationships: [];
       };
+      parcel_tracking_links: {
+        Row: {
+          id: string;
+          parcel_id: string;
+          token_hash: string;
+          label: string;
+          created_by: string | null;
+          expires_at: string | null;
+          revoked_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          parcel_id: string;
+          token_hash: string;
+          label?: string;
+          created_by?: string | null;
+          expires_at?: string | null;
+          revoked_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["parcel_tracking_links"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "parcel_tracking_links_parcel_id_fkey";
+            columns: ["parcel_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       webhook_events: {
         Row: {
           id: number;
@@ -1001,6 +1035,14 @@ export interface Database {
           p_customer_email: string;
         };
         Returns: { ok: boolean; error?: string | null };
+      };
+      get_parcel_by_tracking_token: {
+        Args: { p_token_hash: string };
+        Returns: {
+          ok: boolean;
+          parcel?: Record<string, unknown> | null;
+          events?: Record<string, unknown>[] | null;
+        };
       };
       ingest_crm_po: {
         Args: {

@@ -8,8 +8,9 @@ do $$
 declare
   v_pass     text := crypt('demo123456', gen_salt('bf'));
 begin
-  -- ---- demo users (idempotent: skip if already registered). Emails and names
-  --      match the one-click Quick Login accounts on the sign-in page. ----
+  -- ---- demo users (idempotent: skip if already registered). Sign in
+  --      with these accounts through the normal Sign In form. There are no
+  --      one-click login shortcuts — every sign-in uses Supabase Auth. ----
   if not exists (select 1 from auth.users where email = 'admin@virshipexpress.com') then
     insert into auth.users
       (instance_id, id, aud, role, email, encrypted_password,

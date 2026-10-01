@@ -33,6 +33,8 @@ export type AppNotification =
   Database["public"]["Tables"]["notifications"]["Row"];
 export type EmailVerificationCode =
   Database["public"]["Tables"]["email_verification_codes"]["Row"];
+export type ParcelTrackingLink =
+  Database["public"]["Tables"]["parcel_tracking_links"]["Row"];
 
 export type {
   AppRole,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FileText,
   Sparkles,
@@ -42,6 +42,14 @@ export default function BolGenerator({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  // Issue date is day-resolution "today". Rendering `new Date()` inline would
+  // make the server HTML differ from the client render across a UTC-midnight
+  // boundary (hydration mismatch), so it is stamped after mount instead —
+  // identical (empty) on server and first client render.
+  const [issuedDate, setIssuedDate] = useState("");
+  useEffect(() => {
+    setIssuedDate(new Date().toISOString().slice(0, 10));
+  }, []);
 
   function set<K extends keyof BolInput>(k: K, v: BolInput[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -237,7 +245,7 @@ export default function BolGenerator({
         <div ref={previewRef}>
           <h1>{form.bolType === "HBL" ? "HOUSE BILL OF LADING" : "MASTER BILL OF LADING"}</h1>
           <p className="muted" style={{ marginBottom: 12 }}>
-            No. {form.bolNumber || "—"} · Issued {new Date().toISOString().slice(0, 10)} · {form.freightTerms}
+            No. {form.bolNumber || "—"} · Issued {issuedDate || "—"} · {form.freightTerms}
           </p>
           <div className="bol-grid">
             <div className="cell"><div className="label">Shipper</div><div className="value">{form.shipperName || "—"}</div></div>

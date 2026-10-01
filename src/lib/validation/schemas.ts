@@ -207,6 +207,29 @@ export const parcelEditSchema = z.object({
   weightKg: positiveNumber("Weight must be >= 0").default(0),
 });
 
+/** ----- Customer tracking links (seller-generated, revocable) ----- */
+
+/** Generate a private tracking link for one of the seller's own parcels. */
+export const trackingLinkCreateSchema = z.object({
+  parcelId: z.string().uuid(),
+  label: z.string().trim().max(120).optional().default(""),
+  expiresInDays: z.number().int().min(1).max(365).nullable().optional().default(null),
+});
+export type TrackingLinkCreateInput = z.infer<typeof trackingLinkCreateSchema>;
+
+/** Revoke one of the seller's own parcel links. */
+export const trackingLinkRevokeSchema = z.object({
+  linkId: z.string().uuid(),
+});
+
+/** Regenerate: revoke the previous link, then issue a fresh token. */
+export const trackingLinkRegenerateSchema = z.object({
+  parcelId: z.string().uuid(),
+  linkId: z.string().uuid(),
+  label: z.string().trim().max(120).optional().default(""),
+  expiresInDays: z.number().int().min(1).max(365).nullable().optional().default(null),
+});
+
 /** ----- Seller account lifecycle (admin) ----- */
 
 const passwordRule = z

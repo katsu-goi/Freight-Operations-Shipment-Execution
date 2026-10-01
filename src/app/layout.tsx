@@ -32,8 +32,13 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // suppressHydrationWarning on <html>: the inline theme script above
+  // intentionally adds the `dark` class before hydration (stored choice or OS
+  // preference) so there is no theme flash. React must not manage that class —
+  // without this flag every dark-mode visitor gets a hydration mismatch on
+  // the <html> element on every page.
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

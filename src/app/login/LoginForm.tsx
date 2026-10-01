@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useRef, useEffect, type RefObject } from "react";
+import { useState, useActionState, useEffect } from "react";
 import {
   Loader2,
   Mail,
@@ -15,7 +15,6 @@ import {
   Phone,
   ShieldAlert,
   ShieldCheck,
-  Package,
   KeyRound,
 } from "lucide-react";
 import {
@@ -119,15 +118,11 @@ interface FormStyling {
 function SignInForm({
   showPw,
   onTogglePw,
-  emailRef,
-  pwRef,
   styling,
   onForgot,
 }: { styling: FormStyling } & {
   showPw: boolean;
   onTogglePw: () => void;
-  emailRef: RefObject<HTMLInputElement | null>;
-  pwRef: RefObject<HTMLInputElement | null>;
   onForgot: () => void;
 }) {
   const { inputCls, labelCls } = styling;
@@ -163,12 +158,10 @@ function SignInForm({
         <div className="relative">
           <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
           <input
-            ref={emailRef}
             name="email"
             type="email"
             required
             autoComplete="email"
-            defaultValue="admin@virshipexpress.com"
             className={inputCls}
             placeholder="you@company.com"
           />
@@ -180,12 +173,10 @@ function SignInForm({
         <div className="relative">
           <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
           <input
-            ref={pwRef}
             name="password"
             type={showPw ? "text" : "password"}
             required
             autoComplete="current-password"
-            defaultValue="demo123456"
             className={`${inputCls} pr-10`}
             placeholder="••••••••"
           />
@@ -741,14 +732,6 @@ export default function LoginForm({ compact = false }: { compact?: boolean }) {
   const [mode, setMode] = useState<Mode>("signin");
   const [showPw, setShowPw] = useState(false);
 
-  const emailRef = useRef<HTMLInputElement>(null);
-  const pwRef = useRef<HTMLInputElement>(null);
-
-  const setCredentials = (email: string, pass: string) => {
-    if (emailRef.current) emailRef.current.value = email;
-    if (pwRef.current) pwRef.current.value = pass;
-  };
-
   const inputCls =
     "w-full h-11 bg-white/10 border border-white/15 rounded-xl pl-10 pr-3.5 text-sm font-medium text-white placeholder:text-white/35 focus:outline-none focus:border-pink-300/60 focus:ring-2 focus:ring-pink-500/30 transition shadow-none";
   const labelCls = "block text-[13px] font-medium text-white/75 mb-1.5";
@@ -818,47 +801,6 @@ export default function LoginForm({ compact = false }: { compact?: boolean }) {
           </div>
         )}
 
-        {/* Quick Demo Accounts */}
-        {mode === "signin" && (
-          <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center justify-between mb-2 px-0.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
-                Quick test accounts
-              </span>
-              <span className="text-[11px] font-normal text-white/40">Tap to fill</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setCredentials("admin@virshipexpress.com", "demo123456")}
-                className="flex items-center gap-2 px-2.5 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4 text-pink-300 shrink-0" />
-                <div className="min-w-0 flex-1 leading-tight">
-                  <p className="text-xs font-semibold text-white truncate">
-                    Admin Demo
-                  </p>
-                  <p className="text-[11px] text-white/50 font-normal">Full access</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCredentials("seller@virshipexpress.com", "demo123456")}
-                className="flex items-center gap-2 px-2.5 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-colors cursor-pointer"
-              >
-                <Package className="w-4 h-4 text-blue-300 shrink-0" />
-                <div className="min-w-0 flex-1 leading-tight">
-                  <p className="text-xs font-semibold text-white truncate">
-                    Seller Demo
-                  </p>
-                  <p className="text-[11px] text-white/50 font-normal">Seller portal</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Key remount clears stale errors when switching modes */}
         {mode === "forgot" ? (
           <ForgotPasswordForm key="forgot" styling={styling} onBack={() => setMode("signin")} />
@@ -875,8 +817,6 @@ export default function LoginForm({ compact = false }: { compact?: boolean }) {
             styling={styling}
             showPw={showPw}
             onTogglePw={() => setShowPw((v) => !v)}
-            emailRef={emailRef}
-            pwRef={pwRef}
             onForgot={() => setMode("forgot")}
           />
         )}
